@@ -1,4 +1,4 @@
-# AI互动武侠小说游戏
+# AI 武侠小说交互 RPG GAME
 
 一个用大语言模型驱动的武侠互动小说。你扮演一名穿越到金庸世界的现代人，接下来想干什么都行——练功、行侠、报仇、寻宝，剧情全由 AI 实时生成，没有固定剧本。
 
@@ -27,8 +27,8 @@
 **1. 获取代码，装依赖**
 
 ```bash
-git clone https://github.com/charnamel/ai-wuxia-interactive-novel.git
-cd ai-wuxia-interactive-novel
+git clone https://github.com/charnamel/ai-wuxia-novel-rpg.git
+cd ai-wuxia-novel-rpg
 python -m venv venv
 venv\Scripts\activate        # Linux/macOS 用 source venv/bin/activate
 pip install -r requirements.txt
