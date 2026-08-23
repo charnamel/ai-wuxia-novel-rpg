@@ -1,0 +1,39 @@
+# 敏感配置（严禁提交）
+.env
+.env.bak
+*.env
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# 运行时生成的游戏数据（部署后自动创建）
+data/player.json
+data/game_save.json
+data/interact_log.jsonl
+data/context_cache.json*
+data/cloud_memory_uploaded.json
+data/semantic_ids.json
+data/semantic_vectors.npy
+data/history_archive/
+data/notepad_data.txt
+data/latest_plot.txt
+data/location_time.json
+data/world_state.json
+data/mainline_history.json
+data/metadata.json
+data/progress.json
+data/tasks.json
+data/备份/
+data/启动原始/
+static/images/plot_cache/
+
+# 开发工具
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+*.log

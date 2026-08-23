@@ -1,0 +1,334 @@
+/* ===== 武侠主题 CSS 变量 ===== */
+:root {
+    --bg-primary: #1a1a2e;      /* 墨色背景 */
+    --bg-secondary: #16213e;    /* 卡片背景 */
+    --bg-tertiary: #0f3460;     /* 输入框背景 */
+    --accent-gold: #e6c068;     /* 金色强调 */
+    --accent-red: #c0392b;      /* 朱红，战斗/警告 */
+    --accent-green: #27ae60;    /* 翠绿，成功 */
+    --text-primary: #e8e8e8;    /* 正文白 */
+    --text-secondary: #a0a0a0;  /* 次要灰 */
+    --border: #2c3e50;          /* 边框深蓝 */
+}
+
+/* ===== 全局盒模型：让 width:100% + padding 不再溢出 ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ===== 基础样式（原始） ===== */
+        body { font-family: monospace; background: #111; color: #0f0; padding: 20px; max-width: 900px; margin: 0 auto; }
+        #output { background: #222; border: 1px solid #333; padding: 20px; height: 450px; overflow-y: auto; white-space: pre-wrap; margin-bottom: 10px; border-radius: 8px;}
+        .input-area { display: flex; gap: 10px; }
+        #user_input { flex: 1; padding: 10px; background: #222; border: 1px solid #444; color: #0f0; border-radius: 4px; }
+        button { padding: 10px 20px; background: #0f0; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
+        button:hover { background: #0c0; }
+        .system { color: cyan; }
+        .plot { color: white; }
+        .change { color: purple; }
+        .cmd-btn { margin: 5px; padding: 5px 10px; background: #448; color: white; font-size: 12px; border-radius: 4px; border: 1px solid #66a; }
+        .cmd-btn:hover { background: #66a; }
+        #cmd-buttons { margin-bottom: 15px; }
+
+        /* ===== NPC头像 / 武功图标 内联样式 ===== */
+        .npc-avatar-inline { width: 28px; height: 28px; border-radius: 50%; vertical-align: middle; margin-right: 3px; object-fit: cover; border: 1px solid #665; }
+        .skill-icon-inline { width: 24px; height: 24px; vertical-align: middle; margin-right: 2px; object-fit: contain; }
+
+        /* ===== 剧情配图样式（桌面端） ===== */
+        .plot-scene-img { max-width: 80%; border-radius: 8px; border: 1px solid #555; }
+
+/* ===== 物品/武功 标签样式（原始） ===== */
+        .martial-list-item { cursor: pointer; padding: 6px 10px; border-bottom: 1px dashed #223; }
+        .martial-list-item:hover { background: #222244; }
+        .martial-list-title { color: #eee; font-size: 13px; font-weight: 600; }
+        .martial-list-meta { margin-top: 4px; color: #888; font-size: 11px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .martial-tag { padding: 1px 6px; border-radius: 10px; font-size: 10px; display: inline-block; }
+        .martial-tag-S { background: linear-gradient(90deg,#8a4a00,#ffd700); color: #000; }
+        .martial-tag-A { background: #a22; color: #fff; }
+        .martial-tag-B { background: #448; color: #fff; }
+        .martial-tag-C { background: #2a4; color: #fff; }
+        .martial-tag-D { background: #555; color: #ddd; }
+
+/* ===== 按钮美化增强 ===== */
+button {
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.cmd-btn {
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.cmd-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.15);
+}
+.cmd-btn:active {
+    transform: translateY(0);
+}
+
+/* ===== 卡片/面板美化增强 ===== */
+#output {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+#init-panel,
+#map-panel,
+#editor-modal,
+#notepad-modal,
+#npc-manager-modal,
+#martial-manager-modal,
+#item-manager-modal,
+#faction-manager-modal {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(2px);
+}
+#worldbook-status {
+    transition: all 0.2s ease;
+}
+#worldbook-status:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.martial-list-item {
+    transition: background 0.15s ease, padding-left 0.15s ease;
+}
+.martial-list-item:hover {
+    padding-left: 14px;
+}
+
+/* ===== 滚动条美化 ===== */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 5px;
+    border: 2px solid var(--bg-primary);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-gold);
+}
+::-webkit-scrollbar-corner {
+    background: var(--bg-primary);
+}
+/* Firefox 滚动条 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--bg-primary);
+}
+
+/* ===== 标题美化 ===== */
+h1 {
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+}
+h3 {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== 输入框美化 ===== */
+#user_input {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+#user_input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 8px rgba(230, 192, 104, 0.3);
+}
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent-gold) !important;
+    box-shadow: 0 0 6px rgba(230, 192, 104, 0.25) !important;
+}
+
+/* =========================================================
+   响应式设计
+   断点：手机 <768 | 平板 768-1023 | 桌面 ≥1024 | 小屏 <480 | 横屏手机
+   原则：HTML/JS 零改动，仅用 !important 覆盖内联样式
+   ========================================================= */
+
+/* ===== 桌面端 (≥1024px) ===== */
+@media (min-width: 1024px) {
+    body { max-width: 1200px; }
+    #output { height: 500px; }
+}
+
+/* ===== 平板端 (768-1023px) ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+    body { max-width: 1000px; }
+    #output { height: 420px; }
+}
+
+/* ===== 手机端 (<768px) ===== */
+@media (max-width: 767px) {
+    body {
+        padding: 8px;
+        padding-bottom: 72px;            /* 给底部固定输入栏留位 */
+        padding-top: max(8px, env(safe-area-inset-top));
+        font-size: 14px;
+        max-width: 100%;
+    }
+    h1 { font-size: 1.3em; text-align: center; }
+
+    /* 命令按钮：换行网格 + 加大点击区 */
+    #cmd-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 10px;
+    }
+    .cmd-btn {
+        font-size: 12px;
+        padding: 7px 10px;
+        margin: 2px;
+        min-height: 34px;                /* 手指可点 */
+        flex: 1 1 auto;
+        white-space: nowrap;
+    }
+
+    /* 输出区：按视口高度自适应 */
+    #output {
+        height: calc(100vh - 360px);
+        min-height: 180px;
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    /* 剧情配图：手机端缩小，避免占满屏幕 */
+    .plot-scene-img { max-width: 55%; }
+
+    /* 输入栏固定底部，始终可见 */
+    #input-area {
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        padding: 8px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        background: #111;
+        border-top: 1px solid #333;
+        z-index: 100;
+        gap: 8px;
+    }
+    #input-area #user_input { flex: 1; }
+    #input-area button { flex: 0 0 auto; }
+
+    /* 世界书状态条全宽 */
+    #worldbook-status { display: block !important; width: 100%; }
+
+    /* 管理器/编辑器弹窗 → 全屏抽屉，杜绝被截断 */
+    #editor-modal,
+    #notepad-modal,
+    #npc-manager-modal,
+    #martial-manager-modal,
+    #item-manager-modal,
+    #faction-manager-modal {
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        padding: 12px !important;
+    }
+
+    /* 弹窗内左右两栏 → 单列堆叠（nth-child(2) 即两栏容器） */
+    #npc-manager-modal > div:nth-child(2),
+    #martial-manager-modal > div:nth-child(2),
+    #item-manager-modal > div:nth-child(2),
+    #faction-manager-modal > div:nth-child(2) {
+        flex-direction: column !important;
+        height: calc(100% - 64px) !important;
+        gap: 10px !important;
+    }
+    /* 左侧列表全宽 + 限高 */
+    #npc-manager-modal > div:nth-child(2) > div:first-child,
+    #martial-manager-modal > div:nth-child(2) > div:first-child,
+    #item-manager-modal > div:nth-child(2) > div:first-child,
+    #faction-manager-modal > div:nth-child(2) > div:first-child {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 32vh !important;
+        height: 32vh !important;
+    }
+    /* 右侧编辑区填充剩余空间 */
+    #npc-manager-modal > div:nth-child(2) > div:last-child,
+    #martial-manager-modal > div:nth-child(2) > div:last-child,
+    #item-manager-modal > div:nth-child(2) > div:last-child,
+    #faction-manager-modal > div:nth-child(2) > div:last-child {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    /* 弹窗顶部工具栏：纵向堆叠，输入框/下拉框全宽自动换行 */
+    #npc-manager-modal > div:first-child,
+    #martial-manager-modal > div:first-child,
+    #item-manager-modal > div:first-child,
+    #faction-manager-modal > div:first-child {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    #npc-manager-modal input[type="text"],
+    #martial-manager-modal input[type="text"],
+    #martial-manager-modal select,
+    #item-manager-modal input[type="text"],
+    #item-manager-modal select,
+    #faction-manager-modal input[type="text"] {
+        width: 100% !important;
+        margin: 0 0 4px 0 !important;
+    }
+
+    /* textarea 自适应 */
+    #notepad_editor,
+    #player_json_editor,
+    #npc-editor,
+    #faction-editor {
+        min-height: 240px !important;
+        height: auto !important;
+    }
+
+    /* 地图三栏 → 单列（属性选择器匹配内联 flex 容器） */
+    #map-panel > div[style*="display:flex; gap:10px; flex-wrap:wrap;"] {
+        flex-direction: column !important;
+    }
+    #map-panel > div[style*="display:flex; gap:10px; flex-wrap:wrap;"] > div {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    #map-panel { padding: 10px !important; }
+
+    /* 角色创建面板 */
+    #init-panel { padding: 14px !important; }
+}
+
+/* ===== 小屏手机 (<480px) 进一步压缩 ===== */
+@media (max-width: 479px) {
+    .cmd-btn { font-size: 11px; padding: 6px 8px; min-height: 32px; }
+    h1 { font-size: 1.15em; }
+    #output { font-size: 12px; }
+}
+
+/* ===== 横屏手机（矮屏） ===== */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+    #output { height: calc(100vh - 200px); min-height: 120px; }
+    #npc-manager-modal > div:nth-child(2) > div:first-child,
+    #martial-manager-modal > div:nth-child(2) > div:first-child,
+    #item-manager-modal > div:nth-child(2) > div:first-child,
+    #faction-manager-modal > div:nth-child(2) > div:first-child {
+        max-height: 40vh !important;
+        height: 40vh !important;
+    }
+}

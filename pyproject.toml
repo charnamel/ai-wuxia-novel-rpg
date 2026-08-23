@@ -1,0 +1,22 @@
+[tool.ruff.lint]
+ignore = [
+    "BLE001",    # blind except
+    "F401",      # unused import (动态使用，静态检测不到)
+    "FURB167",   # re.S alias
+    "F841",      # unused variable
+    "S110",      # try-except-pass
+    "TRY002",    # raise vanilla class
+    "SIM102",    # collapsible if
+    "SIM103",    # needless bool
+    "PLR1730",   # if stmt min max
+    "PLW0602",   # global not assigned
+    "RUF010",    # explicit f-string conversion
+    "RUF019",    # unnecessary key check
+    "RUF100",    # unused noqa
+    "W605",      # invalid escape sequence
+    "S112",      # try-except-continue
+    "I001",      # unsorted imports
+    "UP009",     # utf8 encoding declaration
+    "PIE790",    # unnecessary pass
+    "F541",      # f-string without placeholders
+]

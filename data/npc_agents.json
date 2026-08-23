@@ -1,0 +1,6285 @@
+{
+  "npc_list": [
+    {
+      "body_status": "normal",
+      "body_status_desc": "被毒刀所伤身亡",
+      "identity": "辽东大侠，胡家刀法传人",
+      "initial_favor": 10,
+      "life_experience": "与苗人凤比武时因兵器被涂毒而身亡，其妻自杀殉夫；与苗人凤在沧州比武数日不分胜负，惺惺相惜；传授平阿四胡家刀法，后被阎基下毒暗害",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "胡家刀法"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "胡家快刀"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "春蚕掌法"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "胡家内功"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "四象步"
+        }
+      ],
+      "memory_list": [],
+      "name": "胡一刀",
+      "personality": "豪迈重义",
+      "relation_to_player": "",
+      "secret": "被阎基下毒暗害；深爱妻子，临终前托付平阿四照顾妻儿",
+      "year": 1715
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "曾被毒瞎双眼，已治愈",
+      "identity": "金面佛，打遍天下无敌手",
+      "initial_favor": 10,
+      "life_experience": "与胡一刀比武误伤致其死亡；救南兰并娶其为妻，后因妻子出轨而离散；被刘鹤真毒信所伤双目，得胡斐相助；当年误伤胡一刀夫妇，心存愧疚；被田归农暗算弄瞎眼睛，得程灵素医治；与胡斐在雪山对决，最终化解恩怨",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "苗家剑法"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "苗家刀法"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "反两仪刀法"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "苗家内功"
+        }
+      ],
+      "memory_list": [],
+      "name": "苗人凤",
+      "personality": "沉默重义，磊落豪迈",
+      "relation_to_player": "",
+      "secret": "深爱南兰但无法挽回，心中羡慕胡一刀有真心爱人；当年与胡一刀的恩怨；对误杀胡一刀一事深感悔恨，但不愿逃避责任",
+      "year": 1730
+    },
+    {
+      "name": "胡斐",
+      "identity": "胡一刀之子，雪山飞狐",
+      "personality": "机智侠义，重情重义",
+      "life_experience": "被平阿四抚养长大，学得胡家刀法；大闹商家堡，为锺家报仇追杀凤天南；与程灵素结拜为兄妹，得知苗人凤是杀父仇人后内心矛盾；参加掌门人大会，击败众多高手；与苗人凤在雪山对决，最终化解恩怨；深爱程灵素和袁紫衣，但最终孑然一身",
+      "secret": "身负父仇，隐藏身份；对袁紫衣有情，心中矛盾；父母被杀之仇不共戴天，但对苗人凤的豪迈心生敬意",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "胡家刀法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "春蚕掌法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "飞天神行",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "胡家内功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1755
+    },
+    {
+      "name": "程灵素",
+      "identity": "毒手药王弟子，药王谷传人",
+      "personality": "聪慧缜密，外冷内热",
+      "life_experience": "用计制服师兄师姊，救治苗人凤眼伤，与胡斐结拜为兄妹；协助胡斐救治马春花，乔装打扮混入掌门人大会；掌门人大会上使用毒药搅乱大会，后为救胡斐吸出剧毒而亡",
+      "secret": "实为药王传人；自感相貌平凡，对胡斐心生爱慕却不敢表露；暗恋胡斐，但知胡斐心有所属",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "毒砂掌",
+          "skill_level": "略有所成"
+        },
+        {
+          "skill_name": "七心海棠制毒",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "解毒医术",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "药王神篇",
+          "skill_level": "登堂入室"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "为救胡斐吸出剧毒而亡",
+      "relation_to_player": "",
+      "year": 1749
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "武林高手，九家半总掌门",
+      "initial_favor": 10,
+      "life_experience": "连夺韦陀门、八仙剑、九龙派掌门，与胡斐斗气；遵师命三次救父凤天南，与胡斐一路交手，夺多家掌门，最终坦露身世；揭露汤沛，诬陷其勾结红花会，为母报仇",
+      "martial_skills": [
+        {
+          "skill_name": "云帚拂尘功",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "银丝软鞭",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "多家门派武功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "memory_list": [],
+      "name": "袁紫衣",
+      "personality": "活泼好胜，任性倔强",
+      "relation_to_player": "",
+      "secret": "真实姓名非袁紫衣；对胡斐有好感；是凤天南私生女，母亲银姑被凤天南害死",
+      "year": 1748
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "峨眉派尼姑，法名圆性，俗名袁紫衣",
+      "initial_favor": 10,
+      "life_experience": "揭露汤沛，诬陷其勾结红花会，为母报仇，与汤沛激战，救胡斐；掌门人大会上与汤沛大战，后救马春花，杀汤沛，为通知胡斐而连夜奔波；重伤后与胡斐并肩作战，用马鞭救胡斐，最后念偈悄然西去",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "软鞭"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "云帚（含磁石）"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "多派武功"
+        }
+      ],
+      "memory_list": [],
+      "name": "圆性（袁紫衣）",
+      "personality": "机智深情，清冷矜持",
+      "relation_to_player": "",
+      "secret": "是凤天南之女，曾与胡斐有情，已出家；对胡斐有爱意，但因出家身份而压抑",
+      "year": 1748
+    },
+    {
+      "name": "田归农",
+      "identity": "天龙门北宗掌门人",
+      "personality": "阴险狡诈，心机深沉",
+      "life_experience": "勾引苗夫人南兰私奔，劫镖时被苗人凤震慑；诱拐苗人凤之妻南兰，多次设计暗算苗人凤，被胡斐以胡家刀法击败；持宝刀连胜多人，断李廷豹铁棍，逼其自杀，被胡斐夺刀；率众围攻胡斐，持宝刀与胡斐相斗，后被胡斐所伤，大败逃走",
+      "secret": "觊觎闯王宝藏，利用苗夫人；对苗人凤极度恐惧，害怕其报复；与石万嗔相识，曾用断肠草毒瞎苗人凤",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天龙剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "追命毒龙锥",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "天龙掌",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "南兰",
+      "identity": "苗人凤之妻，后随田归农出走",
+      "personality": "温柔娇弱，矛盾多情",
+      "life_experience": "父亲被杀，被苗人凤所救后嫁之，后因感情不合与田归农私奔；在胡斐父母墓前出现，询问苗人凤和女儿近况；指点胡斐挖掘冷月宝刀，说出埋刀秘密后独自远去",
+      "secret": "心中愧疚但对田归农的爱难以自拔；当年狠心抛弃丈夫女儿，如今后悔",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "苗若兰",
+      "identity": "苗人凤与南兰之女",
+      "personality": "天真可爱，温柔善良",
+      "life_experience": "幼时随父寻母，被母亲抛弃；被父亲抱着睡觉，不知外界变故",
+      "secret": "思念母亲",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "苗家刀法",
+          "skill_level": "初学入门",
+          "_source": "门派:苗家剑"
+        },
+        {
+          "skill_name": "苗家内功",
+          "skill_level": "初学入门",
+          "_source": "门派:苗家剑"
+        },
+        {
+          "skill_name": "反两仪刀法(胡苗合璧)",
+          "skill_level": "初学入门",
+          "_source": "门派:苗家剑"
+        },
+        {
+          "skill_name": "猫",
+          "skill_level": "初学入门",
+          "_source": "物品:坐骑"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1765
+    },
+    {
+      "name": "阎基",
+      "identity": "盗魁，后为宝树和尚",
+      "personality": "贪婪无赖，欺软怕硬",
+      "life_experience": "劫镖被苗人凤震慑，被商老太打败并割辫，交出胡家拳经两页；当年下毒害死胡一刀",
+      "secret": "当年下毒害死胡一刀",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "怪异拳脚",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "鬼头刀法",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "平阿四",
+      "identity": "独臂人，胡斐的仆人和抚养者",
+      "personality": "忠诚隐忍，重恩情",
+      "life_experience": "受胡一刀之恩，抚养其子胡斐，在商家堡做杂工；被胡斐找到，分得黄金后回沧州",
+      "secret": "知道胡斐身世，保管胡家拳经",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "胡家内功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "独臂",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "商老太",
+      "identity": "商剑鸣之妻，商家堡主人",
+      "personality": "刚烈阴狠，深藏不露",
+      "life_experience": "打败阎基，护镖不失，收留平四叔侄；暗中练刀，抓住胡斐鞭打，后与胡斐动手，暗器喂毒偷袭；设计铁厅烧死众人，后被胡斐打败，最后怀抱金刀坐于火中自焚",
+      "secret": "丈夫已死，独自支撑家业；想折磨马春花，为夫报仇；对丈夫的思念和复仇执念",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "八卦掌",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "八卦刀",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "怀抱金刀坐于火中自焚",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "商家堡少主人，拜入马行空门下",
+      "initial_favor": 10,
+      "life_experience": "练金镖，与徐铮、何思豪等交手，被田归农打倒；被胡斐打败，后遇到王氏兄弟；与母亲围攻胡斐，被胡斐烫伤脸颊，后被打伤；在商家堡与马春花相识，后投靠福康安，打死徐铮后被马春花所杀",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "八卦掌"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "燕青拳"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "八卦刀"
+        }
+      ],
+      "memory_list": [],
+      "name": "商宝震",
+      "personality": "精明阴狠，痴情冲动",
+      "relation_to_player": "",
+      "secret": "不知母亲商老太的武功深浅；钟情马春花；爱慕马春花，欲夺其心",
+      "year": 1740
+    },
+    {
+      "name": "商剑鸣",
+      "identity": "八卦刀高手，商宝震之父（已故）",
+      "personality": "英雄一世",
+      "life_experience": "曾打败马行空，后被胡一刀和苗人凤所杀（根据回忆）",
+      "secret": "无（已故）",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "八卦刀",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "百胜神拳",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "八卦游身掌",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被胡一刀和苗人凤所杀",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "胡夫人",
+      "identity": "胡一刀之妻",
+      "personality": "忠贞刚烈",
+      "life_experience": "为夫殉情自杀",
+      "secret": "对丈夫深情不渝",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "胡家内功",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "胡苗反两仪合璧",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "为夫殉情自杀",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "情欲初开，经依依疏导心神渐平",
+      "identity": "百胜神拳马行空之女丨玩家同门师姐",
+      "initial_favor": 10,
+      "life_experience": "随父走镖，偷看商宝震练镖，与田归农冲突；与徐铮订亲，后与福公子私会，成为其情妇；与福康安有私生子，后嫁给徐铮，丈夫被杀后杀死商宝震，被接往福康安府；被福康安母亲下毒，胡斐救出，被程灵素施针救治；被福康安抛弃，中毒将死，临终前见到福康安（陈家洛冒充）",
+      "martial_skills": [
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "柳叶刀"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "燕青拳"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "劈挂刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "马春花",
+      "personality": "活泼率真，娇憨多情",
+      "relation_to_player": "",
+      "secret": "对师兄徐铮有依赖之情；与福公子的私情；对福康安旧情难忘，且孩子是福康安所出",
+      "year": 1738
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "除夕守岁，轻伤尽愈",
+      "identity": "马行空之徒丨玩家同门师兄",
+      "initial_favor": 10,
+      "life_experience": "与何思豪比武获胜，被阎基打伤，后被田归农戏弄；因醋意与商宝震动手；被困铁厅，发现马春花与福公子私情，愤怒追杀，后师父惨死；继承马行空镖局，生意衰落，被商宝震打死",
+      "martial_skills": [
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "燕青拳"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "查拳"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "披挂刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "徐铮",
+      "personality": "急躁鲁莽，嫉妒冲动",
+      "relation_to_player": "",
+      "secret": "对师妹马春花有爱慕之心；对马春花与商宝震的猜疑；明知两个孩子非己亲生，仍隐忍",
+      "year": 1725
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "伤势痊愈",
+      "identity": "飞马镖局总镖头丨外号百胜神拳丨玩家授艺恩师",
+      "initial_favor": 10,
+      "life_experience": "被阎基打败，又被田归农打伤，护镖失利；在商家堡养伤，发现商老太复仇计划，为女儿订亲，后见识胡斐武功；被困铁厅，后为商老太打入火窟烧死",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "燕青拳"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "混元掌"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "混元功"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "查拳"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "披挂刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "马行空",
+      "personality": "老练沉稳，疼爱女儿",
+      "relation_to_player": "",
+      "secret": "曾败于八卦刀商剑鸣，引为奇耻大辱；曾与商剑鸣有过节，怕女儿受苦",
+      "year": 1710
+    },
+    {
+      "name": "何思豪",
+      "identity": "御前蓝翎侍卫",
+      "personality": "好色无赖，官气十足",
+      "life_experience": "与徐铮比武被打败，被商宝震维护面子；作为侍卫邀请掌门，被刘鹤真摔跌",
+      "secret": "冒充大内高手",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "太极拳",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "太极刀",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "福康安",
+      "identity": "兵部尚书，总管内务府大臣",
+      "personality": "心机深沉，心狠手辣",
+      "life_experience": "与马春花有私情，默许母亲下毒杀死马春花，下令捉拿胡斐；举办天下掌门人大会，被胡斐闯入抢子；主持掌门人大会，被红花会设计，信了圆性之言，下令拿汤沛；传闻为乾隆私生子；在书剑恩仇录时期已被卷入朝廷与红花会的博弈；六和塔事件中受牵连；后在飞狐外传中与马春花私定终身、举办掌门人大会分化武林",
+      "secret": "是乾隆私生子，对马春花始乱终弃；纵容母亲毒害马春花；负心薄幸，与马春花生子；与乾隆的真实关系；掌门人大会分化武林的阴谋",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "指法",
+          "skill_level": "略有所成"
+        },
+        {
+          "skill_name": "大内侍卫武功",
+          "skill_level": "渐入佳境",
+          "_source": "门派:福康安大帅府"
+        },
+        {
+          "skill_name": "血滴子",
+          "skill_level": "略有所成",
+          "_source": "门派:福康安大帅府"
+        },
+        {
+          "skill_name": "大帅府护卫阵",
+          "skill_level": "略有小成",
+          "_source": "门派:福康安大帅府"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1754
+    },
+    {
+      "name": "福公子",
+      "identity": "身份高贵的公子、福府主人",
+      "personality": "风流好色，善于诱惑",
+      "life_experience": "与马春花私会，手下武师众多；与马春花偷情，被徐铮追杀，遇赵半山后吓得逃走",
+      "secret": "垂涎马春花美色；曾为红花会所擒之惧",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1754
+    },
+    {
+      "name": "福康安之母",
+      "identity": "傅恒之妻，福康安母亲",
+      "personality": "心狠手辣，维护门第",
+      "life_experience": "设计毒杀马春花，夺取双生子",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "凤天南",
+      "identity": "五虎门掌门，南霸天",
+      "personality": "阴狠霸道，老谋深算",
+      "life_experience": "被胡斐断辫羞辱，后火烧家业逃走；毁家避祸；杀锺阿四一家后逃亡，在湘妃庙遇胡斐，被袁紫衣救走；杀害钟阿四全家，被胡斐追杀，先后三次被袁紫衣所救，最后逃脱；参加掌门人大会，被胡斐盯上；使用无影银针连胜多人，被胡斐断铜棍，后被汤沛银针射死",
+      "secret": "对儿子的爱和复仇的怨恨；袁紫衣生父，曾强暴袁银姑；曾逼迫银姑，是圆性之父",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "佛山无影腿",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "五股托天叉",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "五虎门武功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被汤沛银针射死",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "凤一鸣",
+      "identity": "凤天南之子",
+      "personality": "有礼城府，孝顺鲁莽",
+      "life_experience": "被胡斐擒拿到北帝庙，后得父亲相救；与父亲凤天南一起出现；随父逃亡，与胡斐交手",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "家传武功",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "单刀",
+          "skill_level": "略有所成"
+        },
+        {
+          "skill_name": "五股托天叉",
+          "skill_level": "略有小成",
+          "_source": "门派:佛山凤家"
+        },
+        {
+          "skill_name": "五虎棍",
+          "skill_level": "初窥门径",
+          "_source": "门派:佛山凤家"
+        },
+        {
+          "skill_name": "恶霸拳脚",
+          "skill_level": "初窥门径",
+          "_source": "门派:佛山凤家"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "凤七",
+      "identity": "英雄楼掌柜，凤天南族弟",
+      "personality": "机灵狡猾，欺软怕硬",
+      "life_experience": "被胡斐用菜刀恐吓，后放走",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "软鞭",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "锺阿四",
+      "identity": "菜农",
+      "personality": "忠厚老实，刚烈",
+      "life_experience": "被凤天南诬陷入狱，后儿子被剖腹，最后被杀",
+      "secret": "冤屈与愤怒",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被凤天南杀害",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "锺四嫂",
+      "identity": "锺阿四之妻",
+      "personality": "慈爱刚烈",
+      "life_experience": "剖腹明冤导致儿子死亡，后疯癫，最终被杀",
+      "secret": "痛苦与复仇的执念",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被凤天南杀害",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "锺小二",
+      "identity": "锺阿四长子",
+      "personality": "孝顺勇敢",
+      "life_experience": "被恶犬追咬，后与母亲一同被杀",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被凤天南杀害",
+      "relation_to_player": "",
+      "year": 1750
+    },
+    {
+      "name": "锺小三",
+      "identity": "锺阿四幼子",
+      "personality": "天真无知",
+      "life_experience": "被母亲剖腹明冤而死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被母亲剖腹明冤而死",
+      "relation_to_player": "",
+      "year": 1758
+    },
+    {
+      "name": "赵半山",
+      "identity": "红花会三当家，千手如来",
+      "personality": "慈和仁善，侠义热心",
+      "life_experience": "追捕陈禹，指点胡斐武功，制住古般若，擒获陈禹；与胡斐结义为异姓兄弟，传授武学要诀，赠金相别；乔装胖侍卫，发射飞燕银梭夺玉杯，打灭烛火，与胡斐对掌；与胡斐重逢，并带他见陈家洛；红花会三当家，千手如来；参与六和塔擒乾隆；红花会远走回疆后仍与胡斐保持联系；在飞狐外传中路过商家堡救下少年胡斐",
+      "secret": "万里追凶，为吕家报仇；红花会成员；红花会反清失败后的隐痛",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "飞燕银梭",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "回龙璧",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "子母飞轮",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "太极拳",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "陈禹",
+      "identity": "太极门叛徒、福公子手下",
+      "personality": "阴险狡诈，贪生怕死",
+      "life_experience": "害死吕希贤父子，被赵半山追捕，挟持吕小妹，后被胡斐所破；用云手累死吕希贤，被赵半山废去武功，后粘在铁门上烫死",
+      "secret": "为学乱环诀与阴阳诀而杀人；临死前醒悟‘自作自受’",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "太极拳",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被赵半山废去武功，后粘在铁门上烫死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "孙刚峯",
+      "identity": "广平太极门掌门",
+      "personality": "刚烈忠义，重义气",
+      "life_experience": "自断双手托赵半山报仇，后现身商家堡指证陈禹；被商老太困在铁厅，后得赵半山相助清理门户",
+      "secret": "为报仇不惜自残；感激赵半山又感为难",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "太极拳",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "自断双手",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "吕小妹",
+      "identity": "吕希贤之女",
+      "personality": "坚毅勇敢，坚毅果敢",
+      "life_experience": "孤身寻赵半山报父仇，被陈禹挟持，后得救；父亲和兄弟被陈禹杀害，赴回疆求援，后得赵半山庇护",
+      "secret": "目睹父亲和弟弟被杀；复仇之心坚决",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1748
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "嵩山少林派青年好手",
+      "initial_favor": 10,
+      "life_experience": "发射飞刀被赵半山制住，后离去",
+      "martial_skills": [
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "少林拳法"
+        }
+      ],
+      "memory_list": [],
+      "name": "古般若",
+      "personality": "年轻气盛",
+      "relation_to_player": "",
+      "secret": "被赵半山暗器震慑",
+      "year": 1728
+    },
+    {
+      "name": "殷仲翔",
+      "identity": "天龙门南宗好手",
+      "personality": "易怒胆小，急躁好赌",
+      "life_experience": "拔剑被赵半山震断；被困铁厅，主张杀胡斐以求生；在商家堡曾与胡斐相遇，后在北京赌局中输钱失态；被胡斐打飞撞假山晕死，后被救醒咒骂凤天南",
+      "secret": "畏惧赵半山；对胡斐的身份惊讶",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天龙剑法",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "切磋后手腕酸麻已缓",
+      "identity": "王维扬之子、八卦门高手",
+      "initial_favor": 10,
+      "life_experience": "与胡斐比武，被毒镖所伤；被困铁厅，欲杀胡斐求商老太开门，后得胡斐所救；与胡斐在商家堡曾见面，后在北京宴会上重逢；与袁紫衣比试，被其用巧计击败，双臂脱臼；保护福康安，被圆性威慑",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "八卦掌"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "八卦刀"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "八卦游身掌"
+        }
+      ],
+      "memory_list": [],
+      "name": "王剑英",
+      "personality": "傲固执拗，势利怕死",
+      "relation_to_player": "",
+      "secret": "对胡斐的忌惮与恼怒；对商老太的愧疚与恐惧；掌门之位曾被圆性所夺",
+      "year": 1718
+    },
+    {
+      "name": "王剑杰",
+      "identity": "王维扬之子、八卦门高手",
+      "personality": "心直口快，暴躁护兄",
+      "life_experience": "与胡斐比武，后为兄长求药；被困铁厅后被烟熏晕，为胡斐所救；见兄长被制，出手攻击被胡斐震退",
+      "secret": "对胡斐的轻视",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "八卦掌",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "八卦游身掌",
+          "skill_level": "渐入佳境",
+          "_source": "门派:八卦门"
+        },
+        {
+          "skill_name": "八卦刀",
+          "skill_level": "略有所成",
+          "_source": "门派:八卦门"
+        },
+        {
+          "skill_name": "内八卦掌",
+          "skill_level": "略有小成",
+          "_source": "门派:八卦门"
+        },
+        {
+          "skill_name": "外八卦刀",
+          "skill_level": "略有小成",
+          "_source": "门派:八卦门"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "张总管",
+      "identity": "福公子亲随侍仆",
+      "personality": "浮躁",
+      "life_experience": "被商宝震打了一耳光",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1725
+    },
+    {
+      "name": "刘鹤真",
+      "identity": "韦陀门前辈",
+      "personality": "古怪刚烈，易上当",
+      "life_experience": "与袁紫衣比梅花桩，败；受张飞雄欺骗送信给苗人凤导致苗中毒，后自毁双目",
+      "secret": "自毁双目以谢罪",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天罡梅花桩",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "链子枪",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "自毁双目",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "仲萍",
+      "identity": "刘鹤真之妻",
+      "personality": "忠贞",
+      "life_experience": "陪丈夫送信，受伤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "受伤",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "张飞雄",
+      "identity": "天龙门弟子",
+      "personality": "阴险胆小",
+      "life_experience": "设计毒害苗人凤，后求饶",
+      "secret": "奉师命行事",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "单刀",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "孙伏虎",
+      "identity": "韦陀门大弟子",
+      "personality": "稳重",
+      "life_experience": "三招败于袁紫衣",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "六合刀法",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "尉迟连",
+      "identity": "韦陀门二弟子",
+      "personality": "精明",
+      "life_experience": "被袁紫衣踢伤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "赤尻连拳",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被袁紫衣踢伤",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "杨宾",
+      "identity": "韦陀门三弟子",
+      "personality": "暴躁",
+      "life_experience": "败于袁紫衣，奔出",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "六合枪法",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "蓝秦",
+      "identity": "广西梧州八仙剑掌门",
+      "personality": "谨慎老练",
+      "life_experience": "与袁紫衣比剑，败，得知其师父后惶恐",
+      "secret": "知道袁紫衣师父的秘密",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "八仙剑法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "八仙掌",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "曹猛",
+      "identity": "御前侍卫",
+      "personality": "精明干练",
+      "life_experience": "被袁紫衣鞭打，后放火暗算",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "火器",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "崔百胜",
+      "identity": "御前侍卫",
+      "personality": "精明干练",
+      "life_experience": "放蝎子毒马，被胡斐擒",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "毒蝎暗器",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "易吉",
+      "identity": "九龙派掌门",
+      "personality": "迷信脾气暴躁",
+      "life_experience": "被袁紫衣拆字挑衅，比斗失败落水",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "九节钢鞭",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "九龙鞭法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "擒拿手",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "钟兆文",
+      "identity": "鄂北鬼见愁钟氏三兄弟老大",
+      "personality": "剽悍忠厚，重义气",
+      "life_experience": "为徒报仇，与苗人凤激战，被打伤；与胡斐一同前往药王庄求医，被田归农手下擒获后又释放",
+      "secret": "因被擒而感到惭愧",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "判官笔",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "钟兆英",
+      "identity": "鄂北鬼见愁钟氏三兄弟老二",
+      "personality": "机灵，老成持重",
+      "life_experience": "为徒报仇，与苗人凤激战，被打伤；被田归农擒获，后得释；起初寻苗人凤报仇，后得知阴谋，助胡斐保护苗人凤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "判官笔",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "铁灵牌（判官笔变）",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1738
+    },
+    {
+      "name": "钟兆能",
+      "identity": "鄂北鬼见愁钟氏三兄弟老三",
+      "personality": "剽悍，机敏",
+      "life_experience": "为徒报仇，与苗人凤激战，被打伤；参与阻截刘鹤真，后守护苗人凤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "判官笔",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "招魂幡",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "慕容景岳",
+      "identity": "毒手药王无嗔大师的大弟子",
+      "personality": "阴鸷狠辣，执念深重",
+      "life_experience": "被程灵素设计装入竹箩，后与姜铁山夫妇化解嫌隙；跟随石万嗔，称薛鹊为拙荆；与薛鹊投靠石万嗔，害死姜铁山父子，后中毒被斩臂",
+      "secret": "对师妹薛鹊旧情难忘，纠缠不休；与薛鹊结为夫妇，背叛师门",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "透骨钉",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "用毒",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "药王神篇(医)",
+          "skill_level": "略有所成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "五毒秘传(毒)",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "七星海棠制毒",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "中毒被斩臂",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "姜铁山",
+      "identity": "毒手药王无嗔大师的二弟子，薛鹊之夫",
+      "personality": "粗豪直率，忠诚顾家",
+      "life_experience": "与妻子薛鹊常被慕容景岳纠缠，儿子小铁中毒，得程灵素救治；被慕容景岳与薛鹊勾结害死",
+      "secret": "对程灵素既忌惮又感激",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "药王神篇(医)",
+          "skill_level": "融会贯通",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "五毒秘传(毒)",
+          "skill_level": "渐入佳境",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "七星海棠制毒",
+          "skill_level": "略有所成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "银针救治",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "黑蝎毒术",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被慕容景岳与薛鹊勾结害死",
+      "relation_to_player": "",
+      "year": 1738
+    },
+    {
+      "name": "薛鹊",
+      "identity": "毒手药王无嗔大师的三弟子，姜铁山之妻",
+      "personality": "文秀心狠，阴鸷狠毒",
+      "life_experience": "年轻时毒死大师嫂，被大师兄毒成驼背，后嫁姜铁山；跟随石万嗔，与慕容景岳同行；与慕容景岳勾结，害死丈夫姜铁山，后中毒而死",
+      "secret": "对大师兄慕容景岳仍有复杂情感；改嫁慕容景岳；亲手害死丈夫和儿子",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "用毒",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "药王神篇(医)",
+          "skill_level": "渐入佳境",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "五毒秘传(毒)",
+          "skill_level": "略有所成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "七星海棠制毒",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "银针救治",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "黑蝎毒术",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "中毒而死",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "姜小铁",
+      "identity": "姜铁山与薛鹊之子",
+      "personality": "莽撞冲动",
+      "life_experience": "引狼群践踏花圃，中毒后被程灵素用沸水熬出身中毒质；被慕容景岳与薛鹊害死",
+      "secret": "曾用无药可解的鬼蝙蝠剧毒杀人",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "毒功",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被慕容景岳与薛鹊害死",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "王铁匠",
+      "identity": "被姜铁山欺压的铁匠",
+      "personality": "朴实善良，知恩图报",
+      "life_experience": "被姜铁山强逼铸造铁屋并被打断肋骨，后得程灵素主持公道，以硬柴殴打姜铁山泄愤",
+      "secret": "对程灵素和胡斐心怀感激，唱情歌暗示程胡之情",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "田青文",
+      "identity": "田归农之女",
+      "personality": "机警伶俐，护父心切",
+      "life_experience": "用铁锥打落程灵素的蜡烛，后被程灵素以赤蝎粉反击",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天龙剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "暗器",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1758
+    },
+    {
+      "name": "秦耐之",
+      "identity": "八极拳掌门，福康安手下",
+      "personality": "老练稳重，知恩图报",
+      "life_experience": "受福康安之命南下接马春花，与胡斐交手后佩服其武功；被袁紫衣击败，肩关节脱臼",
+      "secret": "输给胡斐后保全面子，心存感激",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "八极拳",
+          "skill_level": "渐入佳境",
+          "_source": "武功书:八极门/秦耐之"
+        },
+        {
+          "skill_name": "八极掌",
+          "skill_level": "渐入佳境",
+          "_source": "门派:八极门"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "周铁鹪",
+      "identity": "鹰爪雁行门大师兄，武官",
+      "personality": "沉稳豪爽，工于心计",
+      "life_experience": "在赌局中故意输给胡斐一座宅子，以结识拉拢；与胡斐交手双腿脱臼后被胡斐接回，铜鹰铁雁牌被夺后收回，对袁紫衣怀恨在心；设计救回相国夫人，借机升官；保护福康安，查验铁菩提，被圆性威慑",
+      "secret": "受福康安之意收买胡斐；被袁紫衣击败，心中充满怨毒；暗中帮助胡斐，杀死张九灭口；掌门之位曾被圆性所夺",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "鹰爪力",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "鹰爪雁行功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "曾铁鸥",
+      "identity": "鹰爪雁行门二师兄，武官",
+      "personality": "潇洒精明，忠诚粗鲁",
+      "life_experience": "参与赌局，与胡斐结交；曾与胡斐动手，被袁紫衣鞭伤额头；在陈官屯饭店中与石万嗔相遇，想捉拿他",
+      "secret": "协助周铁鹪拉拢胡斐",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "鹰爪雁行刀",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "鹰爪雁行功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "汪铁鹗",
+      "identity": "鹰爪雁行门弟子，武官",
+      "personality": "心直口快，粗豪贪功",
+      "life_experience": "假扮盗匪参与劫镖，被胡斐擒后又释，后在北京重逢；被袁紫衣羞辱，扶周铁鹪；参与救公主，升官",
+      "secret": "对胡斐武功佩服，愿引荐；曾带胡斐入府",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "鹰爪雁行刀",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "褚姓老者",
+      "identity": "塞北大盗，使雷震挡",
+      "personality": "脾气急躁，武功较强",
+      "life_experience": "参与劫镖，与胡斐交手，后在北京赌局中出现",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "雷震挡法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "上官姓兄弟",
+      "identity": "塞北大盗，使闪电锥",
+      "personality": "狡黠狠辣",
+      "life_experience": "参与劫镖，后在北京赌局中出现",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "闪电锥法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "聂钺",
+      "identity": "爱剑如命的武官",
+      "personality": "正直重义，敬仰胡斐",
+      "life_experience": "帮胡斐打开钢盒救了胡斐，却被匕首刺死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被匕首刺死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "姬晓峯",
+      "identity": "华拳门天字派弟子，姬老三之子",
+      "personality": "剽悍狭隘，直率重义",
+      "life_experience": "被胡斐点穴，被程灵素施针救醒，后上台为胡斐解围，练一路华拳；被程灵素用麻药假毒所骗，后与胡斐交好",
+      "secret": "对胡斐怨恨，但碍于形势；担心身中剧毒，实则被欺骗",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "西岳华拳",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "蔡威",
+      "identity": "西岳华拳门前辈",
+      "personality": "稳重服从掌门，背叛",
+      "life_experience": "跟随胡斐参加掌门人大会；泄露机密，将福康安双生子送回，被圆性点穴，胡斐踢伤",
+      "secret": "与福康安勾结",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "华拳",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被胡斐踢伤",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "蔡姓老者",
+      "identity": "华拳门前辈",
+      "personality": "言语幽默，眼光毒辣",
+      "life_experience": "质疑胡斐武功非本门，但被姬晓峯打断",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "高云",
+      "identity": "华拳门行字派女弟子",
+      "personality": "活跃，武功尚可",
+      "life_experience": "上台比试，击败张复龙，后被壮汉击败",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1745
+    },
+    {
+      "name": "张复龙",
+      "identity": "华拳门艺字派弟子",
+      "personality": "勤勉好学",
+      "life_experience": "上台比试被高云击败",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1745
+    },
+    {
+      "name": "褚轰",
+      "identity": "塞北雷电门弟子",
+      "personality": "莽撞",
+      "life_experience": "被袁紫衣询问师父，不敢应战",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "雷震挡",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "德莽夫",
+      "identity": "莽夫，受凤天南指使",
+      "personality": "粗鲁蛮横",
+      "life_experience": "被周铁鹪教训，后凤天南买宅子送胡斐",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "武官头领",
+      "identity": "福康安手下武官",
+      "personality": "阴险",
+      "life_experience": "用钢盒设计擒胡斐，后被胡斐踢死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被胡斐踢死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "和嘉公主",
+      "identity": "乾隆第四女，福康安二嫂",
+      "personality": "能说会道，善伺人意",
+      "life_experience": "与老夫人谈论双生子",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1745
+    },
+    {
+      "name": "海兰氏",
+      "identity": "福康安之妻",
+      "personality": "不悦但忍耐",
+      "life_experience": "见到双生子后欢喜",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "福长安之妻",
+      "identity": "福长安妻子",
+      "personality": "温顺贤淑",
+      "life_experience": "在场",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "张九",
+      "identity": "福康安府卫士",
+      "personality": "粗鲁",
+      "life_experience": "被胡斐点穴制服，后被周铁鹪杀死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被周铁鹪杀死",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "任通武",
+      "identity": "左营卫士",
+      "personality": "贪财好酒，胆小",
+      "life_experience": "被周铁鹪利用，带胡斐入府",
+      "secret": "被胡斐胁迫",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "全管家",
+      "identity": "周铁鹪派来的管家",
+      "personality": "恭敬周到",
+      "life_experience": "奉周铁鹪之命打理宅子，招待胡斐；出去查问卫士",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "黑大汉",
+      "identity": "卖宅子的人",
+      "personality": "粗鲁直率",
+      "life_experience": "将宅子卖给周铁鹪，后因转送胡斐而上门理论",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "马春花之子",
+      "identity": "马春花与福康安的儿子",
+      "personality": "幼小天真",
+      "life_experience": "被群盗掳走，后送回马春花身边",
+      "secret": "实为福康安骨肉",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1765
+    },
+    {
+      "name": "老妇人",
+      "identity": "石屋中的病妇",
+      "personality": "惊恐",
+      "life_experience": "在石屋中养病，被胡斐等人闯入",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "生病",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "少林寺方丈，四大掌门之一",
+      "initial_favor": 10,
+      "life_experience": "担任掌门人大会公证；参与掌门人大会，识破石万嗔冒充毒手药王",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "少林武功"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "少林七十二绝技"
+        }
+      ],
+      "memory_list": [],
+      "name": "大智禅师",
+      "personality": "威严慈祥，稳重见识",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1710
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "武当山太和宫观主，四大掌门之一",
+      "initial_favor": 10,
+      "life_experience": "担任公证；参与掌门人大会；参加掌门人大会，后与胡斐交手，认出对方是陆菲青",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "武当武功"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "武当剑法"
+        }
+      ],
+      "memory_list": [],
+      "name": "无青子",
+      "personality": "委琐低调，深藏不露",
+      "relation_to_player": "",
+      "secret": "出家为道，隐藏身份",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "伤势痊愈",
+      "identity": "武当派掌门，绵里针",
+      "initial_favor": 10,
+      "life_experience": "出家为无青子，参加掌门人大会，后与胡斐交手，认出彼此；武当名宿，绵里针；张召重师兄；李沅芷之师；因师弟张召重叛变而痛心；协助红花会对抗张召重",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "大摔碑手"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "芙蓉金针"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "武当剑法"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "点穴手"
+        }
+      ],
+      "memory_list": [],
+      "name": "陆菲青",
+      "personality": "稳重，功夫老辣",
+      "relation_to_player": "",
+      "secret": "隐藏身份多年；对师弟叛变的自责与痛心",
+      "year": 1700
+    },
+    {
+      "name": "汤沛",
+      "identity": "三才剑掌门，四大掌门之一，号甘霖惠七省",
+      "personality": "交游广阔，伪善阴险",
+      "life_experience": "担任公证，与常氏兄弟对掌；作为公证，暗中用银针助凤天南，后被圆性诬陷勾结红花会，被福康安怀疑，与圆性激战；在掌门人大会上被围攻，破窗逃走，后为圆性所杀",
+      "secret": "曾逼死银姑，与凤天南勾结，鞋底藏无影银针",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "三才剑",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "暗器",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被圆性所杀",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "海兰弼",
+      "identity": "辽东黑龙门掌门，镶黄旗佐领，四大掌门之一",
+      "personality": "沉稳勇猛，性急",
+      "life_experience": "担任公证，制服宗黄二人，与常氏兄弟对掌；参与掌门人大会，夺玉龙杯，手被烫伤；在掌门人大会上出言，后与胡斐、圆性夹攻汤沛",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "黑龙门武功",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "黑龙双杖",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "黄希节",
+      "identity": "二郎拳掌门",
+      "personality": "粗豪力大",
+      "life_experience": "争夺玉龙杯，与宗雄缠斗",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "二郎拳",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "二郎棍法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "防身刀法",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "主动现身与李三奇搭话",
+      "identity": "燕青拳掌门，千里独行侠",
+      "initial_favor": 10,
+      "life_experience": "被周隆击败受伤",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "燕青拳"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "燕青棍法"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "暗器"
+        }
+      ],
+      "memory_list": [],
+      "name": "欧阳公政",
+      "personality": "轻薄，独脚大盗",
+      "relation_to_player": "",
+      "secret": "劫镖事",
+      "year": 1685
+    },
+    {
+      "name": "西灵道人",
+      "identity": "昆仑刀掌门",
+      "personality": "脸含微笑，知难而退",
+      "life_experience": "坐玉龙杯座；自行退位，离开太师椅",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "昆仑刀",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "昆仑剑法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "道门内功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "文醉翁",
+      "identity": "醉八仙掌门",
+      "personality": "狂妄胆小",
+      "life_experience": "被常氏兄弟吓死",
+      "secret": "作恶多端",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "醉八仙",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "醉拳",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "醉剑",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被常氏兄弟吓死",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "周隆",
+      "identity": "金刚拳掌门，兴隆镖局总镖头",
+      "personality": "坚韧重义",
+      "life_experience": "击败欧阳公政报劫镖之仇",
+      "secret": "对劫镖耿耿于怀",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "金刚拳",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "金刚掌",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "硬气功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "提出替李三奇保管鸳鸯刀，化解周威信寻仇之局",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "齐伯涛",
+      "identity": "鸭形门弟子",
+      "personality": "粗鲁",
+      "life_experience": "与师弟争夺掌门，被老者教训",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "鸭形拳",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "陈高波",
+      "identity": "鸭形门弟子",
+      "personality": "粗鲁",
+      "life_experience": "与师兄争夺掌门，被老者教训",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "鸭形拳",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "宗雄",
+      "identity": "地堂拳掌门",
+      "personality": "暴躁神力",
+      "life_experience": "与黄希节缠斗，被海兰弼掷出",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "地堂拳",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "地堂刀法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "滚地术",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "桑飞虹",
+      "identity": "五湖门掌门",
+      "personality": "活泼好奇，机敏勇敢",
+      "life_experience": "参加掌门人大会，被上官铁生用迷香暗算；与上官铁生打斗，被毒烟迷晕，被程灵素救醒，后与书生一起夺杯被擒",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "五湖门武功",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "水上漂轻功",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "软鞭",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1745
+    },
+    {
+      "name": "倪不大",
+      "identity": "双子门掌门之一",
+      "personality": "怪异，连体兄弟",
+      "life_experience": "抢夺福康安儿子，被常氏兄弟救走；与倪不小抱走马春花的双生子",
+      "secret": "想收双胞胎徒弟",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "双子门合击术",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "双笔点穴",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "倪不小",
+      "identity": "双子门掌门之一",
+      "personality": "怪异，连体兄弟",
+      "life_experience": "与倪不大一起抢夺福康安儿子，被常氏兄弟救走；与倪不大抱走马春花的双生子",
+      "secret": "想收双胞胎徒弟",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "双子门合击术",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "双笔点穴",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "哈赤",
+      "identity": "蒙古哈赤大师，中抓门掌门",
+      "personality": "憨直正直，暴躁直率",
+      "life_experience": "参加大会，为桑飞虹辩护；参与掌门人大会，与书生斗气，被书生戏弄，鞋子被脱，后被上官铁生咬伤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "蒙古摔交",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "蒙古拳法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "骑射",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被上官铁生咬伤",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "上官铁生",
+      "identity": "玄指门掌门，烟霞散人",
+      "personality": "阴险，使用迷香毒药",
+      "life_experience": "用烟管和迷香暗算桑飞虹；用毒烟喷桑飞虹，被书生夺烟管，后被程灵素反下毒，发疯咬哈赤",
+      "secret": "与文醉翁交好",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "玄指门武功",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "毒药",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "红花会心砚，假扮书生",
+      "initial_favor": 10,
+      "life_experience": "为西川双侠辩护，喝止上官铁生；戏弄哈赤，夺玉龙杯，被汤沛擒获，后被赵半山、胡斐等救走",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "点穴"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "轻功"
+        }
+      ],
+      "memory_list": [],
+      "name": "青年书生心砚",
+      "personality": "俊雅侠义，机灵调皮",
+      "relation_to_player": "",
+      "secret": "是红花会成员，假借书生身份捣乱",
+      "year": 1740
+    },
+    {
+      "name": "常赫志",
+      "identity": "西川双侠之一，红花会",
+      "personality": "冷峻，武功高强",
+      "life_experience": "闯入大会救走倪氏兄弟；与常伯志一起救出马春花的双生子；西川双侠之一，红花会成员；参与书剑恩仇录全程事件",
+      "secret": "红花会成员",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "黑砂掌",
+          "skill_level": "融会贯通",
+          "_source": "武功书:青城派/常赫志、常伯志"
+        },
+        {
+          "skill_name": "黑沙掌",
+          "skill_level": "渐入佳境",
+          "_source": "武功书:青城派/常赫志、常伯志"
+        },
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "略有所成",
+          "_source": "门派:红花会"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "常伯志",
+      "identity": "西川双侠之一，红花会",
+      "personality": "冷峻，武功高强",
+      "life_experience": "与常赫志一起闯入大会救走倪氏兄弟；与常赫志一起救出马春花的双生子；西川双侠之一，红花会成员；参与书剑恩仇录全程事件",
+      "secret": "红花会成员",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "黑砂掌",
+          "skill_level": "融会贯通",
+          "_source": "武功书:青城派/常赫志、常伯志"
+        },
+        {
+          "skill_name": "黑沙掌",
+          "skill_level": "渐入佳境",
+          "_source": "武功书:青城派/常赫志、常伯志"
+        },
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "略有所成",
+          "_source": "门派:红花会"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "郭玉堂",
+      "identity": "先天拳掌门",
+      "personality": "见识广博，胆小怕事",
+      "life_experience": "在旁观战解说；旁观比武，被烟管飞向面门，被胡斐所救",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "先天拳",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "先天功",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "掌法",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "童怀道",
+      "identity": "太原府流星赶月，流星锤高手",
+      "personality": "直率暴躁",
+      "life_experience": "连败多人，向田归农挑战，被田归农点穴僵立，后被胡斐飞杯解穴",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "流星锤",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "曹云奇",
+      "identity": "田归农大弟子",
+      "personality": "忠于师父",
+      "life_experience": "为田归农捧剑，提醒师父小心",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天龙剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "天龙掌",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1755
+    },
+    {
+      "name": "李廷豹",
+      "identity": "五台派掌门大弟子，延安五郎镖局总镖头",
+      "personality": "莽撞直率，刚烈",
+      "life_experience": "出头要求田归农解童怀道穴道，被田归农作弄，后与田归农比武，被宝刀断棍并断右手筋，自戕而死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "五郎棍法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "五台刀法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "五台内功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "自戕而死",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "石万嗔",
+      "identity": "毒手神枭，无嗔大师师弟",
+      "personality": "残忍，精于用毒，自负",
+      "life_experience": "想夺取《药王神篇》，在庙中中计双目失明，后逃离；弹铁菩提伤两人，假装为武官驱虫，坐太师椅夺玉龙杯，被程灵素毒烟陷害",
+      "secret": "与田归农勾结，配制毒药害死胡一刀夫妇",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "用毒",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "武功",
+          "skill_level": "略有所成"
+        },
+        {
+          "skill_name": "药王神篇(医)",
+          "skill_level": "略有所成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "五毒秘传(毒)",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        },
+        {
+          "skill_name": "七星海棠制毒",
+          "skill_level": "略有小成",
+          "_source": "门派:药王门"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "双目失明",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "柯子容",
+      "identity": "兰州柯氏七青门掌门",
+      "personality": "自负好胜",
+      "life_experience": "发射铁菩提，被石万嗔弹回中毒，后与凤天南比暗器，被程灵素爆竹戏弄，最后被凤天南银针射中胯下",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "七般暗器",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "七青剑法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被凤天南银针射中胯下",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "木文察",
+      "identity": "清军猛将，福康安部下",
+      "personality": "勇猛知进退",
+      "life_experience": "身披铁甲与凤天南比武，被凤天南银针射落头盔绒球，认输",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "开山大斧",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "安提督",
+      "identity": "提督大人，福康安下属",
+      "personality": "善于逢迎",
+      "life_experience": "主持比武，读汤沛信，下令关闭府门；在掌门人大会上按住肚子，指挥卫士",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "刘之余",
+      "identity": "乾清宫太监",
+      "personality": "胆小",
+      "life_experience": "被红花会挟持假传圣旨",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "红花会鬼见愁",
+      "initial_favor": 10,
+      "life_experience": "乔装侍卫，假传圣旨，被卫士截住；红花会鬼见愁；参与书剑恩仇录全程事件",
+      "martial_skills": [
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "融会贯通",
+          "_source": "门派:红花会"
+        }
+      ],
+      "memory_list": [],
+      "name": "石双英",
+      "personality": "勇猛",
+      "relation_to_player": "",
+      "secret": "红花会成员",
+      "year": 1725
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "独臂",
+      "identity": "红花会二当家，独臂道人",
+      "initial_favor": 10,
+      "life_experience": "在陶然亭与胡斐比武，后与德布交战，获胜；红花会二当家，独臂道人；剑术超群；参与六和塔擒乾隆；红花会远走回疆",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "追魂夺命剑"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "连环迷踪腿"
+        }
+      ],
+      "memory_list": [],
+      "name": "无尘道人",
+      "personality": "好胜豪爽，剑法无双",
+      "relation_to_player": "",
+      "secret": "年轻时曾被官家小姐欺骗而断臂；断臂之因与旧情伤",
+      "year": 1700
+    },
+    {
+      "name": "德布",
+      "identity": "御前侍卫班领，满洲第一勇士",
+      "personality": "勇猛自负",
+      "life_experience": "率大内十八高手与红花会及胡斐交战，被无尘刺伤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "剑法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被无尘刺伤",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "红花会总舵主",
+      "initial_favor": 10,
+      "life_experience": "与胡斐交手后相认，答应冒充福康安去见马春花；原为世家书生，于万亭义子；接任红花会总舵主；识破乾隆身世为亲兄；六和塔擒乾隆逼其歃血为盟；香香公主入宫殉节；红花会远走回疆",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "百花错拳"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "庖丁解牛功"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "无极拳"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "剑盾珠索"
+        }
+      ],
+      "memory_list": [],
+      "name": "陈家洛",
+      "personality": "儒雅深情，武功高强",
+      "relation_to_player": "",
+      "secret": "心中深念香香公主；与乾隆的兄弟关系；对香香公主之死的愧疚",
+      "year": 1725
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "红花会四当家，奔雷手，文四哥",
+      "initial_favor": 10,
+      "life_experience": "掷刀相助胡斐；红花会四当家，奔雷手；获知朝廷秘密被张召重逮捕；经红花会全力营救脱险；参与六和塔擒乾隆",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "霹雳掌"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "奔雷手"
+        }
+      ],
+      "memory_list": [],
+      "name": "文泰来",
+      "personality": "豪迈力大",
+      "relation_to_player": "",
+      "secret": "；掌握乾隆身世秘密",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "伤愈大半，随马善均登船归红花会总舵",
+      "identity": "红花会十一当家",
+      "initial_favor": 10,
+      "life_experience": "曾赠马给胡斐；红花会十一当家，文泰来之妻；文泰来被捕后四处奔走求援；赴铁胆庄寻访文泰来下落",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "连珠飞刀"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "鸳鸯刀"
+        }
+      ],
+      "memory_list": [],
+      "name": "骆冰",
+      "personality": "聪慧善良",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1722
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "红花会十四当家，金笛秀才",
+      "initial_favor": 10,
+      "life_experience": "在庙外吹笛，后与群雄一起；红花会十四当家（非七当家），金笛秀才；暗恋骆冰；以身阻火药线救文泰来面目全毁；后与李沅芷结为夫妻",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "金笛"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "金笛点穴"
+        }
+      ],
+      "memory_list": [],
+      "name": "余鱼同",
+      "personality": "儒雅，善吹笛",
+      "relation_to_player": "",
+      "secret": "；对骆冰的暗恋；毁容后的自卑",
+      "year": 1725
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "归杭安顿，浴池温汤中精神松弛",
+      "identity": "陆菲青之徒，浙江水陆提督李可秀独女丨玩家正妻",
+      "initial_favor": 10,
+      "life_experience": "在陶然亭向陆菲青询问掌门人大会详情；陆菲青之徒，李可秀之女；聪慧调皮；敢爱敢恨；在书剑恩仇录中追逐余鱼同；最终与毁容后的余鱼同结为夫妻",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "武当剑法"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "武当十段锦"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "武当长拳"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "柔云剑法"
+        }
+      ],
+      "memory_list": [],
+      "name": "李沅芷",
+      "personality": "好奇活泼，英姿飒爽",
+      "relation_to_player": "",
+      "secret": "；对余鱼同的执着",
+      "year": 1737
+    },
+    {
+      "name": "徐天宏",
+      "identity": "红花会七当家，武诸葛",
+      "personality": "智谋过人",
+      "life_experience": "劝大家不要贸然进城；红花会七当家，武诸葛；足智多谋；在铁胆庄事件中与周绮患难生情；最终娶周绮为妻",
+      "secret": "；对自身身材矮小的自卑",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁胆",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "周家拳",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1733
+    },
+    {
+      "name": "心砚",
+      "identity": "红花会书童",
+      "personality": "机灵",
+      "life_experience": "在掌门人大会中被擒，被胡斐所救；红花会书童；陈家洛贴身侍从；参与书剑恩仇录全程事件",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "融会贯通",
+          "_source": "门派:红花会"
+        }
+      ],
+      "body_status": "poisoned",
+      "body_status_desc": "中毒",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "苗夫人",
+      "identity": "田归农之妻，原为苗人凤之妻",
+      "personality": "固执神秘，内心复杂",
+      "life_experience": "指点胡斐挖掘冷月宝刀，说出埋刀秘密后独自远去",
+      "secret": "对过往婚姻有深刻感慨，期望胡斐能明白人心",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "司徒雷",
+      "identity": "福康安府武士",
+      "personality": "谨慎，懂得避敌锋芒",
+      "life_experience": "与谢不挡联手阻止胡斐，被胡斐虚招逼退",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "鬼头刀法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "谢不挡",
+      "identity": "福康安府武士",
+      "personality": "谨慎，懂得避敌锋芒",
+      "life_experience": "与司徒雷联手阻止胡斐，被胡斐虚招逼退",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁鞭法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "张宁",
+      "identity": "福康安府武士",
+      "personality": "精明圆滑",
+      "life_experience": "被胡斐抓住当人质，后被点穴",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "丁文沛",
+      "identity": "福康安府武士",
+      "personality": "精明圆滑",
+      "life_experience": "被胡斐砍翻在地",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被胡斐砍伤",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "丁文深",
+      "identity": "福康安府武士",
+      "personality": "精明圆滑",
+      "life_experience": "被胡斐砍翻在地",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被胡斐砍伤",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "陈敬夫",
+      "identity": "福康安府武士",
+      "personality": "自称老夫，年长",
+      "life_experience": "参与围攻胡斐",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "黄樵",
+      "identity": "福康安府武士",
+      "personality": "反应迅捷，擅长擒拿",
+      "life_experience": "被胡斐双掌击中胸口但未摔倒，最终被夺刀",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "十八路大擒拿手",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "伍公权",
+      "identity": "福康安府武士",
+      "personality": "老练沉稳",
+      "life_experience": "参与围攻胡斐",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "高一力",
+      "identity": "福康安府武士",
+      "personality": "身材魁梧，力气大",
+      "life_experience": "被圆性用马鞭圈住头颈拖走",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "熟铜棍法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1745
+    },
+    {
+      "name": "东方",
+      "identity": "福康安府武士",
+      "personality": "精明圆滑",
+      "life_experience": "报姓名时被胡斐刀背击中后脑毙命",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被胡斐刀背击中后脑毙命",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "邝宝官",
+      "identity": "赌场宝官",
+      "personality": "狡猾贪婪",
+      "life_experience": "被胡斐识破赌术，脑袋被插进桌子",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "作弊手法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "蛇皮张",
+      "identity": "英雄当铺护院武师",
+      "personality": "胆小怕事",
+      "life_experience": "被胡斐制服，抬门板跟从",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "武功",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "俞朝奉",
+      "identity": "英雄典当朝奉",
+      "personality": "尖酸刻薄",
+      "life_experience": "被胡斐揪出压在门板下，后获释",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "大掌柜",
+      "identity": "英雄典当大掌柜",
+      "personality": "圆滑老练",
+      "life_experience": "处理胡斐当人事件，后暗中跟踪",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "肥厨子",
+      "identity": "英雄楼厨子",
+      "personality": "憨厚老实",
+      "life_experience": "被胡斐询问炒菜用料",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "尤七",
+      "identity": "英雄楼掌柜",
+      "personality": "势力",
+      "life_experience": "被胡斐整",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "蒋调侯",
+      "identity": "御前侍卫",
+      "personality": "阴险狡诈",
+      "life_experience": "参与夺刀，用毒针伤苗人凤，后被宝刀劈死",
+      "secret": "云南蒋氏毒针传人",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "绝门毒针",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被宝刀劈死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "补锅匠",
+      "identity": "鄂北鬼见愁钟氏门徒",
+      "personality": "粗鲁狂妄",
+      "life_experience": "参与夺刀，被苗人凤用软鞭打死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "轻功",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被苗人凤用软鞭打死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "脚夫",
+      "identity": "夺刀者之一",
+      "personality": "莽撞",
+      "life_experience": "参与夺刀，被苗人凤击毙",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被苗人凤击毙",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "车夫",
+      "identity": "夺刀者之一",
+      "personality": "好色",
+      "life_experience": "参与夺刀，被苗人凤以软鞭打死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "软鞭",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "被苗人凤以软鞭打死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "店伴",
+      "identity": "假扮店伙的夺刀者",
+      "personality": "狡猾",
+      "life_experience": "参与夺刀，被苗人凤后踢致死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被苗人凤后踢致死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "南仁通",
+      "identity": "南兰之父，候补京官",
+      "personality": "傲慢贪财",
+      "life_experience": "因冷月宝刀被强盗杀害",
+      "secret": "宝刀系从江洋大盗处夺得",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被强盗杀害",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "聂姓大盗",
+      "identity": "浙东剑客，福康安手下",
+      "personality": "傲气，重剑爱剑",
+      "life_experience": "参与劫镖，与胡斐比剑后佩服，后在北京赌局中出现",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "祁家剑法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "中年妇人",
+      "identity": "程灵素乔装",
+      "personality": "冷静机智，善于用毒",
+      "life_experience": "救醒桑飞虹，用爆竹下毒于玉杯，喷毒烟引起混乱",
+      "secret": "真实身份是毒手药王弟子，暗中破坏大会",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "毒药",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "医术",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "石先生",
+      "identity": "自称毒手药王，实为石万嗔",
+      "personality": "阴险，善于用毒",
+      "life_experience": "弹铁菩提伤两人，假装为武官驱虫，坐太师椅夺玉龙杯，被程灵素毒烟陷害",
+      "secret": "冒充毒手药王，与田归农相识",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "毒药",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "武功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "平四",
+      "identity": "独臂人，胡斐的仆人和抚养者",
+      "personality": "忠诚，隐忍，重恩情",
+      "life_experience": "受胡一刀之恩，抚养其子胡斐，在商家堡做杂工",
+      "secret": "知道胡斐身世，保管胡家拳经",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "锺兆英",
+      "identity": "锺氏三雄老大",
+      "personality": "沉稳、重信义",
+      "life_experience": "起初寻苗人凤报仇，后得知阴谋，助胡斐保护苗人凤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁灵牌（判官笔变）",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1738
+    },
+    {
+      "name": "锺兆文",
+      "identity": "锺氏三雄老二",
+      "personality": "急躁但仗义",
+      "life_experience": "随胡斐去药王庄求药，中毒",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "哭丧棒",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "锺兆能",
+      "identity": "锺氏三雄老三",
+      "personality": "机敏",
+      "life_experience": "参与阻截刘鹤真，后守护苗人凤",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "招魂幡",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "福康安之母（老夫人）",
+      "identity": "傅恒之妻，福康安母亲",
+      "personality": "心狠手辣，维护门第",
+      "life_experience": "设计毒杀马春花，夺取双生子",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "德莽夫（姓德的莽夫）",
+      "identity": "莽夫，受凤天南指使",
+      "personality": "粗鲁，蛮横",
+      "life_experience": "被周铁鹪教训，后凤天南买宅子送胡斐",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "武官头领（下毒盒者）",
+      "identity": "福康安手下武官",
+      "personality": "阴险，听从命令",
+      "life_experience": "用钢盒设计擒胡斐，后被胡斐踢死",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被胡斐踢死",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "苗夫人（南兰）",
+      "identity": "田归农之妻，原为苗人凤之妻",
+      "personality": "固执、神秘、内心复杂",
+      "life_experience": "指点胡斐挖掘冷月宝刀，说出埋刀秘密后独自远去",
+      "secret": "对过往婚姻有深刻感慨，期望胡斐能明白人心",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1735
+    },
+    {
+      "name": "马春花之子（二人）",
+      "identity": "马春花与福康安的儿子",
+      "personality": "幼小天真",
+      "life_experience": "被群盗掳走，后送回马春花身边",
+      "secret": "实为福康安骨肉",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1765
+    },
+    {
+      "name": "黑大汉（姓德）",
+      "identity": "卖宅子的人",
+      "personality": "粗鲁、直率",
+      "life_experience": "将宅子卖给周铁鹪，后因转送胡斐而上门理论",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "东方（姓东方，名不详）",
+      "identity": "福康安府武士",
+      "personality": "精明圆滑",
+      "life_experience": "报姓名时被胡斐刀背击中后脑毙命",
+      "secret": "",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "被胡斐刀背击中后脑毙命",
+      "relation_to_player": "",
+      "year": 1741
+    },
+    {
+      "name": "中年婦人",
+      "identity": "程灵素乔装",
+      "personality": "冷静、机智、善于用毒",
+      "life_experience": "救醒桑飞虹，用爆竹下毒于玉杯，喷毒烟引起混乱",
+      "secret": "真实身份是毒手药王弟子，暗中破坏大会",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "毒药",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "医术",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "body_status": "poisoned",
+      "body_status_desc": "中毒",
+      "identity": "红花会心砚，假扮书生",
+      "initial_favor": 10,
+      "life_experience": "戏弄哈赤，夺玉龙杯，被汤沛擒获，后被赵半山、胡斐等救走",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "点穴"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "轻功"
+        },
+        {
+          "_source": "物品:秘籍",
+          "skill_level": "初窥门径",
+          "skill_name": "分筋错骨手秘笈"
+        }
+      ],
+      "memory_list": [],
+      "name": "书生心砚",
+      "personality": "机灵、调皮、轻功高",
+      "relation_to_player": "",
+      "secret": "是红花会成员，假借书生身份捣乱",
+      "year": 1740
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "胡一刀之子，化名平斐",
+      "initial_favor": 10,
+      "life_experience": "随平四在商家堡生活，怒斥苗夫人，得回两页拳经",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "胡家快刀"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "春蚕掌法"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "胡家内功"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "四象步"
+        }
+      ],
+      "memory_list": [],
+      "name": "平斐（胡斐）",
+      "personality": "勇敢正直，聪明好学",
+      "relation_to_player": "",
+      "secret": "身世秘密，立志为父报仇",
+      "year": 1755
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "被李三奇点破藏拙，神色复杂",
+      "identity": "杭州知秋园管家，教了少年时代玩家六合功夫",
+      "initial_favor": 71,
+      "life_experience": "",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "六合拳、六合刀"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "鹤舞云光"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "燕行步"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "罗汉功"
+        }
+      ],
+      "memory_list": [],
+      "name": "铁臂周",
+      "personality": "忠厚老实",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1700
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "保定府李府主人，玩家李三奇的父亲",
+      "initial_favor": 73,
+      "life_experience": "",
+      "martial_skills": [],
+      "memory_list": [],
+      "name": "李公福",
+      "personality": "慈祥持重",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1700
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "玩家贴身丫鬟",
+      "initial_favor": 100,
+      "life_experience": "",
+      "martial_skills": [
+        {
+          "skill_level": "初学入门",
+          "skill_name": "燕行步"
+        },
+        {
+          "skill_level": "初学入门",
+          "skill_name": "六合拳"
+        },
+        {
+          "skill_level": "初学入门",
+          "skill_name": "武当十段绵内功"
+        }
+      ],
+      "memory_list": [],
+      "name": "灵儿",
+      "personality": "天真活泼",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1740
+    },
+    {
+      "name": "赵镖头",
+      "identity": "沧州飞马镖局镖师（老赵）",
+      "personality": "豪爽重义",
+      "life_experience": "",
+      "secret": "",
+      "initial_favor": 56,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "乾隆",
+      "identity": "大清皇帝，陈家洛亲兄",
+      "personality": "帝王心术，多疑无情",
+      "life_experience": "实为海宁陈家之子，与陈家洛为同胞兄弟；被雍正调包入宫为帝；六和塔被红花会擒获逼其歃血为盟反清，后背信弃义围剿红花会；索要香香公主入宫，致其殉节；实为海宁陈家之子，与陈家洛为同胞兄弟；被雍正调包入宫为帝；六和塔被红花会擒获逼其歃血为盟反清，后背信弃义围剿红花会；索要香香公主入宫，致其殉节",
+      "secret": "与陈家洛的兄弟关系；调包真相；背盟毁誓；与陈家洛的兄弟关系；调包真相；背盟毁誓",
+      "initial_favor": -20,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "九五之尊",
+      "relation_to_player": "",
+      "year": 1711
+    },
+    {
+      "body_status": "deceased",
+      "body_status_desc": "夜闯禁宫后暴毙",
+      "identity": "红花会前任总舵主",
+      "initial_favor": 5,
+      "life_experience": "原为少林俗家弟子；创立红花会以反清复明为己任；夜闯禁宫后发现乾隆身世秘密；遭害后将总舵主之位传于义子陈家洛",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "红花暗器"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "红花会武功"
+        }
+      ],
+      "memory_list": [],
+      "name": "于万亭",
+      "personality": "刚烈忠义，鞠躬尽瘁",
+      "relation_to_player": "",
+      "secret": "知晓乾隆身世真相；与陈家的渊源",
+      "year": 1700
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "红丸初破，疲惫沉睡",
+      "identity": "回部族长之女，翠羽黄衫丨被玩家破处丨玩家非婚恋人",
+      "initial_favor": 100,
+      "life_experience": "回部首领木卓伦之女；率回部骑兵抗清，以翠羽黄衫之名震慑清军；与陈家洛互生情愫，后因香香公主之事心碎；红花会远走回疆后与陈家洛重逢",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "回部弯刀"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "回部骑射"
+        }
+      ],
+      "memory_list": [],
+      "name": "霍青桐",
+      "personality": "英姿飒爽，智勇隐忍",
+      "relation_to_player": "",
+      "secret": "深爱陈家洛却因姐妹之情隐忍；对妹妹香香公主既爱又妒",
+      "year": 1735
+    },
+    {
+      "name": "香香公主",
+      "identity": "回部族长幼女，绝世美人",
+      "personality": "纯真善良，刚烈忠贞",
+      "life_experience": "回部首领木卓伦幼女；与陈家洛在回疆相遇相爱；被陈家洛为反清大业献入宫中；发现乾隆背信弃义后以死警示陈家洛",
+      "secret": "临死前留下遗书警示陈家洛",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "回部弯刀",
+          "skill_level": "初学入门",
+          "_source": "门派:回部"
+        },
+        {
+          "skill_name": "骑射",
+          "skill_level": "初学入门",
+          "_source": "门派:回部"
+        },
+        {
+          "skill_name": "大漠阵法",
+          "skill_level": "初学入门",
+          "_source": "门派:回部"
+        }
+      ],
+      "body_status": "dead",
+      "body_status_desc": "殉节身亡",
+      "relation_to_player": "",
+      "year": 1738
+    },
+    {
+      "body_status": "",
+      "body_status_desc": "",
+      "identity": "回部族长，霍青桐之父",
+      "initial_favor": 33,
+      "life_experience": "回部首领；因《可兰经》被抢与红花会结盟；率回部抗清；女儿香香公主被送入宫后悲愤；最终在抗清战斗中壮烈牺牲",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "回部刀法"
+        },
+        {
+          "_source": "门派:回部",
+          "skill_level": "略有小成",
+          "skill_name": "回部弯刀"
+        },
+        {
+          "_source": "门派:回部",
+          "skill_level": "初窥门径",
+          "skill_name": "骑射"
+        },
+        {
+          "_source": "门派:回部",
+          "skill_level": "初学入门",
+          "skill_name": "大漠阵法"
+        }
+      ],
+      "memory_list": [],
+      "name": "木卓伦",
+      "personality": "慷慨豪迈，宁死不屈",
+      "relation_to_player": "",
+      "secret": "对清廷的刻骨仇恨；对女儿的爱",
+      "year": 1700
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "初次登场，气度沉稳",
+      "identity": "武当叛徒，火手判官",
+      "initial_favor": -20,
+      "life_experience": "武当派门人，陆菲青师弟；叛入朝廷为鹰犬；逮捕文泰来；六和塔之战中杀伤红花会多人；最终恶贯满盈被红花会处决",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "火手判官剑法"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "武当剑法"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "武当轻功"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "柔云剑法"
+        }
+      ],
+      "memory_list": [],
+      "name": "张召重",
+      "personality": "阴险毒辣，卖身求荣",
+      "relation_to_player": "",
+      "secret": "背叛师门的耻辱；对权位的贪婪",
+      "year": 1715
+    },
+    {
+      "name": "周仲英",
+      "identity": "铁胆庄庄主，西北大豪",
+      "personality": "豪迈重义，铁骨铮铮",
+      "life_experience": "西北武林泰斗；铁胆庄主人；因万庆澜挑拨与红花会产生误会；失手打死幼子周英杰以证清白；后与红花会和解；女儿周绮嫁徐天宏",
+      "secret": "失手打死幼子的悔恨；铁胆庄的秘密",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁胆功",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "子母铁胆",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "铁琶手",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "大刀",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "周绮",
+      "identity": "周仲英之女，俏李逵",
+      "personality": "泼辣直爽，心地善良",
+      "life_experience": "周仲英之女；因铁胆庄误会与红花会结缘；与徐天宏患难中生情；性格泼辣但心地善良；最终嫁与徐天宏",
+      "secret": "对父亲打死幼弟的愧疚；对徐天宏的深情",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁胆功",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "刀法",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1737
+    },
+    {
+      "name": "周英杰",
+      "identity": "周仲英幼子",
+      "personality": "天真顽皮",
+      "life_experience": "周仲英老来得子；因无意间泄露文泰来藏身之处；被周仲英失手打死以证清白",
+      "secret": "无",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁胆(独门暗器)",
+          "skill_level": "略有所成",
+          "_source": "门派:铁胆庄"
+        },
+        {
+          "skill_name": "周家拳",
+          "skill_level": "略有小成",
+          "_source": "门派:铁胆庄"
+        }
+      ],
+      "body_status": "dead",
+      "body_status_desc": "被父失手打死",
+      "relation_to_player": "",
+      "year": 1745
+    },
+    {
+      "body_status": "",
+      "body_status_desc": "被张召重所害",
+      "identity": "武当掌门，张召重师兄",
+      "initial_favor": 0,
+      "life_experience": "武当派掌门；张召重师兄；因心慈手软未能阻止师弟叛变；最终被张召重所害",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "武当轻功"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "武当剑法"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "武当内功"
+        }
+      ],
+      "memory_list": [],
+      "name": "马真",
+      "personality": "正直迂腐，心慈手软",
+      "relation_to_player": "",
+      "secret": "对师弟叛变的自责",
+      "year": 1700
+    },
+    {
+      "name": "白振",
+      "identity": "大内侍卫总管，金爪铁钩",
+      "personality": "忠于职守，阴沉老辣",
+      "life_experience": "大内侍卫总管；忠于乾隆；奉命围剿红花会；武功阴狠",
+      "secret": "对乾隆的绝对忠诚",
+      "initial_favor": -10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "大力鹰爪功",
+          "skill_level": "融会贯通",
+          "_source": "武功书:嵩阳派/白振"
+        },
+        {
+          "skill_name": "铁钩",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "武当剑法(叛徒学)",
+          "skill_level": "略有所成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "大擒拿",
+          "skill_level": "略有小成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "大内血滴子",
+          "skill_level": "略有小成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "金爪铁钩",
+          "skill_level": "略有小成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "瑞大林",
+      "identity": "大内侍卫",
+      "personality": "阴狠毒辣",
+      "life_experience": "大内侍卫；奉命追捕红花会；手段狠辣",
+      "secret": "无",
+      "initial_favor": -10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "七步追魂",
+          "skill_level": "渐入佳境",
+          "_source": "武功书:江湖/瑞大林"
+        },
+        {
+          "skill_name": "八步赶蟾",
+          "skill_level": "略有所成",
+          "_source": "武功书:江湖/瑞大林"
+        },
+        {
+          "skill_name": "擒拿手",
+          "skill_level": "略有小成"
+        },
+        {
+          "skill_name": "八旗军阵",
+          "skill_level": "初窥门径",
+          "_source": "门派:兆惠征西大军"
+        },
+        {
+          "skill_name": "清军长枪阵",
+          "skill_level": "初窥门径",
+          "_source": "门派:兆惠征西大军"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "褚圆",
+      "identity": "御前侍卫，红衣高手",
+      "personality": "好勇斗狠",
+      "life_experience": "御前侍卫高手；在西湖与陈家洛比武落败；好勇斗狠",
+      "secret": "比武落败的耻辱",
+      "initial_favor": -5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "武当剑法(叛徒学)",
+          "skill_level": "融会贯通",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "大擒拿",
+          "skill_level": "渐入佳境",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "大内血滴子",
+          "skill_level": "略有所成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "金爪铁钩",
+          "skill_level": "略有小成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "龙骏",
+      "identity": "暗器高手，清廷鹰犬",
+      "personality": "阴险狡诈",
+      "life_experience": "暗器高手；为清廷效力；以毒蒺藜和飞燕金镖伤人",
+      "secret": "暗器淬毒的秘密",
+      "initial_favor": -10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "飞燕金镖",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "言伯乾",
+      "identity": "暗器高手",
+      "personality": "阴险毒辣",
+      "life_experience": "暗器高手；以飞镖毒针伤人；为清廷效力",
+      "secret": "无",
+      "initial_favor": -10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "飞镖",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "毒针",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "蒋四根",
+      "identity": "红花会十当家，铁塔",
+      "personality": "憨厚耿直，力大无穷",
+      "life_experience": "红花会十当家；使铁桨；力大无穷；忠心耿耿跟随陈家洛",
+      "secret": "无",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁桨",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "渐入佳境",
+          "_source": "门派:红花会"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1728
+    },
+    {
+      "name": "杨成协",
+      "identity": "红花会八当家，铁臂罗汉",
+      "personality": "豪爽刚直",
+      "life_experience": "红花会八当家；铁臂功了得；跟随陈家洛南征北战",
+      "secret": "无",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁臂功",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "渐入佳境",
+          "_source": "门派:红花会"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1725
+    },
+    {
+      "name": "卫春华",
+      "identity": "红花会九当家，独步蟾宫",
+      "personality": "机敏灵活，勇猛无畏",
+      "life_experience": "红花会九当家；轻功出众；以双钩为兵器；勇猛无畏",
+      "secret": "无",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "蟾宫步",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "双钩",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "略有所成",
+          "_source": "门派:红花会"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1728
+    },
+    {
+      "name": "章进",
+      "identity": "红花会十当家（驼子）",
+      "personality": "脾气暴烈，忠心耿耿",
+      "life_experience": "红花会十当家；身有残疾驼背；铁布衫功夫了得；脾气暴烈但忠心",
+      "secret": "对自身残疾的敏感",
+      "initial_favor": 8,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "拳法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "红花会武功",
+          "skill_level": "渐入佳境",
+          "_source": "门派:红花会"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1725
+    },
+    {
+      "name": "蒋天寿",
+      "identity": "红花会六当家",
+      "personality": "沉稳老练",
+      "life_experience": "红花会六当家；沉稳老练；跟随陈家洛",
+      "secret": "无",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "刀法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1728
+    },
+    {
+      "name": "孟健雄",
+      "identity": "铁胆庄管家",
+      "personality": "忠厚老实",
+      "life_experience": "铁胆庄管家；忠心侍奉周仲英；武功平平",
+      "secret": "无",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "查拳",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1728
+    },
+    {
+      "name": "安健刚",
+      "identity": "铁胆庄教师",
+      "personality": "粗犷直率",
+      "life_experience": "铁胆庄护院教师；粗犷直率；忠于周仲英",
+      "secret": "无",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "大洪拳",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1728
+    },
+    {
+      "name": "万庆澜",
+      "identity": "清廷奸细",
+      "personality": "阴险小人，挑拨离间",
+      "life_experience": "清廷奸细；混入铁胆庄挑拨周仲英与红花会关系；导致周英杰之死",
+      "secret": "真实身份是清廷密探",
+      "initial_favor": -15,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "暗器",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "武当剑法(叛徒学)",
+          "skill_level": "渐入佳境",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "大擒拿",
+          "skill_level": "略有所成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "大内血滴子",
+          "skill_level": "略有小成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        },
+        {
+          "skill_name": "金爪铁钩",
+          "skill_level": "略有小成",
+          "_source": "门派:清廷鹰犬(张召重系)"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1728
+    },
+    {
+      "name": "滕一雷",
+      "identity": "辽东大豪，独角龙",
+      "personality": "凶悍霸道",
+      "life_experience": "辽东大豪；使雷震挡；为利而来；凶悍霸道",
+      "secret": "无",
+      "initial_favor": -5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "雷震挡",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "关东各路狠辣武功",
+          "skill_level": "渐入佳境",
+          "_source": "门派:关东六魔"
+        },
+        {
+          "skill_name": "独脚铜人",
+          "skill_level": "略有所成",
+          "_source": "门派:关东六魔"
+        },
+        {
+          "skill_name": "钢叉",
+          "skill_level": "略有小成",
+          "_source": "门派:关东六魔"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "顾金标",
+      "identity": "关东魔头，暗器高手",
+      "personality": "阴险毒辣",
+      "life_experience": "关东魔头；以飞燕金镖闻名；阴险毒辣",
+      "secret": "无",
+      "initial_favor": -10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "飞燕金镖",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "关东各路狠辣武功",
+          "skill_level": "渐入佳境",
+          "_source": "门派:关东六魔"
+        },
+        {
+          "skill_name": "钢叉",
+          "skill_level": "略有所成",
+          "_source": "门派:关东六魔"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "哈合台",
+      "identity": "蒙古武士",
+      "personality": "憨直勇猛",
+      "life_experience": "蒙古武士；与滕一雷同行；憨直勇猛；擅长蒙古摔跤",
+      "secret": "无",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "蒙古摔跤",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "刀法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "关东各路狠辣武功",
+          "skill_level": "略有所成",
+          "_source": "门派:关东六魔"
+        },
+        {
+          "skill_name": "钢叉",
+          "skill_level": "略有小成",
+          "_source": "门派:关东六魔"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1740
+    },
+    {
+      "name": "焦文期",
+      "identity": "镖师，通臂拳好手",
+      "personality": "圆滑世故",
+      "life_experience": "镖师出身；通臂拳好手；圆滑世故；后被卷入纷争",
+      "secret": "无",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "金镖",
+          "skill_level": "略有所成"
+        },
+        {
+          "skill_name": "关东各路狠辣武功",
+          "skill_level": "略有小成",
+          "_source": "门派:关东六魔"
+        },
+        {
+          "skill_name": "钢叉",
+          "skill_level": "初窥门径",
+          "_source": "门派:关东六魔"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "韩文冲",
+      "identity": "镖局镖头",
+      "personality": "谨小慎微",
+      "life_experience": "镖局镖头；谨小慎微；卷入红花会纷争",
+      "secret": "无",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "单刀",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1728
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "中毒已解，精神矍铄",
+      "identity": "八卦门掌门，王剑英之父，洛阳镇远镖局总镖头",
+      "initial_favor": 54,
+      "life_experience": "八卦门掌门；王剑英、王剑杰之父；武林名宿；德高望重",
+      "martial_skills": [
+        {
+          "skill_name": "八卦刀法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "八卦游身掌",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "内八卦掌",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "刀中夹镖",
+          "skill_level": "略有所成"
+        }
+      ],
+      "memory_list": [],
+      "name": "王维扬",
+      "personality": "武林名宿，德高望重",
+      "relation_to_player": "",
+      "secret": "对两个儿子的期望",
+      "year": 1690
+    },
+    {
+      "name": "阿凡提",
+      "identity": "新疆智者",
+      "personality": "幽默智慧，嫉恶如仇",
+      "life_experience": "新疆智者；以智慧化解纷争；与陈家洛交好；嫉恶如仇",
+      "secret": "无",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "回部弯刀",
+          "skill_level": "融会贯通",
+          "_source": "门派:回部"
+        },
+        {
+          "skill_name": "骑射",
+          "skill_level": "渐入佳境",
+          "_source": "门派:回部"
+        },
+        {
+          "skill_name": "大漠阵法",
+          "skill_level": "略有所成",
+          "_source": "门派:回部"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1700
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "identity": "霍青桐之兄",
+      "initial_favor": 0,
+      "life_experience": "回部族长木卓伦之子；霍青桐之兄；勇敢直率；随父抗清",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "回部刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "霍阿伊",
+      "personality": "勇敢直率",
+      "relation_to_player": "",
+      "secret": "无",
+      "year": 1725
+    },
+    {
+      "name": "闫世魁",
+      "identity": "清军将领",
+      "personality": "刚愎自用",
+      "life_experience": "清军将领；奉命征讨回部；刚愎自用",
+      "secret": "无",
+      "initial_favor": -5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "军中枪法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "identity": "少林寺高僧",
+      "initial_favor": 5,
+      "life_experience": "少林寺高僧；武学渊博；慈悲为怀；曾出手相助红花会",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "少林七十二绝技"
+        }
+      ],
+      "memory_list": [],
+      "name": "章虚",
+      "personality": "武学渊博，慈悲为怀",
+      "relation_to_player": "",
+      "secret": "无",
+      "year": 1710
+    },
+    {
+      "name": "彭三春",
+      "identity": "江湖武师",
+      "personality": "趋炎附势",
+      "life_experience": "江湖武师；趋炎附势；依附清廷",
+      "secret": "无",
+      "initial_favor": -5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "三节棍",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1730
+    },
+    {
+      "name": "沈德潜",
+      "identity": "清廷文臣，乾隆近臣",
+      "personality": "圆滑世故，善于逢迎",
+      "life_experience": "清廷文臣；乾隆近臣；善于逢迎；无武功",
+      "secret": "无",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [],
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "relation_to_player": "",
+      "year": 1700
+    },
+    {
+      "body_status": "deceased",
+      "body_status_desc": "毙命",
+      "identity": "萧半和义女，本姓杨",
+      "initial_favor": 73,
+      "life_experience": "本姓杨，三湘大侠杨伯冲之女；被萧半和收养；离家出走寻夺鸳鸯刀；与袁冠南习得夫妻刀法；最终成亲归隐",
+      "martial_skills": [
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "鸳鸯刀法"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "夫妻刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "萧中慧",
+      "personality": "莽撞正义，敢爱敢恨",
+      "relation_to_player": "",
+      "secret": "本姓杨非萧；与袁冠南的姻缘",
+      "year": 1710
+    },
+    {
+      "body_status": "deceased",
+      "body_status_desc": "毙命",
+      "identity": "书生侠客，袁家遗孤",
+      "initial_favor": 59,
+      "life_experience": "袁家遗孤；以书生之姿行走江湖；以智计惊走卓天雄夺得鸳鸯刀；与萧中慧习得夫妻刀法；最终成亲归隐",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "鸳鸯刀法"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "夫妻刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "袁冠南",
+      "personality": "机智沉稳，儒雅风度",
+      "relation_to_player": "",
+      "secret": "家世真相；毛笔点穴的绝技",
+      "year": 1710
+    },
+    {
+      "body_status": "poisoned",
+      "body_status_desc": "中毒",
+      "identity": "晋阳大侠，实为太监萧义",
+      "initial_favor": 68,
+      "life_experience": "本名萧义；为报袁杨两家之仇净身入宫当太监；暗中救出遗孤；在晋阳以萧半和之名行侠仗义；寿宴上揭露真身",
+      "martial_skills": [
+        {
+          "skill_name": "混元炁",
+          "skill_level": "炉火纯青"
+        },
+        {
+          "skill_name": "萧家长拳",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "内家掌力",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "memory_list": [],
+      "name": "萧半和",
+      "personality": "隐忍深沉，忠义双全",
+      "relation_to_player": "",
+      "secret": "太监身份；卧底皇宫数十年的秘密",
+      "year": 1685
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "肩头血痕已止",
+      "identity": "夫妻刀法传人",
+      "initial_favor": 24,
+      "life_experience": "夫妻刀法传人；与妻任飞燕终日吵嘴；将夫妻刀法传给袁冠南萧中慧",
+      "martial_skills": [
+        {
+          "skill_name": "夫妻刀法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "memory_list": [],
+      "name": "林玉龙",
+      "personality": "暴躁直率，嘴硬心软",
+      "relation_to_player": "",
+      "secret": "与任飞燕吵闹半生实则是恩爱夫妻",
+      "year": 1687
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "identity": "夫妻刀法传人",
+      "initial_favor": 16,
+      "life_experience": "夫妻刀法传人；与夫林玉龙终日吵嘴；将夫妻刀法传给袁冠南萧中慧",
+      "martial_skills": [
+        {
+          "skill_name": "夫妻刀法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "memory_list": [],
+      "name": "任飞燕",
+      "personality": "泼辣急躁，嘴硬心软",
+      "relation_to_player": "",
+      "secret": "与林玉龙吵闹半生实则是恩爱夫妻",
+      "year": 1690
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "破财脱身，匿迹江湖",
+      "identity": "大内高手",
+      "initial_favor": -10,
+      "life_experience": "大内高手；奉命护送鸳鸯刀；被袁冠南以智计惊走；习得震天三十掌和呼延十八鞭",
+      "martial_skills": [
+        {
+          "skill_name": "震天三十掌",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "呼延十八鞭",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "memory_list": [],
+      "name": "卓天雄",
+      "personality": "阴狠老辣，恃强凌弱",
+      "relation_to_player": "",
+      "secret": "被书生夺刀的耻辱",
+      "year": 1685
+    },
+    {
+      "name": "周威信",
+      "identity": "威信镖局总镖头，铁鞭盖八方",
+      "personality": "谨小慎微，圆滑世故",
+      "life_experience": "威信镖局总镖头；奉川陕总督之命押送鸳鸯刀入京；被太岳四侠和各路好手劫镖",
+      "secret": "鸳鸯刀的秘密；押镖途中的狼狈",
+      "initial_favor": 10,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "铁鞭",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "震山掌",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "护院武功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "押镖途中，神色警惕",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "name": "逍遥子",
+      "identity": "太岳四侠之首",
+      "personality": "虚张声势，好吹牛",
+      "life_experience": "太岳四侠之首；虚张声势武功不济；拦路劫镖闹出笑话；心地不坏",
+      "secret": "太岳四侠虚有其表",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "逍遥遨游",
+          "skill_level": "略有所成",
+          "_source": "武功书:逍遥派/逍遥子"
+        },
+        {
+          "skill_name": "杂学",
+          "skill_level": "略有小成"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "铁尺落地，神色惊变",
+      "relation_to_player": "",
+      "year": 1710
+    },
+    {
+      "name": "天池怪侠",
+      "identity": "隐居天池的绝世高手",
+      "personality": "性情古怪，亦正亦邪",
+      "life_experience": "隐居长白山天池；持有乾隆身世调包的物证；陈家洛为其取证据而登天池；武学造诣深不可测",
+      "secret": "持有乾隆身世物证",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天池剑法",
+          "skill_level": "出神入化"
+        },
+        {
+          "skill_name": "百花错拳拳谱",
+          "skill_level": "炉火纯青",
+          "_source": "物品:秘籍"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "隐居",
+      "relation_to_player": "",
+      "year": 1695
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "正常",
+      "identity": "少林寺达摩院首座",
+      "initial_favor": 5,
+      "life_experience": "少林寺达摩院首座；在红花会被困时出手相助；与天虹大师同为少林高僧",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "少林七十二绝技"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "金刚掌"
+        }
+      ],
+      "memory_list": [],
+      "name": "铁镜",
+      "personality": "慈悲刚正，武学精深",
+      "relation_to_player": "",
+      "secret": "无",
+      "year": 1715
+    },
+    {
+      "name": "常长风",
+      "identity": "太岳四侠第二",
+      "personality": "自负搞笑",
+      "life_experience": "",
+      "secret": "",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "烟杆功夫",
+          "skill_level": "略有所成",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "铁鞭",
+          "skill_level": "略有小成",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "判官笔",
+          "skill_level": "初窥门径",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "大马金刀刀法",
+          "skill_level": "初学入门",
+          "_source": "门派:太岳四侠"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "劝逍遥子莫要轻举妄动",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "花剑影",
+      "identity": "太岳四侠之三",
+      "personality": "自负搞笑",
+      "life_experience": "",
+      "secret": "",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "烟杆功夫",
+          "skill_level": "略有所成",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "铁鞭",
+          "skill_level": "略有小成",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "判官笔",
+          "skill_level": "初窥门径",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "大马金刀刀法",
+          "skill_level": "初学入门",
+          "_source": "门派:太岳四侠"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "见势不妙欲收手",
+      "relation_to_player": "",
+      "year": 1720
+    },
+    {
+      "name": "盖一鸣",
+      "identity": "太岳四侠之四",
+      "personality": "自负搞笑",
+      "life_experience": "",
+      "secret": "",
+      "initial_favor": 0,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "烟杆功夫",
+          "skill_level": "略有所成",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "铁鞭",
+          "skill_level": "略有小成",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "判官笔",
+          "skill_level": "初窥门径",
+          "_source": "门派:太岳四侠"
+        },
+        {
+          "skill_name": "大马金刀刀法",
+          "skill_level": "初学入门",
+          "_source": "门派:太岳四侠"
+        }
+      ],
+      "body_status": "normal",
+      "body_status_desc": "悄悄藏起短枪",
+      "relation_to_player": "",
+      "year": 1715
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "马行空故交丨江湖包打听丨真定府外茶棚老板",
+      "initial_favor": 44,
+      "life_experience": "",
+      "martial_skills": [],
+      "memory_list": [],
+      "name": "周老茶",
+      "personality": "世故圆滑",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1720
+    },
+    {
+      "name": "狄云",
+      "identity": "湘西农家子弟，绰号空心菜",
+      "personality": "淳朴善良，历经磨难",
+      "martial_skills": [
+        {
+          "skill_name": "神照功",
+          "skill_level": "出神入化"
+        },
+        {
+          "skill_name": "血刀刀法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "连城剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "血刀内功",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "自幼随师父戚长发和师妹戚芳在湘西沅陵习武务农。被万圭陷害入狱，在狱中得丁典传授神照功。越狱后经历雪谷血战、复仇砌墙，最终看透人性贪欲归隐藏边雪谷",
+      "appearance_scene": "藏边雪谷/荆州/湘西沅陵",
+      "state": "归隐",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1760,
+      "memory_list": []
+    },
+    {
+      "name": "丁典",
+      "identity": "江湖侠士，梅念笙传人",
+      "personality": "重情重义，刚烈痴情",
+      "martial_skills": [
+        {
+          "skill_name": "神照功",
+          "skill_level": "出神入化"
+        },
+        {
+          "skill_name": "无影神拳",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "连城剑法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "偶救重伤的梅念笙，得授神照功与连城剑法。与凌霜华一见钟情，被凌退思囚禁多年。越狱后凌霜华已死，抚棺痛哭中毒而亡",
+      "appearance_scene": "荆州死牢/江湖各地",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740,
+      "memory_list": []
+    },
+    {
+      "name": "戚芳",
+      "identity": "戚长发之女，狄云师妹",
+      "personality": "善良重情，命运悲惨",
+      "martial_skills": [],
+      "initial_favor": 0,
+      "life_experience": "随父隐居湘西，狄云蒙冤后嫁与万圭。得知真相后救万圭反被一刀刺死",
+      "appearance_scene": "荆州万家/湘西沅陵",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1742,
+      "memory_list": []
+    },
+    {
+      "name": "戚长发",
+      "identity": "铁锁横江，梅念笙三徒弟",
+      "personality": "城府极深，阴险伪装",
+      "martial_skills": [
+        {
+          "skill_name": "连城剑法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "唐诗剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "铁锁横江手法",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "弑师夺谱后隐居湘西，传假剑法给狄云。万震山寿宴后假死逃脱，最终在天宁寺为宝藏背刺徒弟狄云",
+      "appearance_scene": "湘西沅陵/荆州",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720,
+      "memory_list": []
+    },
+    {
+      "name": "万震山",
+      "identity": "五云万岁手，梅念笙大徒弟",
+      "personality": "城府深沉，伪善心狠",
+      "martial_skills": [
+        {
+          "skill_name": "连城剑法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "唐诗剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "铁锁横江手法",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "穿尸剑法",
+          "skill_level": "略有所成"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "弑师后在荆州成为豪门，杀师弟戚长发砌墙灭迹。最终在天宁寺为宝藏自相残杀而亡",
+      "appearance_scene": "荆州万家",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1715,
+      "memory_list": []
+    },
+    {
+      "name": "万圭",
+      "identity": "万震山之子",
+      "personality": "阴险虚伪，贪财忘义",
+      "martial_skills": [
+        {
+          "skill_name": "唐诗剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "铁锁横江手法",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "设局陷害狄云骗娶戚芳。被狄云砌墙后获戚芳相救，反一刀刺死戚芳。最终在天宁寺中毒而亡",
+      "appearance_scene": "荆州万家",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740,
+      "memory_list": []
+    },
+    {
+      "name": "言达平",
+      "identity": "梅念笙二徒弟",
+      "personality": "隐忍狡猾，暗中布局",
+      "martial_skills": [
+        {
+          "skill_name": "唐诗剑法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "陆地神龙剑",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "弑师后隐姓埋名，化装乞丐暗助狄云三招剑法。破解连城诀密码后在天宁寺被戚长发所杀",
+      "appearance_scene": "江湖各地/荆州",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720,
+      "memory_list": []
+    },
+    {
+      "name": "凌退思",
+      "identity": "荆州知府",
+      "personality": "贪婪阴毒，不择手段",
+      "martial_skills": [],
+      "initial_favor": 0,
+      "life_experience": "以女儿凌霜华为饵囚禁丁典多年。在女儿棺上涂金波旬花毒死丁典。活埋亲生女儿。最终在天宁寺抢宝中毒而亡",
+      "appearance_scene": "荆州",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1715,
+      "memory_list": []
+    },
+    {
+      "name": "凌霜华",
+      "identity": "凌退思之女",
+      "personality": "幽雅清高，至情忠贞",
+      "martial_skills": [],
+      "initial_favor": 0,
+      "life_experience": "与丁典一见钟情，被父亲囚禁逼迫。被父亲活埋封棺，临死前在棺盖内壁刻下遗书与连城诀密码",
+      "appearance_scene": "荆州凌府",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1744,
+      "memory_list": []
+    },
+    {
+      "name": "水笙",
+      "identity": "水岱之女，铃剑双侠",
+      "personality": "天真烂漫，敢爱敢恨",
+      "martial_skills": [
+        {
+          "skill_name": "冷月剑法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "被血刀老祖掳入雪山，雪谷半载后消除对狄云的误会。出谷后被花铁干反诬，最终在藏边雪谷等候狄云归来",
+      "appearance_scene": "川藏边界/藏边雪谷",
+      "state": "活跃",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1747,
+      "memory_list": []
+    },
+    {
+      "name": "梅念笙",
+      "identity": "铁骨墨萼，连城诀持有者",
+      "personality": "正直洞察，看透人心",
+      "martial_skills": [
+        {
+          "skill_name": "连城剑法",
+          "skill_level": "炉火纯青"
+        },
+        {
+          "skill_name": "唐诗剑法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "神照功",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "身怀神照功与连城剑法，察觉三徒弟心性歹毒。被三人联手偷袭重伤，跳江逃生后遇丁典，临终倾囊相授",
+      "appearance_scene": "江南/江湖各地",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1700,
+      "memory_list": []
+    },
+    {
+      "appearance_scene": "川藏边界大雪山",
+      "identity": "血刀门掌门",
+      "initial_favor": 0,
+      "life_experience": "掳水笙逃入大雪山，雪谷中连杀南四奇三人。发现狄云非徒孙后欲杀之，反被狄云神照功所杀",
+      "martial_skills": [
+        {
+          "skill_name": "血刀大法",
+          "skill_level": "炉火纯青"
+        },
+        {
+          "skill_name": "血刀刀法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "血刀内功",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "name": "血刀老祖",
+      "personality": "凶残好色，武功高强",
+      "state": "",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1710,
+      "memory_list": []
+    },
+    {
+      "name": "水岱",
+      "identity": "南四奇之一，冷月剑",
+      "personality": "正直刚烈，爱女心切",
+      "martial_skills": [
+        {
+          "skill_name": "冷月剑法",
+          "skill_level": "登堂入室"
+        },
+        {
+          "skill_name": "孔雀开屏剑",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "为救女儿追入大雪山，雪谷中被血刀老祖所杀",
+      "appearance_scene": "川藏边界大雪山",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1725,
+      "memory_list": []
+    },
+    {
+      "name": "花铁干",
+      "identity": "南四奇之二，双枪将",
+      "personality": "表面正气，实则怯懦",
+      "martial_skills": [
+        {
+          "skill_name": "中平枪",
+          "skill_level": "登堂入室"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "雪谷中临危屈膝投降血刀老祖。出谷后反诬水笙狄云苟且。最终在天宁寺抢宝中毒而亡",
+      "appearance_scene": "川藏边界/荆州",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720,
+      "memory_list": []
+    },
+    {
+      "name": "陆天抒",
+      "identity": "南四奇之三",
+      "personality": "豪迈刚直",
+      "martial_skills": [
+        {
+          "skill_name": "刀法",
+          "skill_level": "登堂入室",
+          "_source": "门派:落花流水(南四奇)"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "追血刀老祖入雪山，雪谷中被杀",
+      "appearance_scene": "川藏边界大雪山",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720,
+      "memory_list": []
+    },
+    {
+      "name": "刘乘风",
+      "identity": "南四奇之四",
+      "personality": "沉稳内敛",
+      "martial_skills": [
+        {
+          "skill_name": "柔云剑法",
+          "skill_level": "登堂入室",
+          "_source": "门派:落花流水(南四奇)"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "追血刀老祖入雪山，雪谷中被杀",
+      "appearance_scene": "川藏边界大雪山",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1720,
+      "memory_list": []
+    },
+    {
+      "name": "宝象",
+      "identity": "血刀门弟子",
+      "personality": "凶残愚蠢",
+      "martial_skills": [
+        {
+          "skill_name": "血刀刀法",
+          "skill_level": "略有所成",
+          "_source": "门派:血刀门"
+        },
+        {
+          "skill_name": "血刀内功",
+          "skill_level": "略有小成",
+          "_source": "门派:血刀门"
+        },
+        {
+          "skill_name": "血刀门邪功",
+          "skill_level": "初窥门径",
+          "_source": "门派:血刀门"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "饥饿欲吃狄云，误食毒老鼠汤而死",
+      "appearance_scene": "长江边破庙",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1740,
+      "memory_list": []
+    },
+    {
+      "name": "汪啸风",
+      "identity": "铃剑双侠，水笙表兄",
+      "personality": "正气但多疑",
+      "martial_skills": [
+        {
+          "skill_name": "冷月剑法",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "与水笙并称铃剑双侠。后在天宁寺抢宝中毒而亡",
+      "appearance_scene": "川藏边界/荆州",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1745,
+      "memory_list": []
+    },
+    {
+      "name": "卜垣",
+      "identity": "万震山弟子",
+      "personality": "圆滑机灵",
+      "martial_skills": [
+        {
+          "skill_name": "万震山剑法",
+          "skill_level": "略有所成"
+        },
+        {
+          "skill_name": "点穴手",
+          "skill_level": "略有小成"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "奉命赴湘西邀请戚长发赴宴",
+      "appearance_scene": "荆州万家",
+      "state": "活跃",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730,
+      "memory_list": []
+    },
+    {
+      "name": "吕通",
+      "identity": "江湖大盗",
+      "personality": "粗暴直率",
+      "martial_skills": [
+        {
+          "skill_name": "黑砂掌",
+          "skill_level": "略有所成"
+        },
+        {
+          "skill_name": "鹰爪功",
+          "skill_level": "略有小成"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "万震山寿宴上寻仇，被狄云打退",
+      "appearance_scene": "荆州/江湖各地",
+      "state": "活跃",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1730,
+      "memory_list": []
+    },
+    {
+      "name": "空心菜",
+      "identity": "戚芳与万圭之女",
+      "personality": "天真无邪",
+      "martial_skills": [],
+      "initial_favor": 0,
+      "life_experience": "戚芳小名同名。母亲死后被狄云带往藏边雪谷",
+      "appearance_scene": "荆州/藏边雪谷",
+      "state": "活跃",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1755,
+      "memory_list": []
+    },
+    {
+      "name": "吴六奇",
+      "identity": "天地会红旗香主（已故）",
+      "personality": "忠义反清",
+      "martial_skills": [
+        {
+          "skill_name": "大力鹰爪功",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "铁布衫",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "双掌",
+          "skill_level": "略有所成"
+        }
+      ],
+      "initial_favor": 0,
+      "life_experience": "康熙年间高僧将连城诀线索托交于他，后遇害。连城诀线索由此散落江湖",
+      "appearance_scene": "背景，已故",
+      "state": "已亡",
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": "",
+      "year": 1700,
+      "memory_list": []
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "双修后精疲力竭",
+      "identity": "袁冠南、萧中慧之女丨嫁给玩家为妾",
+      "initial_favor": 100,
+      "life_experience": "",
+      "martial_skills": [
+        {
+          "skill_level": "略有所成",
+          "skill_name": "混元炁内功"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "夫妻刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "袁依依",
+      "personality": "天真痴情，敢爱敢恨",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1734
+    },
+    {
+      "body_status": "light_injured",
+      "body_status_desc": "肩头刀伤深可见骨，负伤遁走",
+      "identity": "铁门寨寨主，归属清庭后，抢夺鸳鸯刀密宝",
+      "initial_favor": -10,
+      "life_experience": "",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "铁门闩刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "铁雄",
+      "personality": "阴狠贪婪",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1710
+    },
+    {
+      "name": "阮士中",
+      "identity": "天龙门北宗弟子，田归农师弟",
+      "personality": "沉稳老练，忠心耿耿",
+      "life_experience": "天龙门北宗好手，随田归农上玉笔峰",
+      "secret": "",
+      "initial_favor": 7,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天龙剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "天龙掌",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "novel": "雪山飞狐",
+      "year": 1735,
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": ""
+    },
+    {
+      "name": "殷吉",
+      "identity": "天龙门南宗掌门",
+      "personality": "豪爽正直",
+      "life_experience": "天龙门南宗掌门，与北宗田归农对立",
+      "secret": "",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天龙剑法",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "天龙掌",
+          "skill_level": "渐入佳境"
+        },
+        {
+          "skill_name": "轻功",
+          "skill_level": "略有所成"
+        }
+      ],
+      "novel": "雪山飞狐",
+      "year": 1720,
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": ""
+    },
+    {
+      "name": "熊元献",
+      "identity": "辽东大豪，使链子枪",
+      "personality": "粗豪直爽",
+      "life_experience": "辽东武林好手，参与玉笔峰寻宝",
+      "secret": "",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "链子枪",
+          "skill_level": "融会贯通"
+        }
+      ],
+      "novel": "雪山飞狐",
+      "year": 1720,
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": ""
+    },
+    {
+      "name": "郑三娘",
+      "identity": "辽东女盗，使双刀",
+      "personality": "泼辣凶悍",
+      "life_experience": "辽东女盗，参与玉笔峰寻宝",
+      "secret": "",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "双刀",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "novel": "雪山飞狐",
+      "year": 1720,
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": ""
+    },
+    {
+      "name": "陶子安",
+      "identity": "天龙门弟子，田青文未婚夫",
+      "personality": "精明干练",
+      "life_experience": "天龙门弟子，与田青文有婚约",
+      "secret": "",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "天龙剑法",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "novel": "雪山飞狐",
+      "year": 1740,
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": ""
+    },
+    {
+      "name": "刘元鹤",
+      "identity": "大内侍卫",
+      "personality": "阴险狡诈",
+      "life_experience": "大内侍卫，奉命追查玉笔峰宝藏",
+      "secret": "",
+      "initial_favor": 5,
+      "memory_list": [],
+      "martial_skills": [
+        {
+          "skill_name": "大内侍卫武功",
+          "skill_level": "融会贯通"
+        },
+        {
+          "skill_name": "擒拿手",
+          "skill_level": "渐入佳境"
+        }
+      ],
+      "novel": "雪山飞狐",
+      "year": 1730,
+      "body_status": "normal",
+      "body_status_desc": "",
+      "relation_to_player": ""
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "铁臂先生，铁笔山隐士，鸳鸯刀旧事知情者",
+      "initial_favor": 20,
+      "life_experience": "早年与萧半和结义，因鸳鸯刀之秘遭追杀，隐居铁笔山，以铁笔为武器，守护秘密。",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "铁笔点穴法"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "鸳鸯刀法残式"
+        }
+      ],
+      "memory_list": [],
+      "name": "萧远山",
+      "personality": "孤僻寡言，深藏不露",
+      "relation_to_player": "",
+      "secret": "曾与萧半和共谋，但为保秘密，被迫背叛旧友，内心愧疚。",
+      "year": 1680
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "青山寺主持，萧半和挚友，隐世高僧",
+      "initial_favor": 28,
+      "life_experience": "少年出家，云游四方，中年定居青山寺，与萧半和结为莫逆之交，曾助其化解江湖恩怨",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "罗汉伏虎拳"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "金刚禅功"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "轻身术"
+        }
+      ],
+      "memory_list": [],
+      "name": "了尘禅师",
+      "personality": "慈悲淡泊，深藏不露",
+      "relation_to_player": "",
+      "secret": "年轻时曾犯下杀戒，为赎罪而出家，多年来以佛法化解心魔，但午夜梦回仍难释怀",
+      "year": 1670
+    },
+    {
+      "body_status": "deceased",
+      "body_status_desc": "枯柳坡被处决",
+      "identity": "燕子坞坞主，铁翼神鹞",
+      "initial_favor": -30,
+      "life_experience": "幼年父母双亡，被朝廷秘密机构收养，习得一身阴狠刀法与擒拿术，因功绩卓著被提拔为燕子坞坞主，专事暗杀江湖异己",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "铁翼刀法"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "鹰爪擒拿手"
+        }
+      ],
+      "memory_list": [],
+      "name": "赵天鸿",
+      "personality": "阴鸷狠辣、多疑狡诈、唯命是从",
+      "relation_to_player": "",
+      "secret": "曾暗杀一名忠良之后，内心偶尔被愧疚折磨，但表面绝不显露",
+      "year": 1700
+    },
+    {
+      "body_status": "deceased",
+      "body_status_desc": "被铁臂周一刀毙命",
+      "identity": "燕子坞长老，毒蛇娘子",
+      "initial_favor": -40,
+      "life_experience": "自幼被燕子坞收养，习得一身毒功，因屡建奇功升至长老之位，曾暗杀多名江湖义士，与鸳鸯刀传人结怨。",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "毒蛇缠丝掌"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "蛇形步法"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "暗器·毒蒺藜"
+        }
+      ],
+      "memory_list": [],
+      "name": "柳如烟",
+      "personality": "阴狠毒辣、工于心计、冷血无情",
+      "relation_to_player": "",
+      "secret": "内心深处对幼时被灭门的记忆耿耿于怀，暗中追查仇家，却因身份所限无法公开。",
+      "year": 1710
+    },
+    {
+      "body_status": "deceased",
+      "body_status_desc": "断臂后血尽而亡",
+      "identity": "燕子坞护法，鬼影刀",
+      "initial_favor": -30,
+      "life_experience": "自幼被燕子坞收养，练就一身暗杀绝技，专为朝廷铲除武林异己，手上沾满鲜血，在江湖中臭名昭著。",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "鬼影十三刀"
+        },
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "燕子三抄水"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "暗影迷踪步"
+        }
+      ],
+      "memory_list": [],
+      "name": "孙不二",
+      "personality": "阴鸷冷酷，行事诡秘，多疑谨慎",
+      "relation_to_player": "",
+      "secret": "曾暗杀一名无辜妇孺，事后常被噩梦纠缠，内心深藏一丝不为人知的愧疚。",
+      "year": 1715
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "汉水水寨舵主，人称浪里蛟",
+      "initial_favor": 10,
+      "life_experience": "自幼生长于汉水边，水性极佳，少年时曾为渔夫，后因打抱不平杀死恶霸，落草为寇，逐渐创立汉水水寨，成为一方霸主，专劫过往商船，与官府为敌。",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "分水刺法"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "水上漂轻功"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "铁砂掌"
+        }
+      ],
+      "memory_list": [],
+      "name": "焦蛟",
+      "personality": "行事狠辣",
+      "relation_to_player": "",
+      "secret": "曾暗中与官府有交易，为保水寨安全，偶尔出卖情报给官府，换取免剿之诺。",
+      "year": 1710
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "左腿有旧伤，行动略受影响，但精神矍铄。",
+      "identity": "飞马镖局老趟子手，江湖老油条，外号老周",
+      "initial_favor": 22,
+      "life_experience": "少年时入飞马镖局当趟子手，走南闯北三十余年，历经无数镖劫，因腿脚不便转任镖局杂务，却仍被镖局上下尊称一声‘老周’。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "趟泥步"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "单刀术"
+        }
+      ],
+      "memory_list": [],
+      "name": "周大仁",
+      "personality": "沉稳老练，谨慎圆滑，重情重义",
+      "relation_to_player": "",
+      "secret": "年轻时曾因贪杯误事，导致一镖被劫，镖师惨死，此事成为他心中永久的愧疚，自此滴酒不沾。",
+      "year": 1701
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "飞马镖局年轻趟子手，镖局里的跑腿伙计，外号小五",
+      "initial_favor": 24,
+      "life_experience": "自幼父母双亡，被飞马镖局总镖头收留，在镖局长大，十四岁起随镖队走南闯北，虽武艺平平但熟悉江湖规矩。",
+      "martial_skills": [
+        {
+          "skill_level": "初学入门",
+          "skill_name": "飞马镖局趟子拳"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "挑担纵跃法"
+        }
+      ],
+      "memory_list": [],
+      "name": "孙二五",
+      "personality": "机灵勤快、胆小怕事、嘴甜眼活",
+      "relation_to_player": "",
+      "secret": "暗中存了几年月钱，想攒够银子赎回老家被抵债的祖屋，给早逝的父母立个碑。",
+      "year": 1734
+    },
+    {
+      "body_status": "light_injured",
+      "body_status_desc": "北坡夜战受轻伤",
+      "identity": "回部木族青年勇士，木卓伦族中后辈",
+      "initial_favor": 42,
+      "life_experience": "生于回疆木族，自幼习武，与妹妹木雅相依为命。因族中马匹被汉人商队骗走，愤而携妹追至辰州，欲讨回公道。途中与李三奇相遇，得其相助，对其心生敬重。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "回部弯刀刀法"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "骑术"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "摔跤术"
+        }
+      ],
+      "memory_list": [],
+      "name": "木克",
+      "personality": "倔强刚直、重情重义、热血冲动、护妹心切",
+      "relation_to_player": "",
+      "secret": "曾暗中发誓，若不能为族人讨回公道，便终身不娶，以全族中男儿之志。",
+      "year": 1730
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "以弯刀护兄，暂无大碍",
+      "identity": "回疆木部族长之女，木克之妹",
+      "initial_favor": 45,
+      "life_experience": "生于回疆木部，自幼随父兄习武游历，族中备受宠爱。此番随兄长木克远赴中原，为族中采买药材，途中与兄长在辰州码头因船资与船工争执，偶遇李三奇。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "回部飞刀术"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "天山杖法"
+        }
+      ],
+      "memory_list": [],
+      "name": "木雅",
+      "personality": "灵动活泼、率真直爽、略带娇憨",
+      "relation_to_player": "",
+      "secret": "她偷偷收藏了一枚中原汉人少年赠予的玉佩，此事连兄长木克也不知晓，心中隐约对中原风物与人物怀有好奇与好感。",
+      "year": 1734
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "回部老萨满，木卓伦族中长者，通晓巫医占卜",
+      "initial_favor": 25,
+      "life_experience": "生于回疆木部，自幼跟随上代萨满修习巫术医术，中年时曾游历中原，晚年归族，成为族中精神支柱，深受族人敬重。近年因清廷压迫，常为族人祈福驱邪。",
+      "martial_skills": [
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "萨满巫咒"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "回部秘药术"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "占卜星象"
+        }
+      ],
+      "memory_list": [],
+      "name": "阿撒克",
+      "personality": "沉静睿智，寡言少语，心怀慈悲，洞察人心",
+      "relation_to_player": "",
+      "secret": "年轻时曾与一名汉人女子相恋，但因族规与战乱被迫分离，此女后来死于清军之手，他自此暗中痛恨清廷，却因萨满身份不能明言。",
+      "year": 1684
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "西域喀什噶尔商队领队，霍青桐父亲旧友",
+      "initial_favor": 41,
+      "life_experience": "祖籍喀什噶尔，自幼随父行商走中原，三十余年间踏遍丝绸之路。与霍青桐之父木卓伦交情深厚，曾于风沙中救其性命。现为盐湖口商队领队，专走中原路线，贩卖皮货药材，暗中也替回部传递消息。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "大漠刀法"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "骑术"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "商旅辨人术"
+        }
+      ],
+      "memory_list": [],
+      "name": "库尔班",
+      "personality": "豪爽仗义，老练精明，重情重义，口风严谨",
+      "relation_to_player": "",
+      "secret": "年轻时曾暗恋木卓伦之妻，即霍青桐之母，至今未娶，将这份情愫深埋心底，只以兄弟之义待木卓伦一家。",
+      "year": 1704
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "保定府李府主母，书香门第闺秀，玩家母亲",
+      "initial_favor": 90,
+      "life_experience": "京城富贵人家出身，自幼受诗书熏陶，嫁与李三奇之父后持家治业，育有三子。",
+      "martial_skills": [],
+      "memory_list": [],
+      "name": "叶氏",
+      "personality": "温婉持重、内敛端方、爱子心切",
+      "relation_to_player": "",
+      "secret": "当年下嫁李家实因家族没落，为保全门楣而屈就，内心深处始终藏着对京城旧日繁华的淡淡怅惘。",
+      "year": 1704
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "保定府李府大公子，进士出身，京城六品主事，玩家长兄",
+      "initial_favor": 97,
+      "life_experience": "生于保定府富户，自幼聪颖，十七岁中举，廿五岁登进士第，入京为官。与弟李三奇手足情深，然因仕途牵绊，聚少离多。",
+      "martial_skills": [
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "六合刀法"
+        }
+      ],
+      "memory_list": [],
+      "name": "李一然",
+      "personality": "沉稳持重，城府深藏，重情念旧，然以仕途为先",
+      "relation_to_player": "",
+      "secret": "曾受‘半卷书斋’恩惠，为其在京中传递过一封密信，虽未涉要事，然恐东窗事发，累及家族与仕途。",
+      "year": 1721
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "保定府李府二公子，家族生意管事，玩家二哥",
+      "initial_favor": 39,
+      "life_experience": "自幼随父打理家族生意，熟悉商贾之道，与三弟李三奇感情深厚，常替其周旋家事。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "长拳"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "商道"
+        }
+      ],
+      "memory_list": [],
+      "name": "李二田",
+      "personality": "沉稳务实，谨慎持重，重家族情谊",
+      "relation_to_player": "",
+      "secret": "",
+      "year": 1724
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "兴隆镖局总镖头周隆大弟子",
+      "initial_favor": 25,
+      "life_experience": "自幼被周隆收养，随师习金刚拳二十余载，十五岁起随镖走南闯北，十八岁独当一面押镖，因办事稳妥被周隆倚为臂膀，现常住镖局，代师打理日常事务。",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "金刚拳"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "铁臂功"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "摔碑手"
+        }
+      ],
+      "memory_list": [],
+      "name": "陈泰",
+      "personality": "沉稳持重、寡言守信、外冷内热",
+      "relation_to_player": "",
+      "secret": "暗中倾慕同门师妹（周隆之女周婉），但自觉身份卑微，从未表露，只以加倍勤勉报答师恩。",
+      "year": 1721
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "伤势痊愈",
+      "identity": "浙江水陆提督，朝廷重臣，汉人官员，李沅芷父亲",
+      "initial_favor": 60,
+      "life_experience": "出身汉人武官世家，少年从军，屡立战功，由浙江总兵升任水陆提督。早年曾与江湖人士相交，深知绿林疾苦，故为官后对江湖人颇多包容。家中有一独女，视若掌上明珠。",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "八卦刀法"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "六合枪法"
+        }
+      ],
+      "memory_list": [],
+      "name": "李可秀",
+      "personality": "沉稳持重，通情达理，对江湖人怀有宽容之心",
+      "relation_to_player": "",
+      "secret": "年轻时曾受一位江湖侠士救命之恩，一直铭记于心，却从未对人提起，也因此对江湖人始终怀有一份感恩与宽容。",
+      "year": 1705
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "主动攀谈后离去",
+      "identity": "铁剑独行侠，江湖怪剑客，行踪飘忽不定",
+      "initial_favor": 42,
+      "life_experience": "少年时师从无名剑客，习得铁剑绝学。中年时因路见不平得罪权贵，遭朝廷通缉，自此隐姓埋名游走江湖。曾多次暗中相助落难之人，却不留名姓。近年常在保定至京城一带游历，以品茶观人为乐。",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "铁剑十三式"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "游龙身法"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "听风辨位术"
+        }
+      ],
+      "memory_list": [],
+      "name": "沈渊",
+      "personality": "孤僻怪诞、目光如炬、外冷内热、好管闲事",
+      "relation_to_player": "",
+      "secret": "早年曾有一挚爱女子因自己连累而亡，自此立誓不再与人深交，却总忍不住暗中关注江湖后辈的安危。",
+      "year": 1695
+    },
+    {
+      "body_status": "light_injured",
+      "body_status_desc": "良乡巷中被骁骑营追击受伤，下落不明",
+      "identity": "陕甘绿林独行盗，轻功卓绝，诨号飞天蜈蚣",
+      "initial_favor": -22,
+      "life_experience": "早年陕甘一带做没本钱买卖，凭一身轻功屡屡逃脱官府追捕。近年流窜至直隶，犯下数起大案，官府悬赏五百两缉拿。曾于良乡杨林袭击一灰衣汉子，致其重伤不治。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "蜈蚣游身步"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "穿云纵"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "毒蜈蚣爪"
+        }
+      ],
+      "memory_list": [],
+      "name": "崔七",
+      "personality": "狡诈多疑，心狠手辣，惜命如金，独来独往",
+      "relation_to_player": "",
+      "secret": "早年曾受一老丐救命之恩，那老丐临终前托付他寻回失散多年的女儿，他至今未找到，心中暗藏愧疚。",
+      "year": 1728
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "李可秀之弟，李沅芷二叔，在京为官",
+      "initial_favor": 26,
+      "life_experience": "出身浙江官宦世家，与兄李可秀同榜中举后留京任职，历任刑部主事、户部郎中，现官居四品京堂。与兄长分居京浙两地，常暗中照拂在京子侄。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "八卦游身掌"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "太祖长拳"
+        }
+      ],
+      "memory_list": [],
+      "name": "李可贞",
+      "personality": "严谨持重、官场圆融、护短重情、外严内慈",
+      "relation_to_player": "",
+      "secret": "早年曾受镇远镖局老镖头王维扬救命之恩，故暗中维护镖局在京势力，以此偿还旧情。",
+      "year": 1715
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "华山派现任掌门",
+      "initial_favor": 20,
+      "life_experience": "华山派衰微后，袁献于弱冠之年接任掌门，率仅存七弟子隐于华山深处，日夜苦修混元功与华山剑法，以图传承不灭。近年因朝廷鹰犬追索前明遗物，华山派亦受波及，他不得不谨慎行事，暗中留意江湖动向。",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "混元功"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "华山剑法"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "轻身术"
+        }
+      ],
+      "memory_list": [],
+      "name": "袁献",
+      "personality": "沉稳内敛，隐忍持重，心怀门派复兴之志",
+      "relation_to_player": "",
+      "secret": "华山派藏有一部前朝遗下的《混元心经》残卷，袁献私藏多年，未告诸弟子，唯恐引来杀身之祸。他暗中参悟，却始终未能突破最后一层，心结难解。",
+      "year": 1680
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "浙江水陆提督李可秀之妻，李沅芷之母",
+      "initial_favor": 53,
+      "life_experience": "出身江南书香门第，嫁与李可秀为妻，随夫辗转任职，育有一女李沅芷。夫君官至浙江水陆提督，她相夫教女，将提督府打理得井井有条，深得府中上下敬重。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "绣阁剑法"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "点穴手"
+        }
+      ],
+      "memory_list": [],
+      "name": "王宛",
+      "personality": "温婉端庄、持家有道、外柔内刚",
+      "relation_to_player": "",
+      "secret": "年轻时曾与一位江湖侠士有过一段朦胧情愫，虽未逾矩，但至今偶尔忆起仍会暗自怅然。",
+      "year": 1705
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "练拳受激励，拳架渐稳",
+      "identity": "李沅芷贴身丫鬟，小翠",
+      "initial_favor": 53,
+      "life_experience": "自幼父母双亡，被李府管家收留，八岁起伺候李沅芷，随李家辗转保定、杭州，深得小姐信任，知晓小姐诸多私密心事",
+      "martial_skills": [
+        {
+          "skill_level": "初学入门",
+          "skill_name": "燕行步"
+        },
+        {
+          "skill_level": "初学入门",
+          "skill_name": "六合拳"
+        },
+        {
+          "skill_level": "初学入门",
+          "skill_name": "武当十段绵内功"
+        }
+      ],
+      "memory_list": [],
+      "name": "翠柳",
+      "personality": "忠厚老实、心细如发、沉默寡言、重情重义",
+      "relation_to_player": "",
+      "secret": "暗恋府中一名年轻护院，却因身份卑微不敢表露，只盼小姐出嫁时能求个恩典，许她嫁人",
+      "year": 1740
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "太湖隐侠，铁翼神鹞旧部，江湖人称‘铁杖衡公’",
+      "initial_favor": 34,
+      "life_experience": "早年曾是铁翼神鹞麾下密探，负责太湖一带情报。铁翼神鹞覆灭后，隐姓埋名二十载，在太湖畔以渔樵为生。近年因柳如烟之死，燕子坞旧事重提，为查清当年真相，重出江湖。",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "铁杖杖法"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "太湖分水功"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "燕子三抄水"
+        }
+      ],
+      "memory_list": [],
+      "name": "赵衡",
+      "personality": "沉稳老练，心思缜密，外冷内热，重诺守信",
+      "relation_to_player": "",
+      "secret": "当年铁翼神鹞覆灭时，他奉密令护送少主撤离，却在途中遭伏，少主不幸身亡。他为此内疚半生，暗中追查真凶，怀疑当年之事另有隐情。",
+      "year": 1880
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "华山派大师姐，掌门袁献徒弟，剑法清绝",
+      "initial_favor": 20,
+      "life_experience": "自幼被袁献收养于华山，苦修剑法二十载，近年下山历练，偶遇沈家旧事，卷入江南文坛恩怨",
+      "martial_skills": [
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "华山剑法"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "混元功"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "轻身术"
+        }
+      ],
+      "memory_list": [],
+      "name": "沈青萍",
+      "personality": "沉稳内敛，重情重义，外冷内热",
+      "relation_to_player": "",
+      "secret": "实为前朝忠烈之后，身负家族血仇，却因师门恩义暂隐身份",
+      "year": 1724
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "礼部侍郎，掌春闱取士之权，朝中清流之首",
+      "initial_favor": 23,
+      "life_experience": "出身江南书香门第，幼年丧父，由寡母教养成人。乾隆三年中进士，历任翰林院编修、国子监祭酒，以经学闻名朝野。乾隆十年擢升礼部侍郎，主持过两届春闱，门生遍及朝野。与镇远镖局王维扬有旧，因一桩旧案暗中托其押送铁箱南下。",
+      "martial_skills": [
+        {
+          "skill_level": "略有小成",
+          "skill_name": "六合拳"
+        },
+        {
+          "skill_level": "初窥门径",
+          "skill_name": "太祖长拳"
+        }
+      ],
+      "memory_list": [],
+      "name": "梁阑",
+      "personality": "方正严谨，外冷内热，重经义气节，深藏不露",
+      "relation_to_player": "",
+      "secret": "铁箱内实为前朝忠臣遗孤的户籍文书与信物，梁阑暗中资助反清义士多年，表面忠君，实则心存故国，此事若泄，满门抄斩。",
+      "year": 1708
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "铁鹞堂现任堂主，江湖人称鹞眼孤狼",
+      "initial_favor": -30,
+      "life_experience": "出身关外铁鹞部族，幼年部族被灭，独活后习得一身狠辣功夫，二十年间创立铁鹞堂，专接暗杀、劫镖等黑道买卖，近年势力渐大，与红花会屡有冲突。",
+      "martial_skills": [
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "鹞鹰十三爪"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "铁鹞穿林步"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "阴风掌"
+        }
+      ],
+      "memory_list": [],
+      "name": "赫连铁",
+      "personality": "阴鸷深沉，心狠手辣，行事缜密，多疑善变",
+      "relation_to_player": "",
+      "secret": "当年灭族之祸实为红花会前总舵主于万亭暗中挑拨所致，他深知此事却隐忍不发，暗中积蓄力量意图报复红花会。",
+      "year": 1700
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "铁鹞堂右使，人称铁面判官",
+      "initial_favor": -30,
+      "life_experience": "早年是江湖独行客，因得罪权贵被追杀，被铁鹞堂堂主所救，遂入铁鹞堂，凭一身硬功和铁面无私的作风升至右使，多次执行堂中暗杀、围剿任务，手上沾满江湖人士鲜血。",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "铁鹞擒拿手"
+        },
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "判官笔法"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "铁布衫"
+        }
+      ],
+      "memory_list": [],
+      "name": "崔无咎",
+      "personality": "铁面无私、心狠手辣、城府深沉、忠于铁鹞堂",
+      "relation_to_player": "",
+      "secret": "当年被追杀时，曾有一名女子舍命相救，他却为求生而弃她于不顾，女子身死。此事深埋心底，每逢月圆之夜便噩梦缠身，因此对重情重义之人格外痛恨。",
+      "year": 1718
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "铁鹞堂左使，人称鬼手蛇娘",
+      "initial_favor": -20,
+      "life_experience": "幼年遭灭门之祸，被铁鹞堂堂主收养，习得一身毒功与暗器绝技。二十年间为铁鹞堂铲除异己无数，双手沾满鲜血，却始终未忘灭门之仇。近年暗中追查仇家线索，发现与红花会有所牵连。",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "蛇影缠丝手"
+        },
+        {
+          "skill_level": "登堂入室",
+          "skill_name": "鬼手十三针"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "铁鹞毒砂掌"
+        }
+      ],
+      "memory_list": [],
+      "name": "温四娘",
+      "personality": "阴鸷多疑、心狠手辣、行事缜密、喜怒无常",
+      "relation_to_player": "",
+      "secret": "灭门仇人实为铁鹞堂堂主本人，她已查明真相却隐忍不发，暗中布局欲借红花会之力复仇。",
+      "year": 1718
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "铁鹞堂核心杀手十三鹰之一，暗器与追踪高手",
+      "initial_favor": -20,
+      "life_experience": "自幼被铁鹞堂收养，在暗杀与谍报中长大，以一手‘鹞羽钉’暗器闻名江湖，曾参与围杀红花会骆冰等行动，是堂中追踪与伏击的核心人物。",
+      "martial_skills": [
+        {
+          "skill_level": "炉火纯青",
+          "skill_name": "鹞羽钉"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "铁鹞身法"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "短刃搏杀术"
+        }
+      ],
+      "memory_list": [],
+      "name": "铁鹞十三鹰·影鹞",
+      "personality": "阴鸷、机警、忠于铁鹞堂，行事隐秘狠辣",
+      "relation_to_player": "",
+      "secret": "暗中保存着一枚儿时母亲留下的玉佩，虽忠于铁鹞堂，却对堂中滥杀无辜的作风心存隐痛，从未向任何人透露。",
+      "year": 1725
+    },
+    {
+      "body_status": "normal",
+      "body_status_desc": "",
+      "identity": "辽东参帮帮主，关外参商之首",
+      "initial_favor": 20,
+      "life_experience": "少年时随父闯关东采参，三十岁接手参帮，纵横辽东三十载，与关内镖局、绿林皆有交情。近年参帮生意渐衰，为保帮众生计，暗中与官府勾结，贩卖私参牟利。徐铮押送的那批皮货，实为参帮与官府私下交易的掩护。",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "参拳"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "柳叶刀法"
+        },
+        {
+          "skill_level": "略有小成",
+          "skill_name": "擒拿手"
+        }
+      ],
+      "memory_list": [],
+      "name": "梁子翁",
+      "personality": "老辣圆滑，重利守诺，讲究江湖规矩",
+      "relation_to_player": "",
+      "secret": "参帮近年亏损严重，为维持帮中开支，暗中与辽东总兵勾结，以皮货为名走私官盐，若被朝廷查知，满门抄斩。",
+      "year": 1708
+    },
+    {
+      "body_status": "heavy_injured",
+      "body_status_desc": "被李三奇所败，判官笔脱手，重伤倒地",
+      "identity": "铁鹞堂弃徒，黑鹞子盗匪首领",
+      "initial_favor": -22,
+      "life_experience": "原为铁鹞堂内堂弟子，因私吞堂中财物被逐出师门，左眼在逃亡中被追兵射瞎。此后流落关外，集结一伙亡命之徒，以长白山为据点劫掠商旅镖队，渐渐闯出黑鹞子的名号。",
+      "martial_skills": [
+        {
+          "skill_level": "融会贯通",
+          "skill_name": "判官笔法·追魂十三式"
+        },
+        {
+          "skill_level": "渐入佳境",
+          "skill_name": "铁鹞身法"
+        },
+        {
+          "skill_level": "略有所成",
+          "skill_name": "淬毒暗器·鹞羽针"
+        }
+      ],
+      "memory_list": [],
+      "name": "莫七",
+      "personality": "阴狠狡诈、多疑谨慎、睚眦必报",
+      "relation_to_player": "",
+      "secret": "当年私吞的财物并非为己，而是为救一个患病的青楼女子，那女子后来仍病逝，此事成为他心中死结，每逢月圆之夜便独饮至醉。",
+      "year": 1710
+    }
+  ]
+}
