@@ -1052,7 +1052,20 @@ def chat():
             
             parts = user_action.split(maxsplit=1)
             if len(parts) < 2 or not parts[1].strip():
-                return jsonify({"status": "error", "message": "请输入对手姓名，格式：对战 胡斐"})
+                battle_help = (
+                    '⚔️ <b>【对战指令用法】</b><br><br>'
+                    '<b>基本用法：</b>对战 角色名<br>'
+                    '示例：对战 胡斐（挑战档案中已有的NPC）<br>'
+                    '　　　对战 黑衣刀客（陌生对手，AI现场生成人物档案）<br><br>'
+                    '<b>括号锁境界：</b>对战 角色名（境界档）——括号内填14档境界之一，直接锁定对手实力<br>'
+                    '示例：对战 黑衣人（略有小成）<br>'
+                    '<span style="color:#B0A58C">14档境界：初学入门 · 初窥门径 · 略有小成 · 略有所成 · 渐入佳境 · 融会贯通 · 登堂入室 · 炉火纯青 · 出神入化 · 登峰造极 · 超凡入圣 · 返璞归真 · 天人合一 · 破碎虚空</span><br><br>'
+                    '<b>括号线索：</b>对战 角色名（其他描述）——括号内非境界文字，作为身份/门派/武功风格线索供AI参考<br>'
+                    '示例：对战 神秘剑客（使剑，朝廷鹰爪）<br><br>'
+                    '<b>战斗流程：</b>开战后先选模式（1比武切磋 / 2死斗 / 3暗中偷袭 / 4擂台竞技 / 5江湖群斗 / 6退出对战）<br>'
+                    '之后每轮直接输入出招动作（如：一剑刺向对方胸口）；战斗中输入「结束对战」由AI结算结局，「判局」由AI分析当前战局'
+                )
+                return jsonify({"status": "success", "plot": battle_help})
             target_name_raw = parts[1].strip()
             # ★ 括号控档：拆解"黑衣人（略有小成）" → 干净名 + 境界/线索提示
             _paren_m = re.match(r'^(.+?)[（(]([^）)]+)[）)]\s*$', target_name_raw)
@@ -1591,6 +1604,7 @@ def chat():
                 list_saves()
             raw = f.getvalue()
             html = raw.replace('\n', '<br>')
+            html += '<br><span style="color:#C9A55C">【存档指令用法】存档 存档名 / 读档 存档名 / 删档 存档名<br>示例：存档 出门打猎前　→　读档 出门打猎前</span>'
             return jsonify({"status": "success", "plot": html})
 
         elif user_action.startswith("存档 "):
@@ -2876,9 +2890,24 @@ def init_history():
             history_text = "\n\n".join(last_records)
             return jsonify({"status": "success", "history": history_text})
 
+        # 无历史记录（新建角色后的首次进入），用玩家档案动态生成通用开场白
+        _p = get_player()
+        if _p:
+            _name = _p.name or "少侠"
+            _origin = (_p.origin or "").strip()
+            _origin = re.sub(r'^你(?:是|乃)?', '', _origin).rstrip('，。,.；;、 ')
+            if not _origin:
+                _origin = "初入江湖，身世成谜"
+            _ability = (_p.core_ability or "").strip()
+            if _ability in ("", "无", "无。", "none"):
+                history_text = f"你是「{_name}」，{_origin}。江湖风云将起，属于你的故事，正待你亲手书写……"
+            else:
+                history_text = f"你是「{_name}」，{_origin}。脑海深处，《{_ability}》的口诀已然扎根，气息在经脉中缓缓流转。江湖风云将起，属于你的故事，正待你亲手书写……"
+        else:
+            history_text = "初入江湖，属于你的故事，正待你亲手书写……"
         return jsonify({
             "status": "success",
-            "history": "你穿越到了《笑傲江湖》的世界，成为青城派的一名青年弟子。随着穿越，你脑海里还带着《北冥神功》的心法，现在离小说剧情正式开始开始还有1年……"
+            "history": history_text
         })
     except Exception as e:
         print(f"[ERROR] 初始化异常: {e}")

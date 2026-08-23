@@ -6,6 +6,20 @@ An interactive wuxia novel driven by large language models. You play a modern pe
 
 Free and open source, for learning and personal enjoyment only.
 
+## Screenshots
+
+Desktop: grouped command navigation on the left, story reading area in the center, action input at the bottom.
+
+<p align="center">
+  <img src="assets/screenshots/desktop.png" alt="Desktop interface" width="820">
+</p>
+
+Mobile: commands live in a bottom drawer (tap the "☰ 命令" button to open it), and popups go full-screen.
+
+<p align="center">
+  <img src="assets/screenshots/mobile.png" alt="Mobile interface" width="290">
+</p>
+
 ## What You Get
 
 - Free-form story generation: you write one action, the AI continues the story
@@ -15,7 +29,7 @@ Free and open source, for learning and personal enjoyment only.
 - 276 NPCs, each with their own identity, personality, secrets, and an affection score — they remember what you did
 - Worldbook retrieval: 2,000+ lore entries injected on demand, so the AI sticks to the setting
 - A main quest line built from original novel episodes, which you can also skip around
-- Play in the browser, with panels for the map, quests, equipment, and more
+- Play in the browser — works on both desktop and mobile, with panels for the map, quests, equipment, and more
 
 ## Requirements
 
