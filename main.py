@@ -3675,9 +3675,18 @@ def process_one_round(user_input: str, is_web: bool = False):
         recent_logs5 = interact_logs[-5:] if len(interact_logs) >= 5 else interact_logs  # 最近3轮
         #recent_context5 = "\n\n".join(recent_logs5)
         # ★ 缓存友好窗口：50轮一块，块内累加，跨块重置（最大化DeepSeek缓存命中）
+        # 必须用独立round计数器定位块边界：日志被MAX_CONTEXT_LOG截断后len()冻结在2000，
+        # 旧算法block_start恒为1950，窗口退化成每轮平移的滑动窗，块语义与缓存命中全部失效
         total = len(interact_logs)
-        block_start = (total - 1) // 50 * 50
-        cache_window = "\n\n".join(interact_logs[block_start:-1]) if len(interact_logs) > 1 else ""
+        cur_round = context_cache.get("round", total)
+        block_first = (cur_round - 1) // 50 * 50 + 1  # 当前块首轮（轮次空间）
+        start_idx = total - 1 - (cur_round - block_first)  # 块首轮映射为列表索引
+        in_block = cur_round - block_first + 1  # 当前块已积累轮数
+        if in_block < 10:
+            start_idx -= (10 - in_block)  # 新块不足10轮时用上一块尾部补足，避免窗口边界突变
+        if start_idx < 0:
+            start_idx = 0
+        cache_window = "\n\n".join(interact_logs[start_idx:-1]) if total > 1 else ""
         
         # 定义清洗函数：去除 Markdown、括号、书名号等干扰符号，保留中文、英文、数字
         def clean_plot_text(text):
