@@ -101,6 +101,8 @@ A few things worth knowing:
 - "Return to Main Quest" triggers the next episode from the original novel; finish it with "Main Quest Complete" to unlock the next one
 - Pick a location on the map to travel there
 
+For what every UI button does and how to write battle/save/debug commands, see the [Web UI & Command Guide](docs/05-网页界面与指令指南.md) (in Chinese).
+
 ## Project Layout
 
 Twenty Python files at the core; the main ones:
@@ -115,6 +117,7 @@ Twenty Python files at the core; the main ones:
 
 The `docs/` folder goes deeper (all in Chinese):
 
+- [Web UI & Command Guide](docs/05-网页界面与指令指南.md)
 - [Deployment Guide](docs/01-部署指南.md)
 - [Worldbook Engine](docs/02-世界书引擎.md)
 - [Local Semantic Search](docs/03-本地语义向量检索.md)
