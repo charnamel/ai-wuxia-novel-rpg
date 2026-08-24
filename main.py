@@ -1,6 +1,10 @@
 # 你是一名熟读小说背景的现代大学生，一年前穿越到金庸小说世界，随着穿越，你脑海里还有《北冥神功》全套心法口诀，现在离正式小说剧情还有1年多时间。
-# ====================== API 配置说明 ======================
-# 所有密钥均从 .env 读取（参考 .env.example 配置）
+# ====================== DeepSeek API 配置 ======================
+# DEEPSEEK_API_KEY（线下） = "***REMOVED_API_KEY***"
+# DEEPSEEK_API_KEY（线上） = "***REMOVED_API_KEY***"
+# DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+# powershell -ExecutionPolicy Bypass -File .\venv\Scripts\Activate.ps1
+# mimo ***REMOVED_API_KEY***
 import os
 import sys
 import json
@@ -3653,13 +3657,13 @@ def process_one_round(user_input: str, is_web: bool = False):
         active_names = set()
         interact_logs = context_cache.get("interact_log", [])
         _raw_last_log = interact_logs[-1] if interact_logs else ""  # 最后一轮完整记录
-        # ★ L1锚点精简：仅取上一轮【本轮剧情】的结尾片段（约250字），排除【玩家行动】头避免与当前行动混淆，且防止L1过长导致AI直接复制L1而非响应新行动
+        # ★ L1锚点：取上一轮【本轮剧情内容】到下一个【标签】前的纯剧情文字，截取末400字
         if _raw_last_log:
-            _l1_plot_match = re.search(r'【本轮剧情】(.*?)(?:【NPC|$)', _raw_last_log, re.DOTALL)
+            _l1_plot_match = re.search(r'【本轮剧情(?:内容)?】(.*?)(?=【[^】]+】|$)', _raw_last_log, re.DOTALL)
             if _l1_plot_match:
-                last_log = _l1_plot_match.group(1).strip()[-250:] or ""
+                last_log = _l1_plot_match.group(1).strip()[-400:] or ""
             else:
-                last_log = _raw_last_log[-250:]
+                last_log = _raw_last_log[-400:]
         else:
             last_log = ""
         # DEBUG: 打印L1场景锚点状态
@@ -4518,7 +4522,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         _npc_mem_display = npc_memory_block if npc_memory_block.strip() else "（暂无）"
         _wb_display = worldbook_section if worldbook_section.strip() else "\n【*世界书检索*】\n（本轮无相关检索结果）\n"
         _task_display = task_brief_section if task_brief_section.strip() else "【*当前任务目标*】\n（暂无活跃任务）\n\n"
-        _special_block = f"【!特殊指令!】\n{mainline_force_instruction}\n\n{_SEP}\n\n" if mainline_force_instruction.strip() else ""
+        _special_block = f"【!特殊指令!】\n{mainline_force_instruction}\n\n" if mainline_force_instruction.strip() else ""
 
         dynamic_info = f"""
 【*L3-1 全局剧情脉络*】
@@ -4547,16 +4551,15 @@ def process_one_round(user_input: str, is_web: bool = False):
 
 {_task_display}{character_panel}
 
-{_special_block}【*L4-1 NPC个人记忆*】
+【*L4-1 NPC个人记忆*】
 {_npc_mem_display}
-
-【*L4-2 历史剧情线索*】
-{relevant_l4_nodes}
 
 【*当前活跃NPC状态*】（好感/态度/状态，静态档案见下方世界书检索）
 {npc_info}
-{_wb_display}
-{_SEP}"""
+
+【*L4-2 历史剧情线索*】
+{relevant_l4_nodes}
+{_wb_display}{_special_block}{_SEP}"""
 
         # 如果有战斗接续，附加到动态信息
         if battle_extra_prompt:
