@@ -1606,10 +1606,14 @@ def update_context_cache(new_plot, user_action=""):
         if last_l2_round >= new_round:
             pass  # 本轮已经生成过，直接跳过
         else:
-            start_idx = new_round - 100
-            if start_idx < 0:
-                start_idx = 0
-            logs_slice = cache["interact_log"][start_idx:new_round]
+            # 按轮次差从日志末尾相对取（interact_log被MAX_CONTEXT_LOG截断后绝对索引会错位，
+            # 切片取空导致L2静默停更；相对取法还能在上次断档时自动追补覆盖）
+            span = new_round - last_l2_round
+            logs = cache.get("interact_log", [])
+            if span >= len(logs):
+                logs_slice = list(logs)
+            else:
+                logs_slice = logs[-span:] if span > 0 else []
             if len(logs_slice) >= 10:
                 # 先标记本轮已生成（线程执行前先占坑，防重复）
                 cache["last_l2_gen_round"] = new_round
