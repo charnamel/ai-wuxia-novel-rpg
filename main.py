@@ -1,10 +1,8 @@
 # 你是一名熟读小说背景的现代大学生，一年前穿越到金庸小说世界，随着穿越，你脑海里还有《北冥神功》全套心法口诀，现在离正式小说剧情还有1年多时间。
 # ====================== DeepSeek API 配置 ======================
-# DEEPSEEK_API_KEY（线下） = "***REMOVED_API_KEY***"
-# DEEPSEEK_API_KEY（线上） = "***REMOVED_API_KEY***"
+# API Key 请通过 .env 文件配置，参考 .env.example
 # DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 # powershell -ExecutionPolicy Bypass -File .\venv\Scripts\Activate.ps1
-# mimo ***REMOVED_API_KEY***
 import os
 import sys
 import json
