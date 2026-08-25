@@ -9,6 +9,7 @@ import threading
 # 在 main.py 中删除原来的定义，改为导入
 from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, CLOUD_MEM_SLOT_ID
 from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field #导入作弊器代码
+from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 # ===== 骰子检定系统（最小侵入导入） =====
 import dice_system
 from dice_system import should_skip as dice_should_skip
@@ -3947,6 +3948,14 @@ def process_one_round(user_input: str, is_web: bool = False):
         cmd_clean = stripped_input.replace("（", "").replace("）", "")
         actual_user_action = stripped_input
 
+        # ===== 强制剧情指令检测 =====
+        force_plot = ""
+        force_plot_active = False
+        if stripped_input.startswith("!!") or stripped_input.startswith("！！"):
+            force_plot = stripped_input[2:].strip()
+            force_plot_active = True
+            actual_user_action = force_plot
+
         # ========== 统一指令链：单链互斥，避免分支覆盖 ==========
         if cmd_clean == "回归主线":
             # ===== 前置校验：状态+冷却，不通过则直接返回，零API消耗 =====
@@ -4089,11 +4098,12 @@ def process_one_round(user_input: str, is_web: bool = False):
     """
 
         else:
-            # 普通玩家输入
-            if stripped_input.startswith("（") and stripped_input.endswith("）"):
-                actual_user_action = f"【玩家场景/心理描述】{stripped_input}"
-            else:
-                actual_user_action = f"【玩家台词】{stripped_input}"
+            # 普通玩家输入（强制剧情模式已在上方设置 actual_user_action，此处跳过）
+            if not force_plot_active:
+                if stripped_input.startswith("（") and stripped_input.endswith("）"):
+                    actual_user_action = f"【玩家场景/心理描述】{stripped_input}"
+                else:
+                    actual_user_action = f"【玩家台词】{stripped_input}"
 
         # ========== 新增：回归主线事件NPC注入 + 构建最终npc_info ==========
         # 回归主线轮次：把事件涉及的NPC加入活跃集合，保证人设一致
@@ -4379,11 +4389,40 @@ def process_one_round(user_input: str, is_web: bool = False):
             "last_updated_round": 0
         }
 
+# ===== 主动检索云向量库（与DC检定并行，失败自动降级） =====
+        _active_retrieval_result = {"text": "", "count": 0, "error": "not_started"}
+        _active_retrieval_thread = None
+        _active_cancel_event = threading.Event()
+        _active_retrieval_enabled = os.getenv("ACTIVE_RETRIEVAL_ENABLED", "false").lower().strip() == "true"
+        if _active_retrieval_enabled:
+            try:
+                _recent_logs_for_active = interact_logs[-3:] if len(interact_logs) >= 3 else interact_logs
+                _recent_context_for_active = "\n\n".join(_recent_logs_for_active) if _recent_logs_for_active else ""
+                _active_npcs_for_retrieval = mentioned_npcs[:5] if 'mentioned_npcs' in dir() else []
+                _active_input_for_retrieval = force_plot if force_plot_active else stripped_input
+                _known_npc_names = all_npc_names if 'all_npc_names' in dir() else []
+                def _run_active_retrieval():
+                    nonlocal _active_retrieval_result
+                    _active_retrieval_result = active_retrieve_cloud(
+                        recent_context=_recent_context_for_active,
+                        player_input=_active_input_for_retrieval,
+                        active_npcs=_active_npcs_for_retrieval,
+                        slot_id=CLOUD_MEM_SLOT_ID,
+                        known_npcs=_known_npc_names,
+                        cancel_event=_active_cancel_event,
+                    )
+                _active_retrieval_thread = threading.Thread(target=_run_active_retrieval, daemon=True)
+                _active_retrieval_thread.start()
+            except Exception as _ae:
+                print(f"[主动检索] 启动失败（已降级）: {_ae}")
+
 # ===== 向量检索 L4 相关历史线索 =====
+        # 检索用文本：强制剧情模式下去掉!!前缀，避免污染向量检索
+        query_text = force_plot if force_plot_active else stripped_input
         # L4 双通道：CHAPTER取最高1条 + PLOT_ROUND取最高1条（云端召回2条，按score降序取前1）
         relevant_l4_nodes = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=stripped_input[:100],
+            query=query_text[:100],
             top_k=1,
             min_score=0.45,
             category_filter=[MemoryCategory.CHAPTER]
@@ -4391,7 +4430,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         # PLOT_ROUND：仅任务完成时上传，量少但高价值，保留检索
         relevant_plot = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=stripped_input[:100],
+            query=query_text[:100],
             top_k=1,
             min_score=0.45,
             category_filter=[MemoryCategory.PLOT_ROUND]
@@ -4407,7 +4446,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         # TASK：任务完成总结，量少但高价值
         relevant_task = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=stripped_input[:100],
+            query=query_text[:100],
             top_k=1, min_score=0.45,
             category_filter=[MemoryCategory.TASK]
         )
@@ -4422,7 +4461,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         # RUMOR：玩家剧情记录，每轮上传，语义召回相关历史记录
         relevant_rumor = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=stripped_input[:100],
+            query=query_text[:100],
             top_k=3, min_score=0.45,
             category_filter=[MemoryCategory.RUMOR]
         )
@@ -4438,7 +4477,7 @@ def process_one_round(user_input: str, is_web: bool = False):
     # ===== 向量记忆召回监测（调试用） =====
         current_round = cache.get("round", len(cache.get("interact_log", []))) + 1
         print(f"\n{COLOR_SYSTEM}========== 第 {current_round} 轮 向量记忆召回结果 =========={COLOR_END}")
-        print(f"{COLOR_SYSTEM}检索Query：{stripped_input[:100]}{COLOR_END}")
+        print(f"{COLOR_SYSTEM}检索Query：{query_text[:100]}{COLOR_END}")
         if relevant_l4_nodes and relevant_l4_nodes != "暂无相关历史线索":
             print(f"{COLOR_GREEN}召回命中：{COLOR_END}")
             print(f"{COLOR_PLOT}{relevant_l4_nodes}{COLOR_END}")
@@ -4473,7 +4512,7 @@ def process_one_round(user_input: str, is_web: bool = False):
                 #   （"本轮剧情内容[-250:]"），不可再对它用 [-1] 切片，否则取到的是"最后一个中文字"。
                 #   此处必须使用 3316 行保存的原始完整交互日志 _raw_last_log。
                 _last_ai_output = _raw_last_log[-600:] if _raw_last_log else ""
-                _wb_query = f"{_last_ai_output} {stripped_input}"
+                _wb_query = f"{_last_ai_output} {query_text}"
                 _wb_query_debug = _wb_query
                 # 尝试提取当前年代（novel_node_info 可能在此路径未赋值，安全取值）
                 _wb_year = None
@@ -4567,12 +4606,13 @@ def process_one_round(user_input: str, is_web: bool = False):
 
 【*L4-1 NPC个人记忆*】
 {_npc_mem_display}
+__NPC_MEM_MERGE_SLOT__
 
 【*当前活跃NPC状态*】（好感/态度/状态，静态档案见下方世界书检索）
 {npc_info}
 
 【*L4-2 历史剧情线索*】
-{relevant_l4_nodes}
+__L4_MERGE_SLOT__
 {_wb_display}{_special_block}{_SEP}"""
 
         # 如果有战斗接续，附加到动态信息
@@ -4662,9 +4702,62 @@ def process_one_round(user_input: str, is_web: bool = False):
                 dice_result_for_frontend = None
         # ===== 骰子检定结束 =====
 
+        # ===== 等待主动检索完成（DC检定期间已并行执行，超时则取消） =====
+        _active_l4_text = ""
+        if _active_retrieval_thread:
+            _active_retrieval_thread.join(timeout=10)
+            if _active_retrieval_thread.is_alive():
+                # 超时：置取消标志，线程在下一个检查点自行中止（已发出的HTTP请求无法中断），本轮降级为被动检索
+                _active_cancel_event.set()
+                print("[主动检索] 等待超时(10s)，已发出取消信号，本轮降级为被动检索")
+            if _active_retrieval_result and _active_retrieval_result.get("text"):
+                _active_l4_text = _active_retrieval_result["text"]
+                print(f"[主动检索] 注入成功，{_active_retrieval_result.get('count', 0)}条结果")
+            else:
+                print(f"[主动检索] 无结果或失败，已降级到被动检索")
+
+        # 主动检索结果分流合并：NPC记忆→L4-1，剧情/传闻/任务→L4-2（均与被动去重）
+        _active_npc_append = ""
+        if _active_l4_text:
+            _merged = merge_with_passive(relevant_l4_nodes, _active_retrieval_result, passive_npc_block=npc_memory_block)
+            relevant_l4_nodes = _merged["l4"]
+            _active_npc_append = _merged["npc"]
+            if _active_npc_append:
+                print(f"[主动检索] NPC记忆{len(_active_npc_append.splitlines())}条注入L4-1")
+        dynamic_info = dynamic_info.replace("__L4_MERGE_SLOT__", relevant_l4_nodes or "")
+        # 主动NPC记忆注入L4-1（被动为空占位"（暂无）"时整体替换，否则续接追加）
+        if _active_npc_append:
+            if _npc_mem_display == "（暂无）":
+                dynamic_info = dynamic_info.replace("（暂无）\n__NPC_MEM_MERGE_SLOT__", _active_npc_append, 1)
+            else:
+                dynamic_info = dynamic_info.replace("__NPC_MEM_MERGE_SLOT__", _active_npc_append, 1)
+        dynamic_info = dynamic_info.replace("\n__NPC_MEM_MERGE_SLOT__", "")
+
         _dice_sep = f"        {_SEP}\n\n" if dice_constraint.strip() else ""
 
-        user_message = f"""{_SEP}
+        if force_plot_active:
+            user_message = f"""{_SEP}
+
+【★强制剧情干预★】
+        以下为本轮必须发生的剧情，请直接据此展开场景演绎：
+        → {force_plot}
+
+        {dynamic_info}
+        {dice_constraint}
+        {_SEP}
+
+【再次强调】
+        - 上述【★强制剧情干预★】为本轮最高优先级，必须严格按照该内容展开250字以内的主要剧情
+        - 仍需遵守世界观、NPC人设等设定（不能让NPC做出OOC行为）
+        - 相关剧情人物详细参考L2、L3-1、L3-2等上述已给的所有信息
+        - 给出2-3个10字以内精简的玩家行动选项
+        - NPC仅根据自身身份、立场与处境自然响应,绝对不能OOC
+{"        - ⚠️必须严格遵循上方【!系统检定·必须遵循!】中的检定结论，剧情走向必须与检定结果完全一致，不得违背检定结论自行编造成功或失败。" if dice_constraint else ""}
+
+        ！！输出剧情文字开头必须有【本轮剧情内容】
+        """
+        else:
+            user_message = f"""{_SEP}
 
 【本轮核心指令】
         要求：本轮剧情必须直接、完整、具体地响应玩家的行动/对话，不得回避、不得转移话题、不得一笔带过。

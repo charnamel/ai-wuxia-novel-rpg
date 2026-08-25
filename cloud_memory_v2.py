@@ -503,3 +503,24 @@ def build_compact_context(
     
     base_context += f"\n【世界观基础】{world_basic}\n"
     return base_context.strip()
+
+
+# ========== 10. 本地向量库路由（MEMORY_BACKEND=local 时生效，默认 cloud 走原百炼） ==========
+# 说明：在模块加载时用 local_vector_store 的同名实现替换本模块的公开接口。
+# main.py / active_cloud_retrieval.py 等调用方 "from cloud_memory_v2 import xxx"
+# 拿到的即是本地版（from-import 绑定发生在本补丁之后），无需改动任何调用方代码。
+_MEMORY_BACKEND = os.getenv("MEMORY_BACKEND", "cloud").lower().strip()
+if _MEMORY_BACKEND == "local":
+    try:
+        import local_vector_store as _lvs
+        for _fn in (
+            "upload_plot_memory", "upload_foreshadowing", "upload_rumor_snapshot",
+            "upload_task_node", "upload_milestone", "upload_chapter_summary",
+            "upload_biography_update", "upload_important_memory", "upload_npc_memory",
+            "upload_task_memory", "upload_rumor_item", "get_relevant_history",
+        ):
+            if hasattr(_lvs, _fn):
+                globals()[_fn] = getattr(_lvs, _fn)
+        print("[云记忆] 路由切换：MEMORY_BACKEND=local，读写走本地向量库（百炼不再计费）")
+    except Exception as _e:
+        print(f"[云记忆] 本地向量库加载失败，保持云端模式: {_e}")

@@ -2178,21 +2178,49 @@ def api_map_get_target():
     return jsonify({"status": "success", "target": WEB_MAP_TARGET})
 
 # ======= 世界书 API =======
+_WB_SEM_WARMUP_STARTED = False  # 语义预热自愈只触发一次（幂等）
+
 @app.route('/worldbook/status', methods=['GET'])
 def api_worldbook_status():
     """获取世界书检索状态（供前端显示）
     worldbook.get_status() 返回的 key：ready/entries_count/keywords_count/last_build/groups
     前端期望的 key：status/total_entries/total_keywords/last_build_time
-    此处做 key 映射，保持零侵入。
+    此处做 key 映射 + 时间戳格式化 + 语义自愈，保持零侵入。
+    语义自愈：gunicorn 下 __main__ 预热不执行，语义模型懒加载永不触发——
+    首次状态查询时后台跑一次预热检索（建索引+载向量+载模型）。
     """
+    global _WB_SEM_WARMUP_STARTED
     try:
         import worldbook
+        if getattr(worldbook, "_index", None) is None:
+            # gunicorn 重启后未跑过游戏回合：仅构造索引对象（懒构建零开销），使状态含 semantic 字段
+            worldbook.init()
         s = worldbook.get_status()
+
+        # 语义自愈：启用但未就绪 → 后台加载向量缓存+模型（一次性；不触发索引构建，避免与游戏回合并发冲突）
+        _sem = s.get("semantic") or {}
+        if _sem.get("enabled") and not _sem.get("available") and not _WB_SEM_WARMUP_STARTED:
+            _WB_SEM_WARMUP_STARTED = True
+            def _wb_sem_warmup():
+                try:
+                    import semantic_index
+                    semantic_index.load_cache()
+                    semantic_index.is_available()
+                except Exception:
+                    pass
+            threading.Thread(target=_wb_sem_warmup, daemon=True).start()
+
+        # 时间戳格式化（原始值为 epoch 秒）
+        _lb = s.get("last_build", 0)
+        try:
+            _lb_str = time.strftime("%Y-%m-%d %H:%M", time.localtime(float(_lb))) if _lb else ""
+        except (TypeError, ValueError):
+            _lb_str = str(_lb)
         return jsonify({
             "status": "ready" if s.get("ready") else "not_ready",
             "total_entries": s.get("entries_count", 0),
             "total_keywords": s.get("keywords_count", 0),
-            "last_build_time": s.get("last_build", ""),
+            "last_build_time": _lb_str,
             "groups": s.get("groups", {}),
             "semantic": s.get("semantic", {}),
         })
@@ -2214,6 +2242,75 @@ def api_worldbook_rebuild():
                         "message": "索引重建成功"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
+
+# ======= 长期记忆状态 API（仿世界书） =======
+_MEMORY_CATEGORY_LABELS = {
+    "npc_memory": "NPC记忆",
+    "memory_highlight": "重要剧情",
+}
+_MEMORY_SELFHEAL_STARTED = False  # 自愈线程只启动一次（幂等）
+
+@app.route('/memory/status', methods=['GET'])
+def api_memory_status():
+    """获取长期记忆状态（供前端显示）
+    backend: cloud=百炼云端（不计条数，零API成本）/ local=本地向量库
+    兼容旧版 local_vector_store（无 model_ready/categories 字段）：直接探测 _store 内部状态
+    自愈：模型未加载且无错误时，后台线程触发加载（gunicorn preload/预热线程失效场景下兜底）
+    """
+    global _MEMORY_SELFHEAL_STARTED
+    try:
+        import cloud_memory_v2 as _cmv
+        backend = getattr(_cmv, "_MEMORY_BACKEND", "cloud").lower()
+    except Exception:
+        backend = os.getenv("MEMORY_BACKEND", "cloud").lower().strip()
+    if backend != "local":
+        return jsonify({"backend": "cloud", "status": "cloud",
+                        "total_entries": 0, "categories": {}, "model": ""})
+    try:
+        import local_vector_store as _lvs
+        s = _lvs.get_status()
+        store = getattr(_lvs, "_store", None)
+
+        # 模型就绪判断（新旧版本兼容）
+        model_ready = s.get("model_ready")
+        if model_ready is None:
+            model_ready = store is not None and getattr(store, "_model", None) is not None
+        model_error = s.get("model_error")
+        if model_error is None and store is not None:
+            model_error = getattr(store, "_model_error", None)
+
+        # 分类统计（旧版无 categories 字段时从内部条目现算）
+        cats = dict(s.get("categories") or {})
+        if not cats and store is not None:
+            for e in getattr(store, "_entries", []) or []:
+                c = e.get("category", "")
+                cats[c] = cats.get(c, 0) + 1
+        cats = {_MEMORY_CATEGORY_LABELS.get(k, k): v for k, v in cats.items()}
+
+        # 自愈：模型未加载且无错误 → 后台触发加载（幂等，仅一次）
+        if not model_ready and not model_error and store is not None:
+            if not _MEMORY_SELFHEAL_STARTED:
+                _MEMORY_SELFHEAL_STARTED = True
+                threading.Thread(target=store._load_model, daemon=True).start()
+
+        if model_ready:
+            st = "ready"
+        elif model_error:
+            st = "error"
+        else:
+            st = "loading"
+        return jsonify({
+            "backend": "local",
+            "status": st,
+            "total_entries": s.get("count", 0),
+            "categories": cats,
+            "model": s.get("model", ""),
+            "model_error": model_error,
+        })
+    except Exception as e:
+        return jsonify({"backend": "local", "status": "not_available",
+                        "total_entries": 0, "categories": {}, "model": "",
+                        "model_error": str(e)[:120]})
 
 # ======= 记事本 API =======
 @app.route('/notepad/raw', methods=['GET'])
@@ -2748,6 +2845,24 @@ def _build_editable_schema():
             {"key": "KOLORS_IMG_API_KEY", "label": "API Key", "type": "password"},
             {"key": "KOLORS_IMG_MODEL", "label": "模型名", "type": "text"},
             {"key": "KOLORS_IMG_SIZE", "label": "图片尺寸", "type": "text"},
+        ]
+    })
+    schema.append({
+        "group": "active_retrieval",
+        "label": "🔍 云向量主动检索",
+        "fields": [
+            {"key": "ACTIVE_RETRIEVAL_ENABLED", "label": "启用主动检索 (true/false)", "type": "text"},
+            {"key": "ACTIVE_RETRIEVAL_API_KEY", "label": "API Key（留空则用辅助模型配置）", "type": "password"},
+            {"key": "ACTIVE_RETRIEVAL_BASE_URL", "label": "Base URL（留空则用辅助模型配置）", "type": "text"},
+            {"key": "ACTIVE_RETRIEVAL_MODEL", "label": "模型名（留空则用 deepseek-v4-flash）", "type": "text"},
+        ]
+    })
+    schema.append({
+        "group": "memory_backend",
+        "label": "🧠 云向量记忆本地化",
+        "fields": [
+            {"key": "MEMORY_BACKEND", "label": "记忆后端 cloud=百炼云端 / local=本地向量库", "type": "text"},
+            {"key": "LOCAL_MEMORY_MODEL", "label": "本地检索模型（留空默认 bge-small-zh-v1.5）", "type": "text"},
         ]
     })
     return schema

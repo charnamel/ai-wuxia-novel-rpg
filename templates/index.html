@@ -17,11 +17,18 @@
                 <span class="brand-sub">AI 武侠交互小说</span>
             </div>
         </div>
-        <div id="worldbook-status" class="wb-status">
-            <span id="worldbook-status-icon" class="wb-icon">⚫</span>
-            <span id="worldbook-status-text" class="wb-text">世界书检索未初始化</span>
-            <span id="worldbook-status-detail" class="wb-detail"></span>
-            <button onclick="worldbookRebuild()" class="btn btn-ghost btn-xs">重建</button>
+        <div class="wb-status-group">
+            <div id="worldbook-status" class="wb-status">
+                <span id="worldbook-status-icon" class="wb-icon">⚫</span>
+                <span id="worldbook-status-text" class="wb-text">世界书检索未初始化</span>
+                <span id="worldbook-status-detail" class="wb-detail"></span>
+                <button onclick="worldbookRebuild()" class="btn btn-ghost btn-xs">重建</button>
+            </div>
+            <div id="memory-status" class="wb-status">
+                <span id="memory-status-icon" class="wb-icon">⚫</span>
+                <span id="memory-status-text" class="wb-text">长期记忆未初始化</span>
+                <span id="memory-status-detail" class="wb-detail"></span>
+            </div>
         </div>
     </header>
 

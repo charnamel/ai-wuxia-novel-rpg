@@ -333,6 +333,7 @@ def get_status():
     return {
         "enabled": _ENABLE,
         "available": _available and _vectors is not None,
+        "model_ready": _model is not None,
         "model": _MODEL_NAME if _ENABLE else "未启用",
         "vector_count": len(_id_list) if _id_list else 0,
         "vector_dim": int(_vectors.shape[1]) if _vectors is not None else 0,

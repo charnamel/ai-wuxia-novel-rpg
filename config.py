@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-config.py — 全局配置中心
+config.py — 全局配置中心 v2
 ==================================
 【设计原则】密钥与代码分离，所有 API 配置从 .env 读取
+【备份】原硬编码版本见 config.py.bak
+【回滚】cp config.py.bak config.py 即可恢复
 """
 import os
 
@@ -28,7 +30,7 @@ DASHSCOPE_API_KEY = _env("DASHSCOPE_API_KEY")
 BAILIAN_PLOT_MEMORY_ID = _env("BAILIAN_PLOT_MEMORY_ID")
 BAILIAN_WORLD_KNOWLEDGE_ID = _env("BAILIAN_WORLD_KNOWLEDGE_ID")
 ENABLE_CLOUD_MEMORY = _env("ENABLE_CLOUD_MEMORY", "true").lower() == "true"
-CLOUD_MEM_SLOT_ID = _env("CLOUD_MEM_SLOT_ID", "default_player")
+CLOUD_MEM_SLOT_ID = _env("CLOUD_MEM_SLOT_ID", "default_player_XSFH6")
 
 # ====== 主循环（3选1，MAIN_LOOP_ACTIVE=A/B/C）======
 _ml_active = _env("MAIN_LOOP_ACTIVE", "A")
@@ -89,3 +91,10 @@ SAVE_FILE = "data/game_save.json"
 CONTEXT_CACHE_FILE = "data/context_cache.json"
 MAX_CONTEXT_LOG = 2000
 SUMMARY_KEEP_RECENT_COUNT = 20
+
+# ===== 主动检索小模型配置（独立于主循环模型） =====
+# 用于云向量主动检索：小模型生成关键词 → 并行查向量库
+# 失败时自动降级到被动检索，不影响主循环
+ACTIVE_RETRIEVAL_API_KEY = _env("ACTIVE_RETRIEVAL_API_KEY", "") or DEEPSEEK_API_KEY
+ACTIVE_RETRIEVAL_BASE_URL = _env("ACTIVE_RETRIEVAL_BASE_URL", "") or DEEPSEEK_BASE_URL
+ACTIVE_RETRIEVAL_MODEL = _env("ACTIVE_RETRIEVAL_MODEL", "") or "deepseek-v4-flash"

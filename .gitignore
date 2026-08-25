@@ -25,3 +25,49 @@ test_video.mp4
 # IDE / editor
 *.swp
 *.swo
+
+# Personal play data (local saves & memory stores, not for repo)
+data/game_save.json
+data/player.json
+data/context_cache.json*
+data/interact_log.jsonl
+data/world_state.json
+data/tasks.json
+data/progress.json
+data/metadata.json
+data/latest_plot.txt
+data/notepad_data.txt
+data/location_time.json
+data/mainline_history.json
+data/cloud_memory_uploaded.json
+data/local_memory_*
+data/semantic_vectors.npy
+data/semantic_ids.json
+data/history_archive/
+data/启动原始/
+data/备份/
+data/test_scenarios.json
+saves/
+
+# Local-only scripts, backups & notes
+tools/
+config-mimo.py
+/npc_agents.json
+/web_server (1).py
+/index.html
+static/mockup.html
+static/js/*.bak*
+*.bak
+extract_inputs.py
+extract_scenarios.py
+tmux*.txt
+服务器指令集.txt
+部署.txt
+时间轴.md
+武功大全.txt
+项目说明文档.md
+AI互动游戏小说系统分析.md
+女主角攻略评估_*.md
+武功品阶评判标准.md
+L3全量脉络预览.md
+BACKGROUND_SWITCH_GUIDE.md

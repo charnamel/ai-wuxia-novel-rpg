@@ -127,6 +127,19 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 .wb-text { white-space: nowrap; }
 .wb-detail { color: var(--text-faint); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* 顶栏双状态行（世界书 + 长期记忆） */
+.wb-status-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    min-width: 0;
+}
+.wb-status-group .wb-status {
+    padding: 2px 8px 2px 12px;
+    max-width: 46vw;
+}
+
 /* ─────────── 主体骨架 ─────────── */
 .app-shell {
     display: flex;

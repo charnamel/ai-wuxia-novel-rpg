@@ -584,7 +584,9 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                         if (data.semantic.available) {
                             semText = ` | 语义✅ ${data.semantic.vector_count}条向量`;
                         } else if (data.semantic.enabled) {
-                            semText = ' | 语义⏳加载中';
+                            semText = (data.semantic.model_ready && !data.semantic.vector_count)
+                                ? ' | 语义⚠️无向量缓存(点重建)'
+                                : ' | 语义⏳加载中';
                         } else {
                             semText = ' | 语义未启用';
                         }
@@ -625,9 +627,62 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 append('【网络错误】无法重建世界书（可能向量编码超时，请稍后重试）', 'change');
             }
         }
+
+        // ===== 长期记忆状态管理 =====
+        async function updateMemoryStatus() {
+            try {
+                const res = await fetch('/memory/status');
+                const data = await res.json();
+                const icon = document.getElementById('memory-status-icon');
+                const text = document.getElementById('memory-status-text');
+                const detail = document.getElementById('memory-status-detail');
+                if (!icon || !text) return;
+                if (data.backend === 'cloud') {
+                    icon.textContent = '☁️';
+                    icon.style.color = '#59c';
+                    text.textContent = '长期记忆 · 云端模式';
+                    text.style.color = '#59c';
+                    detail.textContent = '百炼云向量库';
+                    detail.style.color = '#888';
+                    return;
+                }
+                let catText = '';
+                if (data.categories) {
+                    const parts = Object.entries(data.categories)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 4)
+                        .map(([k, v]) => `${k}${v}`);
+                    if (parts.length) catText = `（${parts.join('/')}）`;
+                }
+                if (data.status === 'ready') {
+                    icon.textContent = '✅';
+                    icon.style.color = '#4c4';
+                    text.textContent = '长期记忆已就绪';
+                    text.style.color = '#4c4';
+                    detail.textContent = `${data.total_entries}条${catText} · ${data.model || ''}`;
+                } else if (data.status === 'loading') {
+                    icon.textContent = '⏳';
+                    icon.style.color = '#ec4';
+                    text.textContent = '本地记忆模型加载中';
+                    text.style.color = '#ec4';
+                    detail.textContent = `${data.total_entries}条 · ${data.model || ''}`;
+                } else {
+                    icon.textContent = '⚠️';
+                    icon.style.color = '#ec4';
+                    text.textContent = '本地记忆不可用';
+                    text.style.color = '#ec4';
+                    detail.textContent = data.model_error ? String(data.model_error).slice(0, 60) : '请检查依赖安装';
+                }
+                detail.style.color = '#888';
+            } catch(e) {
+                // 静默失败（记忆库不可用时不影响主功能）
+            }
+        }
         // 页面加载后立即检查一次，然后每30秒刷新
         updateWorldbookStatus();
         setInterval(updateWorldbookStatus, 30000);
+        updateMemoryStatus();
+        setInterval(updateMemoryStatus, 30000);
     
 
         function openPlayerEditor() {
