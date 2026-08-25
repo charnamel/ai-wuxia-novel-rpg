@@ -397,3 +397,63 @@ def get_status():
 
 def flush():
     _store.flush()
+
+
+def rebuild_vectors():
+    """全量重编码向量（后台调用，线程安全）。
+    修复三类问题：①非优雅重启导致的向量数<条目数（磁盘上的孤儿条目一并救回）
+                 ②更换模型后旧向量不兼容
+                 ③启动时模型加载瞬时失败（如重启瞬间内存竞争）——_load_model 见错误即返回
+                   会让失败永久固化，这里清除后强制重试一次
+    编码在锁外进行（约60-120秒，不阻塞游戏写入），完成后锁内原子替换并落盘。
+    返回重建后的条目总数。
+    """
+    # 自愈：清除历史加载失败记录并重试（仍失败则带出真实原因，而非笼统的"模型不可用"）
+    if _store._model is None:
+        _store._model_error = None
+        if _store._load_model() is None:
+            raise RuntimeError(f"模型重试加载仍失败: {(_store._model_error or '未知原因')[:150]}")
+    # 1. 锁外读磁盘全量条目（含孤儿行；同 unique_id 后写的覆盖先写的）
+    disk_entries = {}
+    if os.path.exists(_ENTRIES_FILE):
+        with open(_ENTRIES_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    e = json.loads(line)
+                    disk_entries[e["unique_id"]] = e
+                except (json.JSONDecodeError, KeyError):
+                    continue
+    if not disk_entries:
+        return 0
+    entries = list(disk_entries.values())
+    disk_ids = set(disk_entries.keys())
+    # 2. 锁外全量重编码
+    vecs = _store._encode([e["content"] for e in entries])
+    if vecs is None:
+        raise RuntimeError("模型不可用，无法重编码")
+    # 3. 锁内合并：编码期间新增的条目（在内存但不在磁盘快照）追加编码后原子替换
+    with _store._lock:
+        extra = [e for e in _store._entries if e["unique_id"] not in disk_ids]
+        if extra:
+            extra_vecs = _store._encode([e["content"] for e in extra])
+            if extra_vecs is not None:
+                vecs = np.vstack([vecs, extra_vecs])
+                entries = entries + extra
+        _store._entries = entries
+        _store._ids = {e["unique_id"] for e in entries}
+        _store._vectors = vecs
+        _store._dirty_count = 0
+        # 重写条目文件（清掉历史重复行/孤儿行，保证磁盘条目数=向量数，重启不再告警）
+        with open(_ENTRIES_FILE, "w", encoding="utf-8") as f:
+            for e in entries:
+                f.write(json.dumps(e, ensure_ascii=False) + "\n")
+        _store._flush_locked()
+    return len(entries)
+
+
+# 优雅退出时强制落盘（systemctl restart 发 SIGTERM 可触发；防重启丢尾部向量）
+import atexit as _atexit
+_atexit.register(_store.flush)

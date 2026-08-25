@@ -678,6 +678,34 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 // 静默失败（记忆库不可用时不影响主功能）
             }
         }
+        async function memoryRebuild() {
+            try {
+                append('🔄 正在重建本地记忆向量（后台全量重编码，约1-2分钟，不影响游戏进行）...', 'system');
+                const res = await fetch('/memory/rebuild', {method: 'POST'});
+                const data = await res.json();
+                if (!data.success) {
+                    append(`⚠️ 重建失败：${data.message || '未知错误'}`, 'change');
+                    return;
+                }
+                append(`✅ ${data.message || '重建已开始'}`, 'system');
+                // 后台重建期间每10秒刷新一次状态，最长等5分钟
+                let tries = 0;
+                const poll = setInterval(async () => {
+                    tries++;
+                    await updateMemoryStatus();
+                    const text = document.getElementById('memory-status-text');
+                    if ((text && text.textContent.includes('已就绪')) || tries >= 30) {
+                        clearInterval(poll);
+                        if (text && text.textContent.includes('已就绪')) {
+                            append('✅ 本地记忆向量重建完成，状态栏已更新', 'system');
+                        }
+                    }
+                }, 10000);
+            } catch(e) {
+                append('【网络错误】无法重建本地记忆（请稍后重试）', 'change');
+            }
+        }
+
         // 页面加载后立即检查一次，然后每30秒刷新
         updateWorldbookStatus();
         setInterval(updateWorldbookStatus, 30000);

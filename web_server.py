@@ -2312,6 +2312,42 @@ def api_memory_status():
                         "total_entries": 0, "categories": {}, "model": "",
                         "model_error": str(e)[:120]})
 
+_MEMORY_REBUILDING = False
+
+@app.route('/memory/rebuild', methods=['POST'])
+def api_memory_rebuild():
+    """重建本地记忆向量（后台线程全量重编码）。
+    用途：①非优雅重启后修复"向量数<条目数"（救回孤儿条目）②更换模型后重建。
+    """
+    global _MEMORY_REBUILDING
+    try:
+        import cloud_memory_v2 as _cmv
+        backend = getattr(_cmv, "_MEMORY_BACKEND", "cloud").lower()
+    except Exception:
+        backend = os.getenv("MEMORY_BACKEND", "cloud").lower().strip()
+    if backend != "local":
+        return jsonify({"success": False, "message": "当前是云端记忆模式，无需重建"})
+    if _MEMORY_REBUILDING:
+        return jsonify({"success": True, "message": "重建正在进行中，请稍候（状态栏约1-2分钟后自动更新）"})
+
+    import local_vector_store as _lvs
+    if not hasattr(_lvs, "rebuild_vectors"):
+        return jsonify({"success": False, "message": "服务器 local_vector_store.py 是旧版本，请先上传最新文件"})
+
+    def _run():
+        global _MEMORY_REBUILDING
+        try:
+            n = _lvs.rebuild_vectors()
+            print(f"[记忆重建] 完成，共 {n} 条")
+        except Exception as e:
+            print(f"[记忆重建] 失败: {str(e)[:150]}")
+        finally:
+            _MEMORY_REBUILDING = False
+
+    _MEMORY_REBUILDING = True
+    threading.Thread(target=_run, daemon=True).start()
+    return jsonify({"success": True, "message": "重建已开始（全量重编码约1-2分钟），完成后状态栏自动更新"})
+
 # ======= 记事本 API =======
 @app.route('/notepad/raw', methods=['GET'])
 def api_notepad_raw():
