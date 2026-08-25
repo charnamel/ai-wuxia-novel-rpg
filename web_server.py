@@ -224,9 +224,10 @@ WEB_BATTLE_STATE = {
     "last_dc_summary": ""  # 上轮DC判定+掷骰战果摘要（DC续传锚定用）
 }
 
-def _llm_dc_low_temp(sys_p, user_p):
-    """DC判定专用低温封装：判数值要一致（0.25），剧情生成仍走默认0.65"""
-    return llm_call_common(sys_p, user_p, temp=0.25)
+def _llm_dc_low_temp(sys_p, user_p, **kwargs):
+    """DC判定专用低温封装：判数值要一致（0.25），剧情生成仍走默认0.65
+    **kwargs 透传 tools/tool_choice（V5分量制DC的tool call）"""
+    return llm_call_common(sys_p, user_p, temp=0.25, **kwargs)
 
 def reset_web_battle():
     """【修改点1】增加日志输出，便于追踪状态重置"""
@@ -561,6 +562,9 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                         _dc_scene,
                         extra_npcs=[WEB_BATTLE_STATE["target_npc"]] if WEB_BATTLE_STATE.get("target_npc") else []
                     )
+                    # 对手锚定：防止场景残留其他NPC名导致DC判定对象跑偏
+                    _target_line = dice_system.build_target_npc_line(
+                        WEB_BATTLE_STATE["target_npc"]) if WEB_BATTLE_STATE.get("target_npc") else ""
                     _dc, _dc_reason = dice_ai_judge_dc_only(
                         llm_func=_llm_dc_low_temp,
                         scene=_dc_scene,
@@ -571,6 +575,7 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                         skill_list_summary=_pobj.get_skill_list_summary(),
                         overall_realm=_pobj.overall_realm,
                         active_npcs_text=_battle_npcs_brief,
+                        target_npc_text=_target_line,
                     )
                     print(f"[BattleDC] 命中「{_skill_name}」, DC={_dc}({_dc_reason})")
 

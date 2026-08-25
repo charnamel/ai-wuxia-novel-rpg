@@ -1220,151 +1220,391 @@ def build_active_npcs_brief(npc_list_data, user_action: str,
     return "\n".join(lines)
 
 
+def build_target_npc_line(npc: dict) -> str:
+    """构建对战对手档案行（供DC判定的对手锚定块）。
+    格式与 build_active_npcs_brief 一致，level 与主武功境界都列出。
+    """
+    if not isinstance(npc, dict):
+        return ""
+    name = str(npc.get("name", "")).strip()
+    if not name:
+        return ""
+    identity = str(npc.get("identity", "")).strip()
+    level = str(npc.get("level", "")).strip()
+    _status_map = {
+        "normal": "健康", "light_injured": "轻伤", "heavy_injured": "重伤",
+        "dying": "濒死", "deceased": "已故", "poisoned": "中毒",
+    }
+    status = _status_map.get(str(npc.get("body_status", "normal")).strip(), "健康")
+    skills = npc.get("martial_skills", []) or []
+    skill_parts = []
+    for sk in skills[:3]:
+        if isinstance(sk, dict):
+            sn = str(sk.get("skill_name", "")).strip()
+            sl = str(sk.get("skill_level", "")).strip()
+            if sn:
+                skill_parts.append(f"{sn}·{sl}" if sl else sn)
+    skill_text = "、".join(skill_parts) if skill_parts else (level or "武功不详")
+    if level and level not in skill_text:
+        skill_text = f"{skill_text}（当前境界：{level}）"
+    id_part = f"（{identity}）" if identity else ""
+    return f"{name}{id_part}：{skill_text} [{status}]（注:此为完全体档案数据,需结合场景判断当前实际境界）"
+
+
+# ========== V5 分量制 DC：AI 分项给值，程序加总 ==========
+# 境界 → 基础DC 对照表（与提示词中的参考一致，用于交叉校验 AI 是否自洽）
+REALM_DC_TABLE = {
+    "无武功": 5, "初学入门": 7, "初窥门径": 9, "略有小成": 11, "略有所成": 13,
+    "渐入佳境": 15, "融会贯通": 17, "登堂入室": 19, "炉火纯青": 21,
+    "出神入化": 23, "登峰造极": 25, "超凡入圣": 27, "返璞归真": 28,
+    "天人合一": 29, "破碎虚空": 30,
+}
+
+_REALM_ENUM = list(REALM_DC_TABLE.keys())
+
+# 分量制 tool schema：AI 只分项填值，最终 DC 由程序 compute_final_dc() 加总
+DC_COMPONENT_TOOL = {
+    "type": "function",
+    "function": {
+        "name": "submit_dc_judgement",
+        "description": "分项提交DC判定分量（系统自动加总，禁止自行心算总分），必须如实分项填写",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "action_type": {
+                    "type": "string", "enum": ["battle", "daily"],
+                    "description": "battle=对战行动(与NPC攻防互动) daily=日常行动(无对手)",
+                },
+                "opponent_realm": {
+                    "type": "string", "enum": _REALM_ENUM,
+                    "description": "对手当前实际境界（档案是巅峰数据，须按场景上下文修正：受伤/年迈/初学→降档，奇遇/发威→升档）。日常行动填'无武功'",
+                },
+                "base_dc": {
+                    "type": "integer", "minimum": 5, "maximum": 30,
+                    "description": "基础难度DC。对战=对手当前实际境界对应值(无武功5/初学入门7/初窥门径9/略有小成11/略有所成13/渐入佳境15/融会贯通17/登堂入室19/炉火纯青21/出神入化23/登峰造极25/超凡入圣27/返璞归真28/天人合一29/破碎虚空30)。日常=行动固有难度(喝水吃饭5/普通施展10/演练熟练12/演练生疏14/突破瓶颈16/疗重伤20)",
+                },
+                "base_reason": {
+                    "type": "string",
+                    "description": "30字内说明。对战必须写明对手当前境界名（如'对手登堂入室，独臂带伤'），便于人工校验；日常写明行动难度档（如'演练生疏武功'）",
+                },
+                "environment_mod": {
+                    "type": "integer", "minimum": -8, "maximum": 8,
+                    "description": "天时地利修正(对玩家有利为负)：黑暗+2/雨雪湿滑+1~+2/地形险峻+1~+2/天时不利+1~+2/开阔有利-1。无则0",
+                },
+                "environment_reason": {
+                    "type": "string",
+                    "description": "15字内环境修正说明，修正为0时填'无碍'或'无'",
+                },
+                "situation_mod": {
+                    "type": "integer", "minimum": -3, "maximum": 3,
+                    "description": "人和战况修正(对玩家有利为负)：偷袭得手-1~-3/对手负伤-1~-3/群战围杀-1~-3/以一敌多+1~+3/玩家带伤+1~+3/心神不宁+1~+2。无则0",
+                },
+                "situation_reason": {
+                    "type": "string",
+                    "description": "15字内战况修正说明，修正为0时填'势均力敌'或'无'",
+                },
+                "equipment_mod": {
+                    "type": "integer", "minimum": -2, "maximum": 2,
+                    "description": "装备利钝修正(对玩家有利为负)，参考玩家装备栏自行判断：神兵利刃且用对应武功-1~-2/对手持神兵+1~+2/徒手对兵刃+1~+2/精良防具-1。装备与行动无关填0",
+                },
+                "equipment_reason": {
+                    "type": "string",
+                    "description": "15字内装备修正说明，修正为0时填'无装备影响'或'无'",
+                },
+                "mod_factors": {
+                    "type": "array", "items": {"type": "string"},
+                    "description": "触发的修正因素名列表，如['偷袭得手','玩家带伤']，无则空列表",
+                },
+            },
+            "required": ["action_type", "base_dc", "base_reason",
+                         "environment_mod", "situation_mod", "equipment_mod"],
+        },
+    },
+}
+
+
+def build_equipment_brief(player_obj=None) -> str:
+    """构建玩家装备摘要（供DC判定）。player_obj 缺省时取全局玩家"""
+    try:
+        if player_obj is None:
+            from player_manager import get_player
+            player_obj = get_player()
+        eq = player_obj.equipped or {}
+        parts = []
+        weapon = str(eq.get("weapon", "") or "").strip()
+        armor = str(eq.get("armor", "") or "").strip()
+        items = [str(i).strip() for i in (eq.get("items") or []) if str(i).strip()]
+        if weapon:
+            parts.append(f"武器：{weapon}")
+        if armor:
+            parts.append(f"防具：{armor}")
+        if items:
+            parts.append("随身物品：" + "、".join(items[:8]))
+        return "\n".join(parts) if parts else "（无装备）"
+    except Exception:
+        return "（无装备）"
+
+
 def build_v4_dc_judge_prompt(scene: str, user_action: str,
                              skill_name: str, skill_level: str, grade: int,
                              skill_list_summary: list,
                              overall_realm: str,
                              active_npcs_text: str = "",
-                             battle_mode: bool = True) -> tuple:
+                             battle_mode: bool = True,
+                             target_npc_text: str = "") -> tuple:
     """构建AI DC判定的prompt，返回 (sys_prompt, user_prompt)
-    AI只负责判定DC值，不判断need_check（need_check由正则决定）
-    battle_mode=True(默认): battle专用精简prompt,跳过场景判定,直接查对战DC
-    battle_mode=False: 日常模式,含场景判定优先+日常DC参考
+    AI分项判定DC分量（V5分量制）：AI只填 base_dc/environment_mod/situation_mod/equipment_mod，
+    最终DC由程序 compute_final_dc() 加总，AI不心算总分。
+    battle_mode=True(默认): battle模式，base_dc直接按对手当前实际境界判定
+    battle_mode=False: 日常模式，AI先判行动类型（action_type）再选对应标准
+    target_npc_text: 本次对战对手档案行（对战模块传入）。传入后base_dc只认此对手，
+                     防止场景残留其他NPC名导致判定对象跑偏
     """
     skills_text = "\n".join(skill_list_summary) if skill_list_summary else "（暂无武功）"
     scene_short = (str(scene or ""))[-300:]
     if not scene_short:
         scene_short = "（场景信息暂无）"
 
-    # 活跃NPC区块（有则加入，无则省略）
+    # 玩家装备摘要（供 equipment_mod 判断）
+    equipment_text = build_equipment_brief()
+
+    # 对手锚定块（对战模块专用，最高优先级）
+    target_block = ""
+    if target_npc_text and target_npc_text.strip():
+        target_block = f"""
+【★本次对战对手（base_dc 只能以此NPC判定，其余NPC一律不得作为判定对象）】
+{target_npc_text}
+"""
+
+    # 活跃NPC区块（有则加入，无则省略；对战有锚定时降级为参考信息）
     npcs_block = ""
     if active_npcs_text and active_npcs_text.strip():
+        if target_block:
+            npcs_label = "【其他在场NPC（仅作战况参考，绝不可作为base_dc判定对象）】"
+        else:
+            npcs_label = "【活跃NPC（对手或协作者，据其【当前实际境界】判 base_dc）】"
         npcs_block = f"""
-【活跃NPC（可能为对手或协作者，请据此判定DC）】
+{npcs_label}
 {active_npcs_text}
 """
 
-    if battle_mode:
-        # battle专用精简prompt:跳过场景判定,直接查对战DC
-        sys_prompt = """你是武侠对战的DC难度裁判。当前为对战模式,玩家正与活跃NPC交手,直接判定DC值。
+    mode_line = ("当前为对战模式，玩家正与对手交手，action_type 填 battle，base_dc 按对手当前实际境界判定。"
+                 if battle_mode else
+                 "先判断行动类型：与NPC有攻防互动→action_type=battle（按对手当前实际境界判base_dc）；无对手→action_type=daily（按行动固有难度判base_dc）。")
 
-⚠️【核心原则】DC值只取决于【对手强度】和【环境因素】,与玩家自身实力【完全无关】。
-玩家的实力已经体现在修正值中,绝对不要因为玩家境界高或武功强就降低DC。
-⚠️【对手识别】对手已在【活跃NPC】中给出,直接读取其境界,查【对战DC参考】得基础DC。
-活跃NPC摘要是【完全体档案数据】,表示该NPC巅峰状态。若当前剧情中NPC处于不同阶段(受伤/岁数大了/刚学武功等),需根据场景上下文降低或增加其【当前实际境界】。场景上下文优先级 > 档案数据。
+    sys_prompt = f"""你是武侠世界的DC难度裁判。分项判定本次行动的DC分量，系统会自动加总，你只负责如实分项，禁止预想总分。
 
-【对战DC参考】(基础DC+环境修正。按金庸十四部小说整体标准,"掌门"是门内地位非江湖地位)
-对手无武功→DC5(普通百姓、不会武功的NPC)
-对手初学入门→DC7(刚入门弟子、江湖新丁,修炼0-1年)
-对手初窥门径→DC9(外门弟子、庄客,修炼1-3年)
-对手略有小成→DC11(内门弟子、杂役,修炼3-5年)
-对手略有所成→DC13(镖师、小头目、权臣非武人,修炼5-8年)
-对手渐入佳境→DC15(地方小派掌门/镖局香主/精英弟子/一方好手,修炼8-15年)
-对手融会贯通→DC17(中等门派掌门/总镖头/帮派香主/一方之雄,修炼15-20年)
-对手登堂入室→DC19(名门长老/邪派堂主/小派宗师,修炼20-30年)
-对手炉火纯青→DC21(名门掌门/武林宿望/一方霸主,修炼30-40年,中低武世界天花板)
-对手出神入化→DC23(神功大成/天赋异禀,修炼40-50年或得奇遇)
-对手登峰造极→DC25(邪教教主/大内供奉/绝顶高手,修炼50-70年或天赋+奇遇)
-对手超凡入圣→DC27(武林绝顶/隐世高人,百年难遇,需天赋+奇遇+机缘)
-对手返璞归真→DC28(隐世宗师/武林神话,超凡脱俗)
-对手天人合一→DC29(传说级,与天地共鸣,非凡人可敌)
-对手破碎虚空→DC30(神话级,千古难遇)
-※ 中低武世界天花板为8档(DC21),神功大成者可破例达9档。高武世界(射雕/神雕/倚天/笑傲)天花板为10-11档。超高武世界(天龙/侠客行)天花板为12-13档。"""
-    else:
-        # 日常模式:含场景判定+日常DC参考
-        sys_prompt = """你是武侠世界的武功检定难度裁判。根据场景和玩家行动,判定合理的DC难度值。
+{mode_line}
 
-⚠️【核心原则】DC值只取决于【对手强度】和【环境因素】,与玩家自身实力【完全无关】。
-玩家的实力已经体现在修正值中,绝对不要因为玩家境界高或武功强就降低DC。
-⚠️【场景判定优先】判定DC前,必须先识别行动类型:
-  ■ 日常行动(无对手):演练武功、施展轻功、运功疗伤、破解机关等。查【日常行动DC参考】,不得参考身边NPC境界。
-  ■ 对战行动(有对手):与NPC交手、比武、暗杀、围攻等。查【对战DC参考】,从场景或活跃NPC中识别对手境界。
-  ■ 判定标准:玩家行动是否针对某NPC产生攻防互动?是→对战;否→日常。
-⚠️活跃NPC摘要是【完全体档案数据】,表示该NPC巅峰状态。若当前剧情中NPC处于不同阶段(受伤/岁数大了/刚学武功等),需根据场景上下文降低或增加其【当前实际境界】。场景上下文优先级 > 档案数据。
+【分量标准】
+■ base_dc(5~30)基础难度：
+  对战=对手【当前实际境界】对应DC。对手档案是完全体数据，须按场景上下文修正（受伤/年迈/初学→降，奇遇/发威→升）：
+  无武功5·初学入门7·初窥门径9·略有小成11·略有所成13·渐入佳境15·融会贯通17·登堂入室19·炉火纯青21·出神入化23·登峰造极25·超凡入圣27·返璞归真28·天人合一29·破碎虚空30
+  日常=行动固有难度：喝水吃饭5·日常行走8·普通施展10·演练熟练12·演练生疏14·突破瓶颈16·强行运功18·疗重伤20
+■ environment_mod(-8~+8)天时地利（对玩家有利为负）：黑暗+2·雨雪湿滑+1~+2·地形险峻+1~+2·天时不利+1~+2·开阔有利-1
+■ situation_mod(-3~+3)人和战况（对玩家有利为负）：偷袭得手-1~-3·对手负伤-1~-3·群战围杀-1~-3·对手受制-1~-3·以一敌多+1~+3·玩家带伤+1~+3·玩家受制+1~+3·心神不宁+1~+2
+■ equipment_mod(-2~+2)装备利钝（对玩家有利为负，参考【玩家装备】自行判断利钝）：神兵利刃且用对应武功-1~-2·对手持神兵+1~+2·徒手对兵刃+1~+2·精良防具-1·装备与行动无关填0
+■ 各reason字段：说明数值来历（面向玩家展示，句式自由）。base_reason 必须写明对手当前境界名，如"对手登堂入室，独臂带伤"；日常行动写明难度档，如"演练生疏武功"；其余reason说明来源即可，如"他中我一掌正在踉跄，所以-2"。修正为0时如实填"无碍/无"之类
 
-【日常行动DC参考】(无对手时使用,不得参考身边NPC境界)
-5=极简单(喝水吃饭) 8=很简单(日常行走) 10=简单(普通施展武功)
-12=中等(演练熟练武功) 14=较难(演练生疏武功) 16=困难(尝试突破瓶颈)
-18=很困难(强行运功) 20=极难(运功疗重伤) 25+=近乎不可能(逆天改命)
+【铁律】
+1. DC各分量与玩家自身实力完全无关（实力已在修正值中），绝不因玩家境界高而降DC
+2. 分量各自独立判断；同类因素取最高档，异类可叠加（叠加后不超过各分量上限：环境±8·战况±3·装备±2）
+3. opponent_realm 必须如实填报（系统用于校验 base_dc 是否自洽）
+4. 若给了【★本次对战对手】，base_dc 与 opponent_realm 只能针对该对手
 
-【对战DC参考】(有对手时使用,基础DC+环境修正。按金庸十四部小说整体标准,"掌门"是门内地位非江湖地位)
-对手无武功→DC5(普通百姓、不会武功的NPC)
-对手初学入门→DC7(刚入门弟子、江湖新丁,修炼0-1年)
-对手初窥门径→DC9(外门弟子、庄客,修炼1-3年)
-对手略有小成→DC11(内门弟子、杂役,修炼3-5年)
-对手略有所成→DC13(镖师、小头目、权臣非武人,修炼5-8年)
-对手渐入佳境→DC15(地方小派掌门/镖局香主/精英弟子/一方好手,修炼8-15年)
-对手融会贯通→DC17(中等门派掌门/总镖头/帮派香主/一方之雄,修炼15-20年)
-对手登堂入室→DC19(名门长老/邪派堂主/小派宗师,修炼20-30年)
-对手炉火纯青→DC21(名门掌门/武林宿望/一方霸主,修炼30-40年,中低武世界天花板)
-对手出神入化→DC23(神功大成/天赋异禀,修炼40-50年或得奇遇)
-对手登峰造极→DC25(邪教教主/大内供奉/绝顶高手,修炼50-70年或天赋+奇遇)
-对手超凡入圣→DC27(武林绝顶/隐世高人,百年难遇,需天赋+奇遇+机缘)
-对手返璞归真→DC28(隐世宗师/武林神话,超凡脱俗)
-对手天人合一→DC29(传说级,与天地共鸣,非凡人可敌)
-对手破碎虚空→DC30(神话级,千古难遇)
-※ 中低武世界天花板为8档(DC21),神功大成者可破例达9档。高武世界(射雕/神雕/倚天/笑傲)天花板为10-11档。超高武世界(天龙/侠客行)天花板为12-13档。"""
-
-    # 环境因素段(battle和日常共用)
-    env_factors_block = """
-【DC判定的环境因素·江湖险象】
-·判定DC时,需在对手境界对应基础DC之上,叠加以下环境修正,贴合江湖实战变数。
-·总体原则，对玩家有利就降低DC，对玩家不利就增加DC。
-【减值因素·玩家有利】(降低DC,可放手一搏)
-■ 偷袭得手(-1~-3):趁敌不备,出其不意。夜半突袭、暗中出手,对手仓促应战。
-■ 对手负伤(-1~-4):敌亦带伤,出招迟滞,破绽处处,正是进攻良机。
-■ 群战围杀(-1~-4):玩家一方多人围杀单一对手。2人围杀-1,3人-2,4人及以上-4。人多势众,轮番抢攻,对手首尾难顾。
-■ 玩家持神兵(-1~-3):玩家持名剑宝刀,削铁如泥,对手兵刃触之即断。
-■ 对手受制(-1~-3):对手中毒、被封穴、内息紊乱,出手大打折扣。
-【加值因素·玩家不利】(抬高DC,须谨慎出招)
-■ 玩家带伤(+1~+4):旧创未愈,气血不畅,招式运转大打折扣。
-■ 以一敌多(+1~+6):群敌环伺,腹背受敌。围攻人数愈多,DC攀升愈高。
-■ 黑暗环境(+1~+2):月黑风高,密林昏暗,全凭听声辨位。
-■ 对手持神兵(+1~+3):对手持名剑宝刀,锋芒凌厉,只能避其锋、寻其隙。
-■ 玩家受制(+1~+3):玩家中毒、被封穴、内息走岔,运劲滞涩。
-■ 心神不宁(+1~+2):暴怒失智、惊惧分心、牵挂生乱,招式破绽百出。
-■ 天时不利(+1~+2):雨雪湿滑影响轻功,大风影响暗器,酷暑严寒消耗体力。
-【判定要点】异类修正可叠加(如"玩家带伤+以一敌多"),同类只取最高档(如"对手负伤"与"对手受制"取其一)。双方持神兵相互抵消,不叠加。总修正封顶±8,防止极端DC。
-
-只返回严格JSON,不要任何解释文字:
-{"dc": 16, "reason": "对手登堂入室级"}"""
-
-    sys_prompt = sys_prompt + env_factors_block
+只返回严格JSON，不要任何解释文字：
+{{"action_type":"battle","opponent_realm":"登堂入室","base_dc":19,"base_reason":"对手武功境界登堂入室，所以是19","environment_mod":0,"environment_reason":"月色清朗，无碍","situation_mod":-2,"situation_reason":"他中我一掌正在踉跄，所以-2","equipment_mod":-2,"equipment_reason":"我持韩王青刀削铁如泥，所以-2","mod_factors":["对手负伤"]}}"""
 
     user_prompt = f"""【玩家整体境界】{overall_realm}
+
+【玩家装备】
+{equipment_text}
 
 【玩家武功清单】
 {skills_text}
 
 【本次使用武功】{skill_name}（{skill_level}·品阶{grade}级）
-{npcs_block}
+{target_block}{npcs_block}
 【场景上下文】
 {scene_short}
 
 【玩家行动】
 {user_action}
 
-请判定此行动的合理DC值。"""
+请分项判定DC分量。"""
 
     return sys_prompt, user_prompt
+
+
+def _extract_components_from_tool_calls(tool_calls) -> dict | None:
+    """从 tool_calls 中提取 DC 分量（层1）。兼容 OpenAI 对象和 dict 两种形态"""
+    if not tool_calls:
+        return None
+    for tc in tool_calls:
+        try:
+            fn = getattr(tc, "function", None)
+            if fn is None and isinstance(tc, dict):
+                fn = tc.get("function", {})
+            if fn is None:
+                continue
+            name = getattr(fn, "name", None)
+            if name is None and isinstance(fn, dict):
+                name = fn.get("name", "")
+            if name and name != "submit_dc_judgement":
+                continue
+            args_raw = getattr(fn, "arguments", None)
+            if args_raw is None and isinstance(fn, dict):
+                args_raw = fn.get("arguments", "")
+            if not args_raw:
+                continue
+            data = json.loads(args_raw) if isinstance(args_raw, str) else args_raw
+            if isinstance(data, dict) and "base_dc" in data:
+                return data
+        except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
+            continue
+    return None
+
+
+def _parse_dc_components(raw) -> dict | None:
+    """解析 AI 返回的 DC 分量（三级解析链）
+    层1: tool_calls arguments（真 tool call 模式）
+    层2: content 完整JSON / ```json围栏 / 首个含base_dc的{}块
+    层3: 正则逐字段提取（部分损坏也能用）
+    返回分量 dict 或 None
+    """
+    tool_calls = None
+    content = ""
+    if isinstance(raw, dict):
+        tool_calls = raw.get("tool_calls")
+        content = str(raw.get("content", "") or "")
+    elif raw is not None:
+        content = str(raw)
+
+    # 层1：tool_calls
+    comp = _extract_components_from_tool_calls(tool_calls)
+    if comp:
+        return comp
+
+    # 层2：content JSON
+    text = content.strip()
+    candidates = [text]
+    fence = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if fence:
+        candidates.append(fence.group(1))
+    brace = re.search(r'\{[^{}]*"base_dc"[^{}]*\}', text, re.DOTALL)
+    if brace:
+        candidates.append(brace.group())
+    for cand in candidates:
+        try:
+            data = json.loads(cand)
+            if isinstance(data, dict) and "base_dc" in data:
+                return data
+        except (json.JSONDecodeError, ValueError):
+            continue
+
+    # 层3：正则逐字段提取
+    m = re.search(r'"base_dc"\s*:\s*(\d+)', text)
+    if m:
+        fields = {"base_dc": int(m.group(1))}
+        for key, pat in (
+            ("environment_mod", r'"environment_mod"\s*:\s*(-?\d+)'),
+            ("situation_mod", r'"situation_mod"\s*:\s*(-?\d+)'),
+            ("equipment_mod", r'"equipment_mod"\s*:\s*(-?\d+)'),
+            ("action_type", r'"action_type"\s*:\s*"(battle|daily)"'),
+            ("base_reason", r'"base_reason"\s*:\s*"([^"]{1,30})"'),
+            ("environment_reason", r'"environment_reason"\s*:\s*"([^"]{1,24})"'),
+            ("situation_reason", r'"situation_reason"\s*:\s*"([^"]{1,24})"'),
+            ("equipment_reason", r'"equipment_reason"\s*:\s*"([^"]{1,24})"'),
+            ("flavor_text", r'"flavor_text"\s*:\s*"([^"]{1,80})"'),
+        ):
+            mm = re.search(pat, text)
+            if mm:
+                val = mm.group(1)
+                fields[key] = int(val) if key.endswith("_mod") else val
+        return fields
+    return None
+
+
+def _sanitize_components(comp: dict, user_action: str = "") -> dict:
+    """分量清洗：类型转换+范围夹紧+缺省补全。部分字段损坏不影响其余字段"""
+    def _int(v, lo, hi, default):
+        try:
+            return max(lo, min(hi, int(v)))
+        except (TypeError, ValueError):
+            return default
+
+    action_type = "battle" if str(comp.get("action_type", "battle")) == "battle" else "daily"
+    realm = str(comp.get("opponent_realm", "") or "")[:10]
+    if realm not in REALM_DC_TABLE:
+        realm = ""
+    def _reason(key, limit=36):
+        return str(comp.get(key, "") or "").strip()[:limit]
+    return {
+        "action_type": action_type,
+        "opponent_realm": realm,
+        "base_dc": _int(comp.get("base_dc"), 5, 30, _fallback_dc(user_action)),
+        "base_reason": _reason("base_reason"),
+        "environment_mod": _int(comp.get("environment_mod"), -8, 8, 0),
+        "environment_reason": _reason("environment_reason", 24),
+        "situation_mod": _int(comp.get("situation_mod"), -3, 3, 0),
+        "situation_reason": _reason("situation_reason", 24),
+        "equipment_mod": _int(comp.get("equipment_mod"), -2, 2, 0),
+        "equipment_reason": _reason("equipment_reason", 24),
+        "mod_factors": [str(x)[:12] for x in (comp.get("mod_factors") or [])][:6],
+        "flavor_text": _reason("flavor_text", 80),
+    }
+
+
+def compute_final_dc(comp: dict, user_action: str = "") -> dict:
+    """分量加总（唯一公式入口）。
+    扩展点：以后非AI分量（NPC伤势数据/地形/时辰等）在此追加，
+    AI 分量只负责定性判断，数据权威分量由程序注入。
+    """
+    c = _sanitize_components(comp, user_action)
+    # ★ 公式：总DC = 基础 + 环境 + 战况 + 装备（各分量已独立夹紧，总分再夹紧）
+    total = max(5, min(30, c["base_dc"] + c["environment_mod"] + c["situation_mod"] + c["equipment_mod"]))
+    # realm 交叉校验：报"初学入门"却给 base=25 之类的分项不自洽预警
+    if c["opponent_realm"] and c["action_type"] == "battle":
+        expect = REALM_DC_TABLE[c["opponent_realm"]]
+        if abs(c["base_dc"] - expect) > 3:
+            logger.warning("[DC校验] realm=%s 期望base≈%d 实际=%d（AI分项不自洽）",
+                           c["opponent_realm"], expect, c["base_dc"])
+    # 分项明细：每个分量自带文字解释（数值(标签：解释)），修正值自带正负号
+    # base_reason 程序侧保底补境界名（AI漏写时），确保玩家在骰子面板可见对手境界便于人工校验
+    base_txt = c["base_reason"]
+    if c["action_type"] == "battle" and c["opponent_realm"] and c["opponent_realm"] not in base_txt:
+        base_txt = f"{base_txt}，对手境界{c['opponent_realm']}" if base_txt else f"对手境界{c['opponent_realm']}"
+    def _part(val, label, reason):
+        return f"{val}({label}：{reason})" if reason else f"{val}({label})"
+    parts = [_part(c["base_dc"], "基础", base_txt)]
+    for val, label, reason in (
+        (c["environment_mod"], "环境", c["environment_reason"]),
+        (c["situation_mod"], "战况", c["situation_reason"]),
+        (c["equipment_mod"], "装备", c["equipment_reason"]),
+    ):
+        parts.append(_part(f"{val:+d}", label, reason))
+    bd = "".join(parts) + f"→DC{total}"
+    return {"dc": total, "breakdown": bd, "reason": c["flavor_text"], "components": c}
 
 
 def ai_judge_dc_only(llm_func, scene: str, user_action: str,
                      skill_name: str, skill_level: str, grade: int,
                      skill_list_summary: list, overall_realm: str,
                      active_npcs_text: str = "",
-                     battle_mode: bool = True) -> tuple:
-    """AI只判定DC值（need_check由正则决定）
+                     battle_mode: bool = True,
+                     target_npc_text: str = "") -> tuple:
+    """AI分项判定DC分量，程序加总（V5分量制）
 
     Args:
-        llm_func: AI调用函数（支持双参数和单参数签名）
+        llm_func: AI调用函数（llm_call_common 或支持 tools 透传的封装）
         active_npcs_text: 活跃NPC精简摘要（可选，增强DC判定）
-        battle_mode: True=battle专用精简prompt; False=日常模式含场景判定
+        battle_mode: True=battle模式; False=日常模式（AI自判行动类型）
+        target_npc_text: 本次对战对手档案行（对战模块传入，防止判定对象跑偏）
         其余: 场景、行动、武功信息
 
     Returns:
-        (dc: int, reason: str)
-        失败时返回兜底DC（对战14/日常12, ""）
+        (dc: int, reason: str) reason=分项解释明细（每个分量自带文字说明）
+        四级兜底：①tool call分量 ②文本JSON分量 ③正则提取 ④兜底分量
     """
     if not llm_func:
         return _fallback_dc(user_action), ""
@@ -1372,48 +1612,45 @@ def ai_judge_dc_only(llm_func, scene: str, user_action: str,
     try:
         sys_prompt, user_prompt = build_v4_dc_judge_prompt(
             scene, user_action, skill_name, skill_level, grade,
-            skill_list_summary, overall_realm, active_npcs_text, battle_mode
+            skill_list_summary, overall_realm, active_npcs_text,
+            battle_mode, target_npc_text
         )
-        # 适配双参数和单参数签名
+        # 适配签名：优先尝试 tool call（llm_call_common 及其封装支持 tools 透传）
         import inspect as _inspect
         try:
             _sig = _inspect.signature(llm_func)
-            _nparams = len(_sig.parameters)
+            _params = list(_sig.parameters.keys())
+            _nparams = len(_params)
         except (ValueError, TypeError):
-            _nparams = 1
-        if _nparams >= 2:
-            raw = llm_func(sys_prompt, user_prompt)
-        else:
-            raw = llm_func(sys_prompt + "\n\n" + user_prompt)
-
-        # llm_call_common 返回 {"content": str, ...}，需提取 content
-        if isinstance(raw, dict):
-            raw = raw.get("content", "") or ""
-        raw = str(raw or "").strip()
-
-        # 解析JSON
+            _params, _nparams = [], 1
+        raw = None
         try:
-            data = json.loads(raw)
-            dc = _clamp_dc(data.get("dc", 12))
-            reason = str(data.get("reason", ""))
-            return dc, reason
-        except (json.JSONDecodeError, ValueError, TypeError):
-            # 尝试提取JSON块
-            json_match = re.search(r'\{[^{}]*"dc"[^{}]*\}', raw)
-            if json_match:
-                try:
-                    data = json.loads(json_match.group())
-                    dc = _clamp_dc(data.get("dc", 12))
-                    reason = str(data.get("reason", ""))
-                    return dc, reason
-                except (json.JSONDecodeError, ValueError, TypeError):
-                    pass
-        _fb = _fallback_dc(user_action)
-        logger.warning("V4 AI DC返回解析失败，使用兜底DC=%d: %s", _fb, raw[:200])
-        return _fb, ""
+            if _nparams >= 2 and ("tools" in _params or "**kwargs" in str(_sig)):
+                raw = llm_func(sys_prompt, user_prompt,
+                               tools=[DC_COMPONENT_TOOL], tool_choice="auto")
+            elif _nparams >= 2:
+                raw = llm_func(sys_prompt, user_prompt)
+            else:
+                raw = llm_func(sys_prompt + "\n\n" + user_prompt)
+        except TypeError:
+            # llm_func 不接受 tools 参数（未知封装），降级为纯文本模式
+            try:
+                raw = llm_func(sys_prompt, user_prompt)
+            except TypeError:
+                raw = llm_func(sys_prompt + "\n\n" + user_prompt)
+
+        # 分量解析（四级兜底链）
+        comp = _parse_dc_components(raw)
+        if comp is None:
+            _fb = _fallback_dc(user_action)
+            logger.warning("V5 DC分量解析全部失败，使用兜底DC=%d", _fb)
+            return _fb, ""
+        result = compute_final_dc(comp, user_action)
+        print(f"[DC分量] {result['breakdown']}")
+        return result["dc"], result["breakdown"]
     except Exception as e:
         _fb = _fallback_dc(user_action)
-        logger.warning("V4 AI DC判定异常: %s", e)
+        logger.warning("V5 DC分量判定异常: %s", e)
         return _fb, ""
 
 

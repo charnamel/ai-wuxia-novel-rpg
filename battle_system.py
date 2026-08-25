@@ -8,7 +8,7 @@ import random
 from config import DEEPSEEK_BASE_URL
 from player_manager import get_player
 from llm_utils import get_llm_content
-from dice_system import resolve_check_v4 as dice_resolve_check_v4, detect_martial_skill as dice_detect_martial_skill, detect_martial_skill_classified as dice_detect_martial_skill_classified, ai_judge_dc_only as dice_ai_judge_dc_only, build_active_npcs_brief as dice_build_active_npcs_brief
+from dice_system import resolve_check_v4 as dice_resolve_check_v4, detect_martial_skill as dice_detect_martial_skill, detect_martial_skill_classified as dice_detect_martial_skill_classified, ai_judge_dc_only as dice_ai_judge_dc_only, build_active_npcs_brief as dice_build_active_npcs_brief, build_target_npc_line as dice_build_target_npc_line
 
 # 颜色复用（和主程序完全对齐，补全缺失常量）
 class Color:
@@ -498,6 +498,8 @@ def run_battle_system(
                             npc_data_raw, player_attack, last_round_process or "",
                             extra_npcs=_extra_npcs
                         )
+                        # 对手锚定：防止场景残留其他NPC名导致DC判定对象跑偏
+                        _target_line = dice_build_target_npc_line(target_npc) if target_npc else ""
                         _dc, _dc_reason = dice_ai_judge_dc_only(
                             llm_func=llm_common_func,
                             scene=last_round_process or "",
@@ -508,6 +510,7 @@ def run_battle_system(
                             skill_list_summary=_pobj.get_skill_list_summary(),
                             overall_realm=_pobj.overall_realm,
                             active_npcs_text=_active_npcs_brief,
+                            target_npc_text=_target_line,
                         )
                         # 传入preset跳过AI need_check判定，直接掷骰
                         _check_result = dice_resolve_check_v4(
