@@ -9,6 +9,7 @@ semantic_index.py — 语义向量检索模块
 """
 
 import os
+import sys
 import json
 import time
 import hashlib
@@ -19,6 +20,9 @@ import hashlib
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+# 下载进度条在 gunicorn/journald 等无终端环境下无意义，且是 tqdm/colorama
+# 光标码崩溃的唯一触发源——直接禁用（平台无关的根治方案）
+os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
 import numpy as np
 
@@ -48,6 +52,7 @@ _hash_list = None       # [content_hash, ...] 与向量行一一对应，用于�
 _id_to_idx = None       # {entry_id: row_index}（预留，目前用list.index）
 _available = False      # 模型是否加载成功
 _build_attempted = False  # 是否已尝试过构建（避免反复重试）
+_model_load_started = False  # 后台模型加载是否已踢过一次（防失败后每轮重试刷线程）
 
 
 # ========== 3. 模型加载（懒加载） ==========
@@ -56,6 +61,14 @@ def _load_model():
     global _model, _available
     if _model is None:
         try:
+            # colorama 护栏仅 Windows 本地开发启用；Linux 服务器不执行此分支，
+            # 也无需部署 win_console_guard.py
+            if sys.platform == "win32":
+                try:
+                    from win_console_guard import ensure_safe_console
+                    ensure_safe_console()
+                except Exception:
+                    pass
             from sentence_transformers import SentenceTransformer
             t0 = time.time()
             _model = SentenceTransformer(_MODEL_NAME, device='cpu')
@@ -71,14 +84,18 @@ def _load_model():
 
 
 def is_available():
-    """检查语义检索是否可用（供worldbook调用决定是否走L5）"""
+    """检查语义检索是否可用（供worldbook调用决定是否走L5）
+    【铁律】请求路径绝不等待模型加载（服务器上30-60秒会拖死gunicorn worker）：
+    未就绪时只踢一脚后台加载线程，本轮按"不可用"降级为纯关键词检索。"""
+    global _model_load_started
     if not _ENABLE:
         return False
     if _available and _vectors is not None:
         return True
-    # 首次检查：尝试加载模型
-    if _model is None:
-        _load_model()
+    if _model is None and not _model_load_started:
+        _model_load_started = True
+        import threading
+        threading.Thread(target=_load_model, daemon=True).start()
     return _available and _vectors is not None
 
 

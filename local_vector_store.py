@@ -9,11 +9,19 @@ local_vector_store.py — 本地向量记忆库（替代百炼云向量库）
 【存储】data/local_memory_entries.jsonl（内容） + data/local_memory_vectors.npy（向量矩阵）
 【检索】numpy 余弦相似度（向量归一化后内积即余弦），单次 ~20-50ms
 【去重】unique_id 规则与云端完全一致（迁移时 ID 可对齐校验覆盖率）
+【非阻塞铁律】模型加载（30-60秒）只持有模型锁；检索路径模型未就绪立即返回空，
+       绝不等待——否则请求线程阻塞超时，gunicorn 杀 worker → 新worker重载模型
+       → 再阻塞 → 死循环（表现为"游戏卡住必须刷新"）。
+【自愈】预热线程失败自动重试（默认10次×15秒），服务器重启瞬间的内存竞争等
+       一过性故障无需人工干预。
+【跨平台】服务器（Linux/gunicorn）零额外依赖：colorama 护栏仅 Windows 本地
+       开发启用；下载进度条已全局禁用，从源头消除 tqdm/colorama 光标码崩溃。
 """
 
 import os
 import re
 import json
+import sys
 import time
 import hashlib
 import threading
@@ -25,6 +33,10 @@ try:
     load_dotenv()
 except ImportError:
     pass
+
+# 下载进度条在 gunicorn/journald 等无终端环境下无意义，且是 tqdm/colorama
+# 光标码崩溃的唯一触发源——加载模型前直接禁用（平台无关的根治方案）
+os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
 # ========== 配置 ==========
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +66,8 @@ class MemoryCategory:
 # ========== 存储核心 ==========
 class _LocalStore:
     def __init__(self):
-        self._lock = threading.RLock()
+        self._lock = threading.RLock()       # 数据锁：只保护内存结构（毫秒级操作，绝不在持锁期间加载模型/编码）
+        self._model_lock = threading.Lock()  # 模型锁：只保护模型加载（30-60秒，期间读写照常进行）
         self._ids = set()          # 已写入 unique_id 集合（去重）
         self._entries = []         # [{"unique_id","user_id","content","category","meta"}]
         self._vectors = None       # np.ndarray (N, D) float32 已归一化
@@ -115,25 +128,36 @@ class _LocalStore:
 
     # ---------- 模型 ----------
     def _load_model(self):
+        """加载模型（阻塞，服务器上约30-60秒）。只持有模型锁——加载期间检索/写入完全不受影响。
+        调用方：后台预热线程 / 写入线程 / 重建接口。检索路径绝不调用本方法（防请求超时拖死worker）。
+        失败缓存于 _model_error：由预热线程清除后自动重试（一过性故障自愈）。"""
         if self._model is not None or self._model_error:
             return self._model
-        # RLock可重入：add_memory持锁调用_encode→本方法时同线程直接进入
-        with self._lock:
+        with self._model_lock:
             if self._model is not None or self._model_error:
                 return self._model
             try:
                 t0 = time.time()
+                # colorama 护栏仅用于 Windows 本地开发环境；Linux 服务器不执行此分支，
+                # 也不需要部署 win_console_guard.py（进度条已由环境变量全局禁用）
+                if sys.platform == "win32":
+                    try:
+                        from win_console_guard import ensure_safe_console
+                        ensure_safe_console()
+                    except Exception:
+                        pass
                 from sentence_transformers import SentenceTransformer
                 self._model = SentenceTransformer(_MODEL_NAME, device="cpu")
+                self._model_error = None
                 print(f"[本地记忆] 模型加载完成: {_MODEL_NAME} ({time.time()-t0:.1f}s)")
             except Exception as e:
                 self._model_error = str(e)
-                print(f"[本地记忆] 模型加载失败，读写将不可用: {str(e)[:120]}")
+                print(f"[本地记忆] 模型加载失败: {str(e)[:120]}")
             return self._model
 
     def _encode(self, texts):
-        """单条或批量编码，返回归一化向量 (N, D)"""
-        model = self._load_model()
+        """单条或批量编码，返回归一化向量 (N, D)。不触发模型加载——未就绪直接返回 None"""
+        model = self._model
         if model is None:
             return None
         if isinstance(texts, str):
@@ -147,7 +171,8 @@ class _LocalStore:
 
     # ---------- 写入 ----------
     def add_memory(self, user_id, content, category, meta=None, unique_id=None):
-        """同步写入一条记忆（去重+向量+落盘）。返回 True=新增 / False=重复或失败"""
+        """写入一条记忆（去重+向量+落盘）。调用方为后台线程，可阻塞等待模型加载。
+        返回 True=新增 / False=重复或模型不可用"""
         if not content or not str(content).strip():
             return False
         if unique_id is None:
@@ -156,8 +181,13 @@ class _LocalStore:
         with self._lock:
             if unique_id in self._ids:
                 return False
-            vec = self._encode(content)
-            if vec is None:
+        # 写入线程可等模型（模型锁与数据锁分离，等模型不挡检索）
+        self._load_model()
+        vec = self._encode(content)  # 锁外编码（数十毫秒）
+        if vec is None:
+            return False
+        with self._lock:
+            if unique_id in self._ids:  # 锁内二次查重（等待期间可能被并发写入抢先）
                 return False
             entry = {"unique_id": unique_id, "user_id": user_id,
                      "content": str(content).strip(), "category": category,
@@ -178,6 +208,8 @@ class _LocalStore:
 
     def add_many(self, items):
         """批量写入（迁移用）：[{user_id, content, category, meta, unique_id}]，分批encode，返回新增数"""
+        if self._load_model() is None:
+            return 0
         with self._lock:
             new_items = [it for it in items
                          if it.get("unique_id") and it["unique_id"] not in self._ids
@@ -214,20 +246,21 @@ class _LocalStore:
 
     # ---------- 检索 ----------
     def search(self, user_id, query, top_k=4, min_score=0.45, category_filter=None):
-        """语义检索，返回 (文本, 节点列表)——文本格式与云端 get_relevant_history 一致"""
+        """语义检索，返回 (文本, 节点列表)——文本格式与云端 get_relevant_history 一致。
+        【铁律】模型未就绪立即返回空：绝不等待、绝不触发模型加载。
+        否则请求线程会阻塞30-60秒 → gunicorn WORKER TIMEOUT → worker被杀 → 死循环。"""
         if not query or not str(query).strip():
             return "", []
+        if self._model is None or self._vectors is None:
+            return "", []  # 模型还在加载/失败：本轮跳过记忆召回，游戏照常进行
         with self._lock:
-            candidates = []
-            for i, e in enumerate(self._entries):
-                if user_id and e["user_id"] != user_id:
-                    continue
-                if category_filter and e["category"] not in category_filter:
-                    continue
-                candidates.append(i)
-            if not candidates or self._vectors is None:
+            cand = [(e, i) for i, e in enumerate(self._entries)
+                    if (not user_id or e["user_id"] == user_id)
+                    and (not category_filter or e["category"] in category_filter)]
+            if not cand:
                 return "", []
-            sub_matrix = self._vectors[candidates]  # (n, D) 复制（锁内快照）
+            sub_matrix = self._vectors[[i for _, i in cand]]  # (n, D) 快照
+            entries_snapshot = [e for e, _ in cand]  # 条目一并快照（防重建期间被整体替换）
 
         qv = self._encode(str(query)[:100])
         if qv is None:
@@ -241,7 +274,7 @@ class _LocalStore:
             score = float(sims[idx])
             if score < min_score:
                 break
-            e = self._entries[candidates[idx]]
+            e = entries_snapshot[idx]
             nodes.append({"content": e["content"], "category": e["category"],
                           "meta_data": {"category": e["category"], **(e.get("meta") or {})},
                           "score": score})
@@ -275,14 +308,29 @@ class _LocalStore:
 
 _store = _LocalStore()
 
+_WARMUP_MAX_RETRY = 10      # 自动重试上限（覆盖服务器重启后约5-10分钟的自愈窗口）
+_WARMUP_RETRY_INTERVAL = 15  # 重试间隔（秒）
+
 
 def _warmup_model():
+    """后台预热：加载模型；失败自动重试（服务器重启瞬间的内存竞争等一过性故障可自愈，
+    无需手动重启/点重建）。重试期间清除错误标记——状态栏显示"加载中"而非"不可用"。"""
     # 延迟启动：避开进程启动即退出的短命脚本（daemon线程中途加载torch会在解释器关闭时崩溃）
     time.sleep(1)
-    try:
-        _store._load_model()
-    except Exception:
-        pass
+    retries = 0
+    while _store._model is None:
+        try:
+            if _store._load_model() is not None:
+                return
+        except Exception:
+            pass
+        retries += 1
+        if retries >= _WARMUP_MAX_RETRY:
+            print(f"[本地记忆] 模型预热失败（已重试{retries}次），读写暂不可用，"
+                  f"可点击状态栏'重建'按钮恢复。最后原因: {str(_store._model_error)[:100]}")
+            return
+        _store._model_error = None  # 一过性失败：清除标记稍后重试，期间对外显示"加载中"
+        time.sleep(_WARMUP_RETRY_INTERVAL)
 
 
 threading.Thread(target=_warmup_model, daemon=True).start()
