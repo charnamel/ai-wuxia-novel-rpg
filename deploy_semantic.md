@@ -34,7 +34,6 @@
 |------|------|------|
 | `semantic_index.py` | 语义向量检索模块（新增） | ✅ 已创建 |
 | `worldbook.py` | 世界书主模块（修改3处：构建/L5检索/状态） | ✅ 已修改 |
-| `test_semantic.py` | 测试脚本（103个用例） | ✅ 已创建 |
 | `data/*.json` | 6个数据源文件 | ✅ 已有 |
 
 ### 3.2 Xshell 连接配置
@@ -79,7 +78,7 @@ cd /opt/ai_novel
 
 # 上传文件（在Xshell终端输入rz，会弹出文件选择窗口）
 rz
-# 在弹窗中选择本地的 semantic_index.py、worldbook.py、test_semantic.py
+# 在弹窗中选择本地的 semantic_index.py、worldbook.py
 ```
 
 #### 方法B：scp命令（在本地PowerShell执行）
@@ -88,7 +87,6 @@ rz
 # 在本地 Windows PowerShell 中执行
 scp "D:\code\AI_novel_simulatorNEW V4.0\semantic_index.py" root@服务器IP:/opt/ai_novel/
 scp "D:\code\AI_novel_simulatorNEW V4.0\worldbook.py" root@服务器IP:/opt/ai_novel/
-scp "D:\code\AI_novel_simulatorNEW V4.0\test_semantic.py" root@服务器IP:/opt/ai_novel/
 ```
 
 #### 方法C：Xftp拖拽（图形界面）
@@ -237,82 +235,15 @@ curl http://localhost:5000/worldbook/status | python3 -m json.tool
 #   "vector_count": 2179,
 #   "vector_dim": 512
 # }
-
-# 方法2：运行测试脚本（见第五节）
-cd /opt/ai_novel
-python3 test_semantic.py
 ```
 
 ---
 
-## 五、运行测试
+## 五、验证检索效果
 
-### 5.1 运行完整测试
+部署完成后，在游戏网页顶栏查看「世界书检索」状态：`语义✅ N条向量` 即为正常。
 
-```bash
-cd /opt/ai_novel
-python3 test_semantic.py
-```
-
-### 5.2 测试覆盖说明（103个用例）
-
-测试覆盖6大类JSON的 **5种组合维度**：
-
-#### Part 1: 单类检索（66个用例）
-| 类别 | JSON源 | 用例数 | 测试维度 |
-|------|--------|--------|---------|
-| NPC | npc_agents.json | 15 | 精确人名/绰号/身份/能力/性格/容错 |
-| 武功 | martial_arts_bonus.json | 12 | 精确全名/属性/门派/类型/效果/简称 |
-| 任务 | mainline_catalog.json | 9 | 精确标题/内容/人物/关键词 |
-| 物品 | items_catalog.json | 14 | 精确全名/描述/功能/类型/错字 |
-| 门派 | timeline_reference.json | 8 | 精确全名/属性/立场/地域/成员 |
-| 地点 | map_data.json | 8 | 精确全名/地域/功能/关联/特征 |
-
-#### Part 2: 双类组合（16个用例）
-覆盖 C(6,2)=15 种两两组合 + 1个额外用例：
-- NPC+武功、NPC+任务、NPC+物品、NPC+门派、NPC+地点
-- 武功+任务、武功+物品、武功+门派、武功+地点
-- 任务+物品、任务+门派、任务+地点
-- 物品+门派、物品+地点
-- 门派+地点
-
-#### Part 3: 三类组合（7个用例）
-- NPC+武功+门派、NPC+武功+物品、NPC+任务+地点
-- 武功+门派+地点、NPC+物品+门派
-- 任务+物品+地点、NPC+武功+任务
-
-#### Part 4: 四类+组合（4个用例）
-- 四类：NPC+武功+门派+地点、NPC+武功+物品+任务、NPC+武功+门派+物品
-- 五类：NPC+武功+门派+地点+物品
-
-#### Part 5: 长文本场景（10个用例）
-模拟实际游戏中的多关键词组合检索场景。
-
-### 5.3 测试结果参考
-
-```
-总计: 103 | 通过: ~93 | 失败: ~10
-通过率: ~90%
-
-按类别统计:
-  NPC     : 12/15 (80%)
-  武功     : 10/12 (83%)
-  任务     : 7/9 (78%)
-  物品     : 14/14 (100%)
-  门派     : 8/8 (100%)
-  地点     : 8/8 (100%)
-  双类     : 14/16 (88%)
-  三类     : 6/7 (86%)
-  四类+    : 4/4 (100%)
-  长文本   : 10/10 (100%)
-
-性能统计:
-  平均: ~40ms
-  最快: ~20ms
-  最慢: ~210ms
-```
-
-> 实际通过率取决于模型版本和数据内容，>85% 即为正常。
+开发期内部测试结论（供参考）：103个用例覆盖6大类JSON的单类/双类/三类/四类+/长文本组合，通过率约90%，平均检索约40ms。
 
 ---
 
@@ -555,7 +486,6 @@ nohup python3 web_server.py > server.log 2>&1 &
 |------|------|------|
 | `semantic_index.py` | 语义向量检索模块（新增） | 上传到服务器 |
 | `worldbook.py` | 世界书主模块（修改3处） | 替换服务器上的 |
-| `test_semantic.py` | 测试脚本（103个用例） | 上传到服务器 |
 | `.env` | 环境配置（新增4行） | 追加配置 |
 | `data/semantic_vectors.npy` | 向量缓存（自动生成） | 预构建时生成 |
 | `data/semantic_ids.json` | ID缓存（自动生成） | 预构建时生成 |
@@ -581,7 +511,7 @@ echo $HF_ENDPOINT  # 应为 https://hf-mirror.com
 grep ENABLE_SEMANTIC_SEARCH .env  # 应为 true
 
 # 5. 代码文件
-ls -la semantic_index.py worldbook.py test_semantic.py
+ls -la semantic_index.py worldbook.py
 
 # 6. 向量缓存
 ls -la data/semantic_vectors.npy  # 应为 4.2MB
@@ -589,9 +519,6 @@ ls -la data/semantic_ids.json
 
 # 7. Web服务运行
 curl -s http://localhost:5000/worldbook/status | grep -o '"available": [a-z]*'
-
-# 8. 测试通过（通过率>85%）
-python3 test_semantic.py 2>&1 | tail -5
 ```
 
 ---
@@ -605,7 +532,7 @@ python3 test_semantic.py 2>&1 | tail -5
 cd /opt/ai_novel
 
 # ====== 2. 上传代码（用rz，或用scp从本地传） ======
-# rz  # 弹窗选择 semantic_index.py worldbook.py test_semantic.py
+# rz  # 弹窗选择 semantic_index.py worldbook.py
 
 # ====== 3. 安装依赖 ======
 pip3 install torch --index-url https://download.pytorch.org/whl/cpu

@@ -71,3 +71,9 @@ AI互动游戏小说系统分析.md
 武功品阶评判标准.md
 L3全量脉络预览.md
 BACKGROUND_SWITCH_GUIDE.md
+
+# Local test scripts & internal test reports
+/test_*.py
+docs/README.md
+docs/检索质量对比测试报告*.md
+docs/local_vs_cloud_report.json
