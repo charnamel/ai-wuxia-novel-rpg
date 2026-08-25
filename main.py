@@ -193,7 +193,7 @@ STATIC_SYSTEM_PROMPT = """
 4. 武功经验类：skill_exp_gain（武学经验增长时填写，按照日常勤练、战斗厮杀、月余苦练、数年苦修、顿悟突破、奇遇机缘等不同场景分别给出合理数值）、skill_exp_update（感悟更新）、bottleneck_progress_delta（瓶颈增量）。
 5. 任务进度类：task（任务进展，name优先传完整任务名，单轮涨幅≤5%）。
 6. 武功学习类：new_skills（习得新武功时填写）。
-7. NPC状态类：npc_status_update（状态变化时填写）、npc_favor_update（好感实质变化时填写，单次±1~±8；施恩/契合性格则增，冒犯/违背立场则减，闲聊不触发）、npc_relationship_update（关系标签4字内）。
+7. NPC状态类：npc_status_update（状态变化时填写；normal=恢复健康；deceased=仅限战斗结算或主线明确死亡，必须填desc说明死因，严禁普通交互中随意使用）、npc_favor_update（好感实质变化时填写，单次±1~±8；施恩/契合性格则增，冒犯/违背立场则减，闲聊不触发）、npc_relationship_update（关系标签4字内）。
 8. 主角状态类：self_state（身体/精神状态变化时填写，30字内）。
 9. 小说节点类：novel_node（必须以“YYYY年M季，”开头，如“1751年春，萧半和寿宴在即”；无变化时填空字符串）。
 
@@ -2454,6 +2454,14 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
                                     if npc.get("body_status") == "deceased":
                                         print(f"{COLOR_WARN}⚠️ 已故NPC「{name}」禁止更改状态，忽略本次更新{COLOR_END}")
                                         break
+                                    if status == "deceased":
+                                        if not desc or not desc.strip():
+                                            print(f"{COLOR_WARN}⚠️ NPC「{name}」被标记为已故但未提供死因，已拦截{COLOR_END}")
+                                            break
+                                        if npc.get("body_status") in ("normal", None):
+                                            print(f"{COLOR_WARN}🪦 [突变警告] NPC「{name}」从健康直接标记为已故，死因：{desc}{COLOR_END}")
+                                        else:
+                                            print(f"{COLOR_WARN}🪦 NPC「{name}」被标记为已故，死因：{desc}{COLOR_END}")
                                     npc["body_status"] = status
                                     npc["body_status_desc"] = desc.strip()
                                     append_npc_memory(name, user_action, npc_data=npc_data)
@@ -3844,7 +3852,7 @@ def process_one_round(user_input: str, is_web: bool = False):
                                     "status": {
                                         "type": "string",
                                         "enum": ["light_injured", "heavy_injured", "dying", "deceased", "poisoned", "normal"],
-                                        "description": "身体状态"
+                                        "description": "NPC身体状态。normal=恢复健康；light_injured=轻伤；heavy_injured=重伤；dying=濒死；poisoned=中毒；deceased=死亡（仅限战斗结算或主线明确死亡，必须填写desc说明死因，严禁普通交互中随意使用）"
                                     },
                                     "desc": {"type": "string", "description": "状态原因"}
                                 },
