@@ -1818,6 +1818,7 @@ def chat():
                     # 将约束文本和结果存入 dice_system 模块变量，供 main.py 读取
                     dice_system.WEB_PROCESSED_CONSTRAINT_V4 = _check_result["constraint_text"]
                     dice_system.WEB_PROCESSED_RESULT_V4 = {
+                        "action_type": _check_result.get("action_type", "daily"),
                         "skill_name": _check_result["skill_name"],
                         "skill_level": _check_result["skill_level"],
                         "grade": _check_result["grade"],

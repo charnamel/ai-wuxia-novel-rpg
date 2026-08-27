@@ -655,6 +655,13 @@ def run_battle_system(
                 )
                 if _vit_log:
                     print(_vit_log)
+                # ===== 对战回合回气：双方 MP+5%（先结算掉蓝再回气） =====
+                _regen_log = vitality_system.battle_regen_mp(
+                    player_obj.name if player_obj else None,
+                    [target_npc.get("name")] if target_npc.get("name") else [],
+                )
+                if _regen_log:
+                    print(_regen_log)
             except Exception as _ve:
                 print(f"{COLOR_WARN}[WARN] 对战体力结算异常: {_ve}{COLOR_END}")
 

@@ -4692,6 +4692,7 @@ __L4_MERGE_SLOT__
         # ===== 骰子检定系统 V4（武功品阶+境界双值 + AI判定 + 8档分级） =====
         dice_constraint = ""
         dice_result_for_frontend = None
+        _dc_check_result = None   # 本轮DC检定结果（Web端或CLI端来源统一）
 
         # 优先检查 Web 端是否已处理骰子（避免重复掷骰）
         _web_constraint = getattr(dice_system, 'WEB_PROCESSED_CONSTRAINT_V4', '')
@@ -4702,6 +4703,7 @@ __L4_MERGE_SLOT__
             dice_clear_web_state_v4()
             dice_constraint = f"\n{_web_constraint}\n"
             dice_result_for_frontend = _web_result
+            _dc_check_result = _web_result
             print(f"[骰子V4] 收到Web端约束文本，长度={len(_web_constraint)}字，结论={_web_result.get('verdict','?') if _web_result else '?'}")
         elif _web_skipped:
             # Web 端玩家选择跳过掷骰，不执行检定
@@ -4738,6 +4740,7 @@ __L4_MERGE_SLOT__
                     active_npcs_text=_active_npcs_brief,
                     classified_skills=_classified_skills,
                 )
+                _dc_check_result = _check_result
 
                 if _check_result:
                     dice_constraint = f"\n{_check_result['constraint_text']}\n"
@@ -5087,6 +5090,18 @@ __L4_MERGE_SLOT__
                     "poisoned": _cur_v.get("poisoned", False),
                 }
                 player_obj.save()
+
+        # ===== 对战回合回气（仅本轮DC判定为对战类时：双方 MP+5%，先结算掉蓝再回气） =====
+        try:
+            if _dc_check_result and _dc_check_result.get("action_type") == "battle":
+                _br_log = vit_sys.battle_regen_mp(
+                    player_obj.name if player_obj else None,
+                    _vit_scene_names or [],
+                )
+                if _br_log:
+                    print(f"{COLOR_GREEN}{_br_log}{COLOR_END}")
+        except Exception as _bre:
+            print(f"{COLOR_WARN}⚠️ 对战回气异常：{_bre}{COLOR_END}")
         update_context_cache(plot_content, actual_user_action)
 
         # 推进进度

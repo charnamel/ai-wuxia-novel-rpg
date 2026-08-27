@@ -19,6 +19,9 @@ import logging
 
 logger = logging.getLogger("dice_system")
 
+# 最近一次DC判定的行动类型（"battle"/"daily"），ai_judge_dc_only 副作用写入，供对战回气等逻辑读取
+_LAST_DC_ACTION_TYPE = "daily"
+
 
 # ==================== 1. 基础骰子引擎 ====================
 
@@ -1605,7 +1608,10 @@ def ai_judge_dc_only(llm_func, scene: str, user_action: str,
     Returns:
         (dc: int, reason: str) reason=分项解释明细（每个分量自带文字说明）
         四级兜底：①tool call分量 ②文本JSON分量 ③正则提取 ④兜底分量
+        副作用：把本次判定的 action_type 存入 _LAST_DC_ACTION_TYPE（供回气等逻辑读取）
     """
+    global _LAST_DC_ACTION_TYPE
+    _LAST_DC_ACTION_TYPE = "daily"
     if not llm_func:
         return _fallback_dc(user_action), ""
 
@@ -1646,6 +1652,7 @@ def ai_judge_dc_only(llm_func, scene: str, user_action: str,
             logger.warning("V5 DC分量解析全部失败，使用兜底DC=%d", _fb)
             return _fb, ""
         result = compute_final_dc(comp, user_action)
+        _LAST_DC_ACTION_TYPE = (result.get("components") or {}).get("action_type", "daily")
         print(f"[DC分量] {result['breakdown']}")
         return result["dc"], result["breakdown"]
     except Exception as e:
@@ -2132,6 +2139,7 @@ def resolve_check_v4(player_obj, user_action: str, l1_scene: str = "",
 
     return {
         "required": True,
+        "action_type": _LAST_DC_ACTION_TYPE,
         "skill_name": skill_name,
         "skill_level": skill_level,
         "grade": grade,

@@ -564,6 +564,59 @@ def natural_regen(round_num):
     return "\n".join(changed)
 
 
+# ---------- 对战回合回气 ----------
+BATTLE_REGEN_MP = 5   # 对战每回合双方回气
+
+def battle_regen_mp(player_name, npc_names):
+    """对战回合回气：双方 MP+5%（上限100）。
+    只回MP不动HP（战斗中活血不现实）；已故(-1)冻结；
+    落盘NPC批量改一次落盘，临时NPC（未落盘）走内存缓存。
+    返回恢复日志（空串=无变化）。"""
+    npc_names = [n for n in (npc_names or []) if n]
+    if not player_name and not npc_names:
+        return ""
+    changed = []
+    # 玩家
+    if player_name:
+        pv = get_player_vitality()
+        if pv["hp"] != -1 and pv["mp"] < 100:
+            old_mp = pv["mp"]
+            pv["mp"] = min(100, pv["mp"] + BATTLE_REGEN_MP)
+            set_player_vitality(pv)
+            changed.append(f"主角：MP {old_mp}→{pv['mp']}%（回气）")
+    # NPC：落盘与临时分开处理
+    data = load_json(NPC_AGENT_FILE)
+    npc_list = data.get("npc_list", []) if data else []
+    persisted_names = {n.get("name", "") for n in npc_list}
+    dirty = False
+    for raw in npc_names:
+        matched = raw if raw in persisted_names else find_npc_name(raw, list(persisted_names))
+        if matched:
+            for npc in npc_list:
+                if npc.get("name") == matched:
+                    if npc.get("body_status") == "deceased":
+                        break  # 亡故冻结
+                    vit = _normalize_vitality(npc.get("vitality") or {"hp": 100, "mp": 100})
+                    if vit["mp"] < 100:
+                        old_mp = vit["mp"]
+                        vit["mp"] = min(100, vit["mp"] + BATTLE_REGEN_MP)
+                        npc["vitality"] = vit
+                        dirty = True
+                        changed.append(f"{matched}：MP {old_mp}→{vit['mp']}%（回气）")
+                    break
+            continue
+        # 临时NPC（内存缓存）
+        vit = get_temp_vitality(raw)
+        if vit["mp"] < 100:
+            old_mp = vit["mp"]
+            vit["mp"] = min(100, vit["mp"] + BATTLE_REGEN_MP)
+            set_temp_vitality(raw, vit)
+            changed.append(f"{raw}：MP {old_mp}→{vit['mp']}%（回气·临时）")
+    if dirty:
+        save_json(NPC_AGENT_FILE, data)
+    return "\n".join(changed)
+
+
 # ---------- 事件日志（供前端/控制台显示） ----------
 def format_settle_log(results, user_action=""):
     """把结算结果格式化成人类可读的日志"""
