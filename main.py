@@ -4206,6 +4206,13 @@ def process_one_round(user_input: str, is_web: bool = False):
         active_lines = []
         passive_list = []
         all_deceased_npcs = []
+        # 当前剧情年份（novel_node正则提一次，供活跃NPC计算年龄）
+        _cur_year = 0
+        for _ym in re.finditer(r"(\d{1,4})年", player_obj.novel_node or ""):
+            _yv = int(_ym.group(1))
+            if 1500 <= _yv <= 2049:
+                _cur_year = _yv
+                break
         # 状态中文映射：补全健康状态，所有情况都明确标注
         status_label = {
             "normal": " 健康",
@@ -4234,7 +4241,12 @@ def process_one_round(user_input: str, is_web: bool = False):
                 relation = npc.get("relation_to_player", "")
                 relation_part = f"·关系:{relation}" if relation else ""
                 status_text = status_label.get(status, " 健康")
-                npc_line = f"丨 {name}（{identity}）态度:{attitude}{relation_part} {status_text}"
+                # 年龄（档案year + 当前剧情年份推算，数据不全则省略）
+                _birth = npc.get("year", 0)
+                _age_part = ""
+                if _cur_year and _birth and 0 < _cur_year - int(_birth) <= 120:
+                    _age_part = f"年龄:{_cur_year - int(_birth)} "
+                npc_line = f"丨 {name}（{identity}）态度:{attitude}{relation_part} {_age_part}{status_text}"
                 active_lines.append(npc_line)
             else:
                 passive_list.append(f"丨{name}（{identity}）")

@@ -2243,15 +2243,6 @@
       "special_move_name": "削铁如泥",
       "special_move_desc": "劲力贯注锋刃，削铁如泥"
     },
-    "希夷剑": {
-      "grade": 3,
-      "bonus": 1,
-      "category": "sword",
-      "source": "华山派/岳不群",
-      "brief_desc": "华山派剑法之一。",
-      "special_move_name": "希夷剑诀",
-      "special_move_desc": "希夷剑诀听之不闻，剑出无声无息"
-    },
     "并体连功之法": {
       "grade": 4,
       "bonus": 2,
@@ -2371,13 +2362,6 @@
       "brief_desc": "达尔巴的武功 招式无甚变化 仅是双手握杵横挥八招加上直击八招",
       "special_move_name": "无上大力",
       "special_move_desc": "无上大力杵法杵如泰山，一杵压下天崩地裂"
-    },
-    "无声无色": {
-      "grade": 4,
-      "bonus": 2,
-      "category": "sword",
-      "source": "昆仑派/何太冲",
-      "brief_desc": "昆仑派剑法的绝招 必须两人同使 两人功力相若 内劲相同"
     },
     "无妄神功": {
       "grade": 3,
@@ -2503,15 +2487,6 @@
       "brief_desc": "绝情谷大弟子樊一翁自创的杖法 招式共有八十一路",
       "special_move_name": "泼水不入",
       "special_move_desc": "泼水杖法杖如泼水，密不透风无懈可击"
-    },
-    "淑女剑": {
-      "grade": 3,
-      "bonus": 1,
-      "category": "sword",
-      "source": "华山派/岳不群",
-      "brief_desc": "华山派剑法之一 是宁中则的拿手剑法。",
-      "special_move_name": "淑女剑心",
-      "special_move_desc": "淑女剑法剑心如淑女，端庄而不失凌厉"
     },
     "混元掌": {
       "grade": 5,
@@ -3062,11 +3037,15 @@
       "special_move_desc": "青字九打暗器连环，九打之下无孔不入"
     },
     "韦陀伏魔剑": {
-      "grade": 3,
-      "bonus": 1,
+      "grade": 4,
+      "bonus": 2,
       "category": "sword",
       "source": "少林寺/方证",
       "brief_desc": "少林七十二绝技之一 亦流传至西域少林一派",
+      "effect": {
+        "type": "disarm",
+        "base_rate": 5
+      },
       "special_move_name": "韦陀伏魔",
       "special_move_desc": "韦陀伏魔剑降妖伏魔，剑光如韦陀护法"
     },
@@ -3473,8 +3452,8 @@
       "brief_desc": "西夏一品堂高手九翼道人的武学。"
     },
     "回风剑": {
-      "grade": 3,
-      "bonus": 1,
+      "grade": 2,
+      "bonus": 0,
       "category": "sword",
       "source": "沐王府/沐家人",
       "brief_desc": "沐王府成名江湖的剑法 在武林中流传颇广 练就者众。",
@@ -3894,8 +3873,8 @@
       "brief_desc": "内家拳术之一 “千跌张”传下的秘术 陆菲青曾用来对付罗信"
     },
     "泼妇剑法": {
-      "grade": 4,
-      "bonus": 2,
+      "grade": 3,
+      "bonus": 1,
       "category": "sword",
       "source": "梅家/梅文馨",
       "brief_desc": "梅文馨的新奇剑法 一招一式克制金龙鞭法 丁氏拳脚",
@@ -4150,9 +4129,13 @@
     "豹尾脚": {
       "grade": 3,
       "bonus": 1,
-      "category": "fist",
+      "category": "lightfoot",
       "source": "华山派/岳不群",
-      "brief_desc": "华山派的腿招。"
+      "brief_desc": "华山派的腿招。",
+      "effect": {
+        "type": "dodge",
+        "base_rate": 4
+      }
     },
     "赤尻连拳": {
       "grade": 3,
@@ -4806,8 +4789,8 @@
       "brief_desc": "阎基和商老太交手时用的刀法。"
     },
     "基础剑诀": {
-      "grade": 2,
-      "bonus": 0,
+      "grade": 1,
+      "bonus": -1,
       "category": "sword",
       "source": "江湖/通用",
       "brief_desc": "江湖通用剑法基础 各派入门剑招"
@@ -5188,19 +5171,6 @@
       },
       "special_move_name": "锐不可当",
       "special_move_desc": "锐气如虹，锋刃难挡"
-    },
-    "连环三仙剑": {
-      "grade": 4,
-      "bonus": 2,
-      "category": "sword",
-      "source": "华山派剑宗/封不平",
-      "effect": {
-        "type": "external_wound",
-        "base_rate": 5
-      },
-      "brief_desc": "华山剑宗连环三仙剑 三剑连环一气呵成",
-      "special_move_name": "连环三仙",
-      "special_move_desc": "连环三仙剑三剑连环，一剑快过一剑"
     },
     "寒梅剑法": {
       "grade": 5,
@@ -7728,6 +7698,48 @@
       "category": "sword",
       "source": "华山派（清朝残篇）",
       "brief_desc": "华山派剑法于明末清初战乱中多有遗失，仅存残篇，剑招古朴简练，但破绽较多。"
+    },
+    "翻天十三掌": {
+      "grade": 4,
+      "bonus": 2,
+      "category": "palm",
+      "source": "鸳鸯刀/晋阳大侠萧半和",
+      "brief_desc": "以浑厚内劲催动，掌势如翻天覆地，一式十三变，攻守兼备的顶级掌法。",
+      "effect": {
+        "type": "shock",
+        "base_rate": 4
+      },
+      "special_move_name": "翻天覆地",
+      "special_move_desc": "双掌连环拍出，劲力如浪涛叠涌，一浪高过一浪，最后一掌蕴含十三重暗劲，中者五脏俱震，气血翻涌，心神为之夺。"
+    },
+    "希夷剑法": {
+      "grade": 3,
+      "bonus": 1,
+      "category": "sword",
+      "source": "华山派/岳不群",
+      "brief_desc": "华山派剑法之一。",
+      "special_move_name": "希夷剑诀",
+      "special_move_desc": "希夷剑诀听之不闻，剑出无声无息"
+    },
+    "淑女剑法": {
+      "grade": 3,
+      "bonus": 1,
+      "category": "sword",
+      "source": "华山派/岳不群",
+      "brief_desc": "华山派剑法之一 是宁中则的拿手剑法。",
+      "special_move_name": "淑女剑心",
+      "special_move_desc": "淑女剑法剑心如淑女，端庄而不失凌厉"
+    },
+    "无声无色剑诀": {
+      "grade": 4,
+      "bonus": 2,
+      "category": "sword",
+      "source": "昆仑派/何太冲",
+      "brief_desc": "昆仑派剑法的绝招 必须两人同使 两人功力相若 内劲相同",
+      "effect": {
+        "type": "reverse",
+        "base_rate": 8
+      }
     }
   }
 }
