@@ -5288,6 +5288,14 @@ __L4_MERGE_SLOT__
         with _plot_text_lock:
             latest_plot1_text = plot_content
 
+        # ===== 周期性自然恢复（每5轮：气血+10/内力+20，亡故冻结/濒死不恢复） =====
+        try:
+            regen_log = vit_sys.natural_regen(current_round)
+            if regen_log:
+                print(f"{COLOR_GREEN}[自然恢复] 第{current_round}轮：\n{regen_log}{COLOR_END}")
+        except Exception as e:
+            print(f"{COLOR_WARN}⚠️ 自然恢复异常：{e}{COLOR_END}")
+
         # ★ 最终返回前再读取一次，确保一致 ★
         final_loc_time = load_location_time()
         if final_loc_time:

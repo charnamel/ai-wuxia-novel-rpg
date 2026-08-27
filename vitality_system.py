@@ -520,6 +520,50 @@ def restore_player_full():
     return ok, "主角 HP/MP 已全部恢复至 100%" if ok else "玩家存档不存在"
 
 
+# ---------- 周期性自然恢复 ----------
+NATURAL_REGEN_ROUNDS = 5   # 每N轮触发一次
+NATURAL_REGEN_HP = 10      # 气血+10%
+NATURAL_REGEN_MP = 20      # 内力+20%
+
+def natural_regen(round_num):
+    """周期性自然恢复：每N轮，玩家+所有落盘NPC 气血+10/内力+20。
+    规则：已故(-1)冻结、濒死(0=HP)不自动恢复（须剧情疗伤），上限100不溢出。
+    未到周期零开销直接返回空串；满血全员不写盘。"""
+    if round_num <= 0 or round_num % NATURAL_REGEN_ROUNDS != 0:
+        return ""
+    changed = []
+    # 玩家
+    pv = get_player_vitality()
+    if pv["hp"] > 0 or pv["mp"] < 100:  # 濒死(0)/已故(-1)的HP不动，MP仍恢复
+        old = (pv["hp"], pv["mp"])
+        if pv["hp"] > 0:
+            pv["hp"] = min(100, pv["hp"] + NATURAL_REGEN_HP)
+        pv["mp"] = min(100, pv["mp"] + NATURAL_REGEN_MP)
+        if (pv["hp"], pv["mp"]) != old:
+            set_player_vitality(pv)
+            changed.append(f"主角：HP {old[0]}→{pv['hp']}%，MP {old[1]}→{pv['mp']}%")
+    # NPC
+    data = load_json(NPC_AGENT_FILE)
+    if data and "npc_list" in data:
+        dirty = False
+        for npc in data["npc_list"]:
+            if npc.get("body_status") == "deceased":
+                continue  # 亡故冻结
+            vit = _normalize_vitality(npc.get("vitality") or {"hp": 100, "mp": 100})
+            old = (vit["hp"], vit["mp"])
+            if vit["hp"] > 0:  # 濒死(0)不自动恢复
+                vit["hp"] = min(100, vit["hp"] + NATURAL_REGEN_HP)
+            vit["mp"] = min(100, vit["mp"] + NATURAL_REGEN_MP)
+            if (vit["hp"], vit["mp"]) != old:
+                npc["vitality"] = vit
+                _sync_body_status(npc)  # HP回升自动降级伤势（重伤→轻伤）
+                dirty = True
+                changed.append(f"{npc['name']}：HP {old[0]}→{vit['hp']}%，MP {old[1]}→{vit['mp']}%")
+        if dirty:
+            save_json(NPC_AGENT_FILE, data)
+    return "\n".join(changed)
+
+
 # ---------- 事件日志（供前端/控制台显示） ----------
 def format_settle_log(results, user_action=""):
     """把结算结果格式化成人类可读的日志"""
