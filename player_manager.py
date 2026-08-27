@@ -8,6 +8,7 @@
 
 import os
 import json
+import re
 from file_utils import save_json, load_json
 
 # 玩家数据文件路径
@@ -139,6 +140,7 @@ class Player:
             self._data = {
                 "name": "",
                 "age": 0,
+                "year": 0,
                 "origin": "",
                 "core_ability": "",
                 "self_state": "状态平稳",
@@ -155,6 +157,7 @@ class Player:
                     "armor": "",
                     "items": []
                 },
+                "vitality": {"hp": 100, "mp": 100, "poisoned": False},
                 "bottleneck_level": 0,
                 "bottleneck_progress": 0,
                 "bottleneck_ready": False,
@@ -185,6 +188,15 @@ class Player:
     @age.setter
     def age(self, value):
         self._data["age"] = value
+
+    @property
+    def year(self):
+        # 玩家出生年份（0=未知，AI从origin/novel_node推断）
+        return self._data.get("year", 0)
+
+    @year.setter
+    def year(self, value):
+        self._data["year"] = value
 
     @property
     def origin(self):
@@ -783,16 +795,18 @@ class Player:
         return None
 
     @classmethod
-    def create_new(cls, name, origin, ability, age=0):
+    def create_new(cls, name, origin, ability, age=0, year=0):
         # 创建新玩家
         # name: 玩家姓名
         # origin: 出身背景
         # ability: 核心功法
         # age: 玩家年龄（0=未知，AI从origin推断）
+        # year: 出生年份（0=未知，AI从origin推断）
         # 返回: 新的Player对象
         player = cls()
         player.name = name
         player.age = age
+        player.year = year
         player.origin = origin
         player.core_ability = ability
         player.self_state = "状态平稳"
@@ -840,7 +854,31 @@ def set_player(player_obj):
     # player_obj: Player对象
     global _player_instance
     _player_instance = player_obj
-    
+
+
+def sync_age_from_novel_node(player=None):
+    """从 novel_node 提取年份自动更新 age（只涨不减）。
+    匹配 novel_node 中的 1~9999 年份数字（如"1754年春"），age = 年份 - year。
+    遍历所有匹配取第一个推算出合理年龄的；year=0（未知）、
+    无合理匹配、或推算结果倒退时不动。"""
+    if player is None:
+        player = get_player()
+    if not player:
+        return None
+    year = player._data.get("year", 0)
+    if not year:
+        return None
+    for m in re.finditer(r"(\d{1,4})年", player.novel_node or ""):
+        new_age = int(m.group(1)) - int(year)
+        if 0 <= new_age <= 120 and new_age >= player.age:
+            if new_age != player.age:
+                player.age = new_age
+                player.save()
+                print(f"[年龄同步] novel_node 年份推算：{m.group(1)} - {year} = {new_age} 岁")
+            return new_age
+    return None
+
+
 # ---------- 外挂级玩家属性编辑器 ----------
 def edit_player_raw():
     # 外挂级玩家属性编辑器：返回完整玩家字典

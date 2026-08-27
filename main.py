@@ -8,7 +8,7 @@ import colorama
 import threading
 # 在 main.py 中删除原来的定义，改为导入
 from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, CLOUD_MEM_SLOT_ID
-from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field #导入作弊器代码
+from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node #导入作弊器代码
 from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 # ===== 骰子检定系统（最小侵入导入） =====
 import dice_system
@@ -2404,6 +2404,11 @@ def parse_and_update_player_state(reply_text: str, tool_calls=None):
     if new_novel_node and new_novel_node != player.novel_node:
         player.novel_node = new_novel_node
         print(f"【小说节点更新】{new_novel_node}")
+        # 年龄自动同步：从 novel_node 年份推算（只涨不减，提取失败不动）
+        try:
+            sync_age_from_novel_node(player)
+        except Exception as e:
+            print(f"{COLOR_WARN}⚠️ 年龄同步异常：{e}{COLOR_END}")
     # ---- 7. 最终同步 ----
     player.sync_overall_level()
     player.save()
