@@ -1304,8 +1304,8 @@ DC_COMPONENT_TOOL = {
                     "description": "15字内战况修正说明，修正为0时填'势均力敌'或'无'",
                 },
                 "equipment_mod": {
-                    "type": "integer", "minimum": -2, "maximum": 2,
-                    "description": "装备利钝修正(对玩家有利为负)，参考玩家装备栏自行判断：神兵利刃且用对应武功-1~-2/对手持神兵+1~+2/徒手对兵刃+1~+2/精良防具-1。装备与行动无关填0",
+                    "type": "integer", "minimum": -1, "maximum": 1,
+                    "description": "装备利钝修正(对玩家有利为负)，参考玩家装备栏自行判断：神兵利刃且用对应武功/精良防具-1/对手持神兵或徒手对兵刃+1。装备与行动无关填0",
                 },
                 "equipment_reason": {
                     "type": "string",
@@ -1403,17 +1403,17 @@ def build_v4_dc_judge_prompt(scene: str, user_action: str,
   日常=行动固有难度：喝水吃饭5·日常行走8·普通施展10·演练熟练12·演练生疏14·突破瓶颈16·强行运功18·疗重伤20
 ■ environment_mod(-8~+8)天时地利（对玩家有利为负）：黑暗+2·雨雪湿滑+1~+2·地形险峻+1~+2·天时不利+1~+2·开阔有利-1
 ■ situation_mod(-3~+3)人和战况（对玩家有利为负）：偷袭得手-1~-3·对手负伤-1~-3·群战围杀-1~-3·对手受制-1~-3·以一敌多+1~+3·玩家带伤+1~+3·玩家受制+1~+3·心神不宁+1~+2
-■ equipment_mod(-2~+2)装备利钝（对玩家有利为负，参考【玩家装备】自行判断利钝）：神兵利刃且用对应武功-1~-2·对手持神兵+1~+2·徒手对兵刃+1~+2·精良防具-1·装备与行动无关填0
+■ equipment_mod(-1~+1)装备利钝（对玩家有利为负，参考【玩家装备】自行判断利钝）：神兵利刃且用对应武功或精良防具-1·对手持神兵或徒手对兵刃+1·装备与行动无关填0
 ■ 各reason字段：说明数值来历（面向玩家展示，句式自由）。base_reason 必须写明对手当前境界名，如"对手登堂入室，独臂带伤"；日常行动写明难度档，如"演练生疏武功"；其余reason说明来源即可，如"他中我一掌正在踉跄，所以-2"。修正为0时如实填"无碍/无"之类
 
 【铁律】
 1. DC各分量与玩家自身实力完全无关（实力已在修正值中），绝不因玩家境界高而降DC
-2. 分量各自独立判断；同类因素取最高档，异类可叠加（叠加后不超过各分量上限：环境±8·战况±3·装备±2）
+2. 分量各自独立判断；同类因素取最高档，异类可叠加（叠加后不超过各分量上限：环境±8·战况±3·装备±1）
 3. opponent_realm 必须如实填报（系统用于校验 base_dc 是否自洽）
 4. 若给了【★本次对战对手】，base_dc 与 opponent_realm 只能针对该对手
 
 只返回严格JSON，不要任何解释文字：
-{{"action_type":"battle","opponent_realm":"登堂入室","base_dc":19,"base_reason":"对手武功境界登堂入室，所以是19","environment_mod":0,"environment_reason":"月色清朗，无碍","situation_mod":-2,"situation_reason":"他中我一掌正在踉跄，所以-2","equipment_mod":-2,"equipment_reason":"我持韩王青刀削铁如泥，所以-2","mod_factors":["对手负伤"]}}"""
+{{"action_type":"battle","opponent_realm":"登堂入室","base_dc":19,"base_reason":"对手武功境界登堂入室，所以是19","environment_mod":0,"environment_reason":"月色清朗，无碍","situation_mod":-2,"situation_reason":"他中我一掌正在踉跄，所以-2","equipment_mod":-1,"equipment_reason":"我持韩王青刀削铁如泥，所以-1","mod_factors":["对手负伤"]}}"""
 
     user_prompt = f"""【玩家整体境界】{overall_realm}
 
@@ -1548,7 +1548,7 @@ def _sanitize_components(comp: dict, user_action: str = "") -> dict:
         "environment_reason": _reason("environment_reason", 24),
         "situation_mod": _int(comp.get("situation_mod"), -3, 3, 0),
         "situation_reason": _reason("situation_reason", 24),
-        "equipment_mod": _int(comp.get("equipment_mod"), -2, 2, 0),
+        "equipment_mod": _int(comp.get("equipment_mod"), -1, 1, 0),
         "equipment_reason": _reason("equipment_reason", 24),
         "mod_factors": [str(x)[:12] for x in (comp.get("mod_factors") or [])][:6],
         "flavor_text": _reason("flavor_text", 80),

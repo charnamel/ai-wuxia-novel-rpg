@@ -1,0 +1,1224 @@
+1. 圆性（袁紫衣）
+   identity: 峨眉派尼姑，法名圆性，俗名袁紫衣
+   personality: 机智深情，清冷矜持
+   year: 1748
+   life: 揭露汤沛，诬陷其勾结红花会，为母报仇，与汤沛激战，救胡斐；掌门人大会上与汤沛大战，后救马春花，杀汤沛，为通知胡斐而连夜奔波；重伤后与胡斐并肩作战，用马鞭救胡斐，最后念偈悄然西去
+
+2. 徐铮
+   identity: 马行空之徒丨玩家同门师兄
+   personality: 急躁鲁莽，嫉妒冲动
+   year: 1725
+   life: 与何思豪比武获胜，被阎基打伤，后被田归农戏弄；因醋意与商宝震动手；被困铁厅，发现马春花与福公子私情，愤怒追杀，后师父惨死；继承马行空镖局，生意衰落，被商宝震打死
+
+3. 马行空
+   identity: 飞马镖局总镖头丨外号百胜神拳丨玩家授艺恩师
+   personality: 老练沉稳，疼爱女儿
+   year: 1710
+   life: 被阎基打败，又被田归农打伤，护镖失利；在商家堡养伤，发现商老太复仇计划，为女儿订亲，后见识胡斐武功；被困铁厅，后为商老太打入火窟烧死
+
+4. 何思豪
+   identity: 御前蓝翎侍卫
+   personality: 好色无赖，官气十足
+   year: 1740
+   life: 与徐铮比武被打败，被商宝震维护面子；作为侍卫邀请掌门，被刘鹤真摔跌
+
+5. 福公子
+   identity: 身份高贵的公子、福府主人
+   personality: 风流好色，善于诱惑
+   year: 1754
+   life: 与马春花私会，手下武师众多；与马春花偷情，被徐铮追杀，遇赵半山后吓得逃走
+
+6. 福康安之母
+   identity: 傅恒之妻，福康安母亲
+   personality: 心狠手辣，维护门第
+   year: 1710
+   life: 设计毒杀马春花，夺取双生子
+
+7. 凤天南
+   identity: 五虎门掌门，南霸天
+   personality: 阴狠霸道，老谋深算
+   year: 1715
+   life: 被胡斐断辫羞辱，后火烧家业逃走；毁家避祸；杀锺阿四一家后逃亡，在湘妃庙遇胡斐，被袁紫衣救走；杀害钟阿四全家，被胡斐追杀，先后三次被袁紫衣所救，最后逃脱；参加掌门人大会，被胡斐盯上；使用无影银针连胜多人
+
+8. 凤一鸣
+   identity: 凤天南之子
+   personality: 有礼城府，孝顺鲁莽
+   year: 1740
+   life: 被胡斐擒拿到北帝庙，后得父亲相救；与父亲凤天南一起出现；随父逃亡，与胡斐交手
+
+9. 凤七
+   identity: 英雄楼掌柜，凤天南族弟
+   personality: 机灵狡猾，欺软怕硬
+   year: 1720
+   life: 被胡斐用菜刀恐吓，后放走
+
+10. 锺阿四
+   identity: 菜农
+   personality: 忠厚老实，刚烈
+   year: 1730
+   life: 被凤天南诬陷入狱，后儿子被剖腹，最后被杀
+
+11. 锺四嫂
+   identity: 锺阿四之妻
+   personality: 慈爱刚烈
+   year: 1735
+   life: 剖腹明冤导致儿子死亡，后疯癫，最终被杀
+
+12. 锺小二
+   identity: 锺阿四长子
+   personality: 孝顺勇敢
+   year: 1750
+   life: 被恶犬追咬，后与母亲一同被杀
+
+13. 锺小三
+   identity: 锺阿四幼子
+   personality: 天真无知
+   year: 1758
+   life: 被母亲剖腹明冤而死
+
+14. 陈禹
+   identity: 太极门叛徒、福公子手下
+   personality: 阴险狡诈，贪生怕死
+   year: 1730
+   life: 害死吕希贤父子，被赵半山追捕，挟持吕小妹，后被胡斐所破；用云手累死吕希贤，被赵半山废去武功，后粘在铁门上烫死
+
+15. 孙刚峯
+   identity: 广平太极门掌门
+   personality: 刚烈忠义，重义气
+   year: 1710
+   life: 自断双手托赵半山报仇，后现身商家堡指证陈禹；被商老太困在铁厅，后得赵半山相助清理门户
+
+16. 吕小妹
+   identity: 吕希贤之女
+   personality: 坚毅勇敢，坚毅果敢
+   year: 1748
+   life: 孤身寻赵半山报父仇，被陈禹挟持，后得救；父亲和兄弟被陈禹杀害，赴回疆求援，后得赵半山庇护
+
+17. 古般若
+   identity: 嵩山少林派青年好手
+   personality: 年轻气盛
+   year: 1740
+   life: 发射飞刀被赵半山制住，后离去
+
+18. 殷仲翔
+   identity: 天龙门南宗好手
+   personality: 易怒胆小，急躁好赌
+   year: 1720
+   life: 拔剑被赵半山震断；被困铁厅，主张杀胡斐以求生；在商家堡曾与胡斐相遇，后在北京赌局中输钱失态；被胡斐打飞撞假山晕死，后被救醒咒骂凤天南
+
+19. 王剑英
+   identity: 王维扬之子、八卦门高手
+   personality: 傲固执拗，势利怕死
+   year: 1718
+   life: 与胡斐比武，被毒镖所伤；被困铁厅，欲杀胡斐求商老太开门，后得胡斐所救；与胡斐在商家堡曾见面，后在北京宴会上重逢；与袁紫衣比试，被其用巧计击败，双臂脱臼；保护福康安，被圆性威慑
+
+20. 王剑杰
+   identity: 王维扬之子、八卦门高手
+   personality: 心直口快，暴躁护兄
+   year: 1720
+   life: 与胡斐比武，后为兄长求药；被困铁厅后被烟熏晕，为胡斐所救；见兄长被制，出手攻击被胡斐震退
+
+21. 张总管
+   identity: 福公子亲随侍仆
+   personality: 浮躁
+   year: 1725
+   life: 被商宝震打了一耳光
+
+22. 刘鹤真
+   identity: 韦陀门前辈
+   personality: 古怪刚烈，易上当
+   year: 1715
+   life: 与袁紫衣比梅花桩，败；受张飞雄欺骗送信给苗人凤导致苗中毒，后自毁双目
+
+23. 仲萍
+   identity: 刘鹤真之妻
+   personality: 忠贞
+   year: 1735
+   life: 陪丈夫送信，受伤
+
+24. 张飞雄
+   identity: 天龙门弟子
+   personality: 阴险胆小
+   year: 1735
+   life: 设计毒害苗人凤，后求饶
+
+25. 孙伏虎
+   identity: 韦陀门大弟子
+   personality: 稳重
+   year: 1730
+   life: 三招败于袁紫衣
+
+26. 尉迟连
+   identity: 韦陀门二弟子
+   personality: 精明
+   year: 1730
+   life: 被袁紫衣踢伤
+
+27. 杨宾
+   identity: 韦陀门三弟子
+   personality: 暴躁
+   year: 1730
+   life: 败于袁紫衣，奔出
+
+28. 蓝秦
+   identity: 广西梧州八仙剑掌门
+   personality: 谨慎老练
+   year: 1720
+   life: 与袁紫衣比剑，败，得知其师父后惶恐
+
+29. 曹猛
+   identity: 御前侍卫
+   personality: 精明干练
+   year: 1740
+   life: 被袁紫衣鞭打，后放火暗算
+
+30. 崔百胜
+   identity: 御前侍卫
+   personality: 精明干练
+   year: 1740
+   life: 放蝎子毒马，被胡斐擒
+
+31. 易吉
+   identity: 九龙派掌门
+   personality: 迷信脾气暴躁
+   year: 1720
+   life: 被袁紫衣拆字挑衅，比斗失败落水
+
+32. 钟兆文
+   identity: 鄂北鬼见愁钟氏三兄弟老大
+   personality: 剽悍忠厚，重义气
+   year: 1735
+   life: 为徒报仇，与苗人凤激战，被打伤；与胡斐一同前往药王庄求医，被田归农手下擒获后又释放
+
+33. 钟兆英
+   identity: 鄂北鬼见愁钟氏三兄弟老二
+   personality: 机灵，老成持重
+   year: 1738
+   life: 为徒报仇，与苗人凤激战，被打伤；被田归农擒获，后得释；起初寻苗人凤报仇，后得知阴谋，助胡斐保护苗人凤
+
+34. 钟兆能
+   identity: 鄂北鬼见愁钟氏三兄弟老三
+   personality: 剽悍，机敏
+   year: 1740
+   life: 为徒报仇，与苗人凤激战，被打伤；参与阻截刘鹤真，后守护苗人凤
+
+35. 慕容景岳
+   identity: 毒手药王无嗔大师的大弟子
+   personality: 阴鸷狠辣，执念深重
+   year: 1720
+   life: 被程灵素设计装入竹箩，后与姜铁山夫妇化解嫌隙；跟随石万嗔，称薛鹊为拙荆；与薛鹊投靠石万嗔，害死姜铁山父子，后中毒被斩臂
+
+36. 姜铁山
+   identity: 毒手药王无嗔大师的二弟子，薛鹊之夫
+   personality: 粗豪直率，忠诚顾家
+   year: 1738
+   life: 与妻子薛鹊常被慕容景岳纠缠，儿子小铁中毒，得程灵素救治；被慕容景岳与薛鹊勾结害死
+
+37. 薛鹊
+   identity: 毒手药王无嗔大师的三弟子，姜铁山之妻
+   personality: 文秀心狠，阴鸷狠毒
+   year: 1740
+   life: 年轻时毒死大师嫂，被大师兄毒成驼背，后嫁姜铁山；跟随石万嗔，与慕容景岳同行；与慕容景岳勾结，害死丈夫姜铁山，后中毒而死
+
+38. 姜小铁
+   identity: 姜铁山与薛鹊之子
+   personality: 莽撞冲动
+   year: 1740
+   life: 引狼群践踏花圃，中毒后被程灵素用沸水熬出身中毒质；被慕容景岳与薛鹊害死
+
+39. 王铁匠
+   identity: 被姜铁山欺压的铁匠
+   personality: 朴实善良，知恩图报
+   year: 1730
+   life: 被姜铁山强逼铸造铁屋并被打断肋骨，后得程灵素主持公道，以硬柴殴打姜铁山泄愤
+
+40. 田青文
+   identity: 田归农之女
+   personality: 机警伶俐，护父心切
+   year: 1758
+   life: 用铁锥打落程灵素的蜡烛，后被程灵素以赤蝎粉反击
+
+41. 秦耐之
+   identity: 八极拳掌门，福康安手下
+   personality: 老练稳重，知恩图报
+   year: 1720
+   life: 受福康安之命南下接马春花，与胡斐交手后佩服其武功；被袁紫衣击败，肩关节脱臼
+
+42. 周铁鹪
+   identity: 鹰爪雁行门大师兄，武官
+   personality: 沉稳豪爽，工于心计
+   year: 1720
+   life: 在赌局中故意输给胡斐一座宅子，以结识拉拢；与胡斐交手双腿脱臼后被胡斐接回，铜鹰铁雁牌被夺后收回，对袁紫衣怀恨在心；设计救回相国夫人，借机升官；保护福康安，查验铁菩提，被圆性威慑
+
+43. 曾铁鸥
+   identity: 鹰爪雁行门二师兄，武官
+   personality: 潇洒精明，忠诚粗鲁
+   year: 1720
+   life: 参与赌局，与胡斐结交；曾与胡斐动手，被袁紫衣鞭伤额头；在陈官屯饭店中与石万嗔相遇，想捉拿他
+
+44. 汪铁鹗
+   identity: 鹰爪雁行门弟子，武官
+   personality: 心直口快，粗豪贪功
+   year: 1740
+   life: 假扮盗匪参与劫镖，被胡斐擒后又释，后在北京重逢；被袁紫衣羞辱，扶周铁鹪；参与救公主，升官
+
+45. 褚姓老者
+   identity: 塞北大盗，使雷震挡
+   personality: 脾气急躁，武功较强
+   year: 1710
+   life: 参与劫镖，与胡斐交手，后在北京赌局中出现
+
+46. 上官姓兄弟
+   identity: 塞北大盗，使闪电锥
+   personality: 狡黠狠辣
+   year: 1730
+   life: 参与劫镖，后在北京赌局中出现
+
+47. 聂钺
+   identity: 爱剑如命的武官
+   personality: 正直重义，敬仰胡斐
+   year: 1730
+   life: 帮胡斐打开钢盒救了胡斐，却被匕首刺死
+
+48. 姬晓峯
+   identity: 华拳门天字派弟子，姬老三之子
+   personality: 剽悍狭隘，直率重义
+   year: 1730
+   life: 被胡斐点穴，被程灵素施针救醒，后上台为胡斐解围，练一路华拳；被程灵素用麻药假毒所骗，后与胡斐交好
+
+49. 蔡威
+   identity: 西岳华拳门前辈
+   personality: 稳重服从掌门，背叛
+   year: 1740
+   life: 跟随胡斐参加掌门人大会；泄露机密，将福康安双生子送回，被圆性点穴，胡斐踢伤
+
+50. 蔡姓老者
+   identity: 华拳门前辈
+   personality: 言语幽默，眼光毒辣
+   year: 1710
+   life: 质疑胡斐武功非本门，但被姬晓峯打断
+
+51. 高云
+   identity: 华拳门行字派女弟子
+   personality: 活跃，武功尚可
+   year: 1745
+   life: 上台比试，击败张复龙，后被壮汉击败
+
+52. 张复龙
+   identity: 华拳门艺字派弟子
+   personality: 勤勉好学
+   year: 1745
+   life: 上台比试被高云击败
+
+53. 褚轰
+   identity: 塞北雷电门弟子
+   personality: 莽撞
+   year: 1730
+   life: 被袁紫衣询问师父，不敢应战
+
+54. 德莽夫
+   identity: 莽夫，受凤天南指使
+   personality: 粗鲁蛮横
+   year: 1730
+   life: 被周铁鹪教训，后凤天南买宅子送胡斐
+
+55. 武官头领
+   identity: 福康安手下武官
+   personality: 阴险
+   year: 1730
+   life: 用钢盒设计擒胡斐，后被胡斐踢死
+
+56. 和嘉公主
+   identity: 乾隆第四女，福康安二嫂
+   personality: 能说会道，善伺人意
+   year: 1745
+   life: 与老夫人谈论双生子
+
+57. 海兰氏
+   identity: 福康安之妻
+   personality: 不悦但忍耐
+   year: 1740
+   life: 见到双生子后欢喜
+
+58. 福长安之妻
+   identity: 福长安妻子
+   personality: 温顺贤淑
+   year: 1740
+   life: 在场
+
+59. 张九
+   identity: 福康安府卫士
+   personality: 粗鲁
+   year: 1740
+   life: 被胡斐点穴制服，后被周铁鹪杀死
+
+60. 任通武
+   identity: 左营卫士
+   personality: 贪财好酒，胆小
+   year: 1730
+   life: 被周铁鹪利用，带胡斐入府
+
+61. 全管家
+   identity: 周铁鹪派来的管家
+   personality: 恭敬周到
+   year: 1730
+   life: 奉周铁鹪之命打理宅子，招待胡斐；出去查问卫士
+
+62. 黑大汉
+   identity: 卖宅子的人
+   personality: 粗鲁直率
+   year: 1730
+   life: 将宅子卖给周铁鹪，后因转送胡斐而上门理论
+
+63. 马春花之子
+   identity: 马春花与福康安的儿子
+   personality: 幼小天真
+   year: 1765
+   life: 被群盗掳走，后送回马春花身边
+
+64. 老妇人
+   identity: 石屋中的病妇
+   personality: 惊恐
+   year: 1720
+   life: 在石屋中养病，被胡斐等人闯入
+
+65. 大智禅师
+   identity: 少林寺方丈，四大掌门之一
+   personality: 威严慈祥，稳重见识
+   year: 1710
+   life: 担任掌门人大会公证；参与掌门人大会，识破石万嗔冒充毒手药王
+
+66. 无青子
+   identity: 武当山太和宫观主，四大掌门之一
+   personality: 委琐低调，深藏不露
+   year: 1720
+   life: 担任公证；参与掌门人大会；参加掌门人大会，后与胡斐交手，认出对方是陆菲青
+
+67. 陆菲青
+   identity: 武当派掌门，绵里针
+   personality: 稳重，功夫老辣
+   year: 1700
+   life: 出家为无青子，参加掌门人大会，后与胡斐交手，认出彼此；武当名宿，绵里针；张召重师兄；李沅芷之师；因师弟张召重叛变而痛心；协助红花会对抗张召重
+
+68. 汤沛
+   identity: 三才剑掌门，四大掌门之一，号甘霖惠七省
+   personality: 交游广阔，伪善阴险
+   year: 1715
+   life: 担任公证，与常氏兄弟对掌；作为公证，暗中用银针助凤天南，后被圆性诬陷勾结红花会，被福康安怀疑，与圆性激战；在掌门人大会上被围攻，破窗逃走，后为圆性所杀
+
+69. 海兰弼
+   identity: 辽东黑龙门掌门，镶黄旗佐领，四大掌门之一
+   personality: 沉稳勇猛，性急
+   year: 1715
+   life: 担任公证，制服宗黄二人，与常氏兄弟对掌；参与掌门人大会，夺玉龙杯，手被烫伤；在掌门人大会上出言，后与胡斐、圆性夹攻汤沛
+
+70. 黄希节
+   identity: 二郎拳掌门
+   personality: 粗豪力大
+   year: 1720
+   life: 争夺玉龙杯，与宗雄缠斗
+
+71. 欧阳公政
+   identity: 燕青拳掌门，千里独行侠
+   personality: 轻薄，独脚大盗
+   year: 1715
+   life: 被周隆击败受伤
+
+72. 西灵道人
+   identity: 昆仑刀掌门
+   personality: 脸含微笑，知难而退
+   year: 1710
+   life: 坐玉龙杯座；自行退位，离开太师椅
+
+73. 文醉翁
+   identity: 醉八仙掌门
+   personality: 狂妄胆小
+   year: 1715
+   life: 被常氏兄弟吓死
+
+74. 周隆
+   identity: 金刚拳掌门，兴隆镖局总镖头
+   personality: 坚韧重义
+   year: 1715
+   life: 击败欧阳公政报劫镖之仇
+
+75. 齐伯涛
+   identity: 鸭形门弟子
+   personality: 粗鲁
+   year: 1740
+   life: 与师弟争夺掌门，被老者教训
+
+76. 陈高波
+   identity: 鸭形门弟子
+   personality: 粗鲁
+   year: 1740
+   life: 与师兄争夺掌门，被老者教训
+
+77. 宗雄
+   identity: 地堂拳掌门
+   personality: 暴躁神力
+   year: 1720
+   life: 与黄希节缠斗，被海兰弼掷出
+
+78. 桑飞虹
+   identity: 五湖门掌门
+   personality: 活泼好奇，机敏勇敢
+   year: 1745
+   life: 参加掌门人大会，被上官铁生用迷香暗算；与上官铁生打斗，被毒烟迷晕，被程灵素救醒，后与书生一起夺杯被擒
+
+79. 倪不大
+   identity: 双子门掌门之一
+   personality: 怪异，连体兄弟
+   year: 1730
+   life: 抢夺福康安儿子，被常氏兄弟救走；与倪不小抱走马春花的双生子
+
+80. 倪不小
+   identity: 双子门掌门之一
+   personality: 怪异，连体兄弟
+   year: 1730
+   life: 与倪不大一起抢夺福康安儿子，被常氏兄弟救走；与倪不大抱走马春花的双生子
+
+81. 哈赤
+   identity: 蒙古哈赤大师，中抓门掌门
+   personality: 憨直正直，暴躁直率
+   year: 1740
+   life: 参加大会，为桑飞虹辩护；参与掌门人大会，与书生斗气，被书生戏弄，鞋子被脱，后被上官铁生咬伤
+
+82. 上官铁生
+   identity: 玄指门掌门，烟霞散人
+   personality: 阴险，使用迷香毒药
+   year: 1720
+   life: 用烟管和迷香暗算桑飞虹；用毒烟喷桑飞虹，被书生夺烟管，后被程灵素反下毒，发疯咬哈赤
+
+83. 青年书生
+   identity: 红花会心砚，假扮书生
+   personality: 俊雅侠义，机灵调皮
+   year: 1740
+   life: 为西川双侠辩护，喝止上官铁生；戏弄哈赤，夺玉龙杯，被汤沛擒获，后被赵半山、胡斐等救走
+
+84. 常赫志
+   identity: 西川双侠之一，红花会
+   personality: 冷峻，武功高强
+   year: 1720
+   life: 闯入大会救走倪氏兄弟；与常伯志一起救出马春花的双生子；西川双侠之一，红花会成员；参与书剑恩仇录全程事件
+
+85. 常伯志
+   identity: 西川双侠之一，红花会
+   personality: 冷峻，武功高强
+   year: 1720
+   life: 与常赫志一起闯入大会救走倪氏兄弟；与常赫志一起救出马春花的双生子；西川双侠之一，红花会成员；参与书剑恩仇录全程事件
+
+86. 郭玉堂
+   identity: 先天拳掌门
+   personality: 见识广博，胆小怕事
+   year: 1720
+   life: 在旁观战解说；旁观比武，被烟管飞向面门，被胡斐所救
+
+87. 童怀道
+   identity: 太原府流星赶月，流星锤高手
+   personality: 直率暴躁
+   year: 1720
+   life: 连败多人，向田归农挑战，被田归农点穴僵立，后被胡斐飞杯解穴
+
+88. 曹云奇
+   identity: 田归农大弟子
+   personality: 忠于师父
+   year: 1755
+   life: 为田归农捧剑，提醒师父小心
+
+89. 李廷豹
+   identity: 五台派掌门大弟子，延安五郎镖局总镖头
+   personality: 莽撞直率，刚烈
+   year: 1720
+   life: 出头要求田归农解童怀道穴道，被田归农作弄，后与田归农比武，被宝刀断棍并断右手筋，自戕而死
+
+90. 石万嗔
+   identity: 毒手神枭，无嗔大师师弟
+   personality: 残忍，精于用毒，自负
+   year: 1710
+   life: 想夺取《药王神篇》，在庙中中计双目失明，后逃离；弹铁菩提伤两人，假装为武官驱虫，坐太师椅夺玉龙杯，被程灵素毒烟陷害
+
+91. 柯子容
+   identity: 兰州柯氏七青门掌门
+   personality: 自负好胜
+   year: 1730
+   life: 发射铁菩提，被石万嗔弹回中毒，后与凤天南比暗器，被程灵素爆竹戏弄，最后被凤天南银针射中胯下
+
+92. 木文察
+   identity: 清军猛将，福康安部下
+   personality: 勇猛知进退
+   year: 1720
+   life: 身披铁甲与凤天南比武，被凤天南银针射落头盔绒球，认输
+
+93. 安提督
+   identity: 提督大人，福康安下属
+   personality: 善于逢迎
+   year: 1715
+   life: 主持比武，读汤沛信，下令关闭府门；在掌门人大会上按住肚子，指挥卫士
+
+94. 刘之余
+   identity: 乾清宫太监
+   personality: 胆小
+   year: 1730
+   life: 被红花会挟持假传圣旨
+
+95. 石双英
+   identity: 红花会鬼见愁
+   personality: 勇猛
+   year: 1725
+   life: 乔装侍卫，假传圣旨，被卫士截住；红花会鬼见愁；参与书剑恩仇录全程事件
+
+96. 无尘道人
+   identity: 红花会二当家，独臂道人
+   personality: 好胜豪爽，剑法无双
+   year: 1700
+   life: 在陶然亭与胡斐比武，后与德布交战，获胜；红花会二当家，独臂道人；剑术超群；参与六和塔擒乾隆；红花会远走回疆
+
+97. 德布
+   identity: 御前侍卫班领，满洲第一勇士
+   personality: 勇猛自负
+   year: 1720
+   life: 率大内十八高手与红花会及胡斐交战，被无尘刺伤
+
+98. 徐天宏
+   identity: 红花会七当家，武诸葛
+   personality: 智谋过人
+   year: 1733
+   life: 劝大家不要贸然进城；红花会七当家，武诸葛；足智多谋；在铁胆庄事件中与周绮患难生情；最终娶周绮为妻
+
+99. 心砚
+   identity: 红花会书童
+   personality: 机灵
+   year: 1740
+   life: 在掌门人大会中被擒，被胡斐所救；红花会书童；陈家洛贴身侍从；参与书剑恩仇录全程事件
+
+100. 苗夫人
+   identity: 田归农之妻，原为苗人凤之妻
+   personality: 固执神秘，内心复杂
+   year: 1735
+   life: 指点胡斐挖掘冷月宝刀，说出埋刀秘密后独自远去
+
+101. 司徒雷
+   identity: 福康安府武士
+   personality: 谨慎，懂得避敌锋芒
+   year: 1720
+   life: 与谢不挡联手阻止胡斐，被胡斐虚招逼退
+
+102. 谢不挡
+   identity: 福康安府武士
+   personality: 谨慎，懂得避敌锋芒
+   year: 1730
+   life: 与司徒雷联手阻止胡斐，被胡斐虚招逼退
+
+103. 张宁
+   identity: 福康安府武士
+   personality: 精明圆滑
+   year: 1730
+   life: 被胡斐抓住当人质，后被点穴
+
+104. 丁文沛
+   identity: 福康安府武士
+   personality: 精明圆滑
+   year: 1730
+   life: 被胡斐砍翻在地
+
+105. 丁文深
+   identity: 福康安府武士
+   personality: 精明圆滑
+   year: 1730
+   life: 被胡斐砍翻在地
+
+106. 陈敬夫
+   identity: 福康安府武士
+   personality: 自称老夫，年长
+   year: 1730
+   life: 参与围攻胡斐
+
+107. 黄樵
+   identity: 福康安府武士
+   personality: 反应迅捷，擅长擒拿
+   year: 1720
+   life: 被胡斐双掌击中胸口但未摔倒，最终被夺刀
+
+108. 伍公权
+   identity: 福康安府武士
+   personality: 老练沉稳
+   year: 1720
+   life: 参与围攻胡斐
+
+109. 高一力
+   identity: 福康安府武士
+   personality: 身材魁梧，力气大
+   year: 1745
+   life: 被圆性用马鞭圈住头颈拖走
+
+110. 东方
+   identity: 福康安府武士
+   personality: 精明圆滑
+   year: 1730
+   life: 报姓名时被胡斐刀背击中后脑毙命
+
+111. 邝宝官
+   identity: 赌场宝官
+   personality: 狡猾贪婪
+   year: 1730
+   life: 被胡斐识破赌术，脑袋被插进桌子
+
+112. 蛇皮张
+   identity: 英雄当铺护院武师
+   personality: 胆小怕事
+   year: 1730
+   life: 被胡斐制服，抬门板跟从
+
+113. 俞朝奉
+   identity: 英雄典当朝奉
+   personality: 尖酸刻薄
+   year: 1720
+   life: 被胡斐揪出压在门板下，后获释
+
+114. 大掌柜
+   identity: 英雄典当大掌柜
+   personality: 圆滑老练
+   year: 1720
+   life: 处理胡斐当人事件，后暗中跟踪
+
+115. 肥厨子
+   identity: 英雄楼厨子
+   personality: 憨厚老实
+   year: 1730
+   life: 被胡斐询问炒菜用料
+
+116. 尤七
+   identity: 英雄楼掌柜
+   personality: 势力
+   year: 1730
+   life: 被胡斐整
+
+117. 蒋调侯
+   identity: 御前侍卫
+   personality: 阴险狡诈
+   year: 1730
+   life: 参与夺刀，用毒针伤苗人凤，后被宝刀劈死
+
+118. 补锅匠
+   identity: 鄂北鬼见愁钟氏门徒
+   personality: 粗鲁狂妄
+   year: 1730
+   life: 参与夺刀，被苗人凤用软鞭打死
+
+119. 脚夫
+   identity: 夺刀者之一
+   personality: 莽撞
+   year: 1730
+   life: 参与夺刀，被苗人凤击毙
+
+120. 车夫
+   identity: 夺刀者之一
+   personality: 好色
+   year: 1730
+   life: 参与夺刀，被苗人凤以软鞭打死
+
+121. 店伴
+   identity: 假扮店伙的夺刀者
+   personality: 狡猾
+   year: 1730
+   life: 参与夺刀，被苗人凤后踢致死
+
+122. 南仁通
+   identity: 南兰之父，候补京官
+   personality: 傲慢贪财
+   year: 1710
+   life: 因冷月宝刀被强盗杀害
+
+123. 聂姓大盗
+   identity: 浙东剑客，福康安手下
+   personality: 傲气，重剑爱剑
+   year: 1730
+   life: 参与劫镖，与胡斐比剑后佩服，后在北京赌局中出现
+
+124. 中年妇人
+   identity: 程灵素乔装
+   personality: 冷静机智，善于用毒
+   year: 1730
+   life: 救醒桑飞虹，用爆竹下毒于玉杯，喷毒烟引起混乱
+
+125. 石先生
+   identity: 自称毒手药王，实为石万嗔
+   personality: 阴险，善于用毒
+   year: 1720
+   life: 弹铁菩提伤两人，假装为武官驱虫，坐太师椅夺玉龙杯，被程灵素毒烟陷害
+
+126. 平四
+   identity: 独臂人，胡斐的仆人和抚养者
+   personality: 忠诚，隐忍，重恩情
+   year: 1740
+   life: 受胡一刀之恩，抚养其子胡斐，在商家堡做杂工
+
+127. 锺兆英
+   identity: 锺氏三雄老大
+   personality: 沉稳、重信义
+   year: 1738
+   life: 起初寻苗人凤报仇，后得知阴谋，助胡斐保护苗人凤
+
+128. 锺兆文
+   identity: 锺氏三雄老二
+   personality: 急躁但仗义
+   year: 1735
+   life: 随胡斐去药王庄求药，中毒
+
+129. 锺兆能
+   identity: 锺氏三雄老三
+   personality: 机敏
+   year: 1740
+   life: 参与阻截刘鹤真，后守护苗人凤
+
+130. 福康安之母（老夫人）
+   identity: 傅恒之妻，福康安母亲
+   personality: 心狠手辣，维护门第
+   year: 1710
+   life: 设计毒杀马春花，夺取双生子
+
+131. 德莽夫（姓德的莽夫）
+   identity: 莽夫，受凤天南指使
+   personality: 粗鲁，蛮横
+   year: 1730
+   life: 被周铁鹪教训，后凤天南买宅子送胡斐
+
+132. 武官头领（下毒盒者）
+   identity: 福康安手下武官
+   personality: 阴险，听从命令
+   year: 1730
+   life: 用钢盒设计擒胡斐，后被胡斐踢死
+
+133. 苗夫人（南兰）
+   identity: 田归农之妻，原为苗人凤之妻
+   personality: 固执、神秘、内心复杂
+   year: 1735
+   life: 指点胡斐挖掘冷月宝刀，说出埋刀秘密后独自远去
+
+134. 马春花之子（二人）
+   identity: 马春花与福康安的儿子
+   personality: 幼小天真
+   year: 1765
+   life: 被群盗掳走，后送回马春花身边
+
+135. 黑大汉（姓德）
+   identity: 卖宅子的人
+   personality: 粗鲁、直率
+   year: 1730
+   life: 将宅子卖给周铁鹪，后因转送胡斐而上门理论
+
+136. 东方（姓东方，名不详）
+   identity: 福康安府武士
+   personality: 精明圆滑
+   year: 1741
+   life: 报姓名时被胡斐刀背击中后脑毙命
+
+137. 中年婦人
+   identity: 程灵素乔装
+   personality: 冷静、机智、善于用毒
+   year: 1730
+   life: 救醒桑飞虹，用爆竹下毒于玉杯，喷毒烟引起混乱
+
+138. 书生
+   identity: 红花会心砚，假扮书生
+   personality: 机灵、调皮、轻功高
+   year: 1740
+   life: 戏弄哈赤，夺玉龙杯，被汤沛擒获，后被赵半山、胡斐等救走
+
+139. 平斐（胡斐）
+   identity: 胡一刀之子，化名平斐
+   personality: 勇敢正直，聪明好学
+   year: 1755
+   life: 随平四在商家堡生活，怒斥苗夫人，得回两页拳经
+
+140. 护院老周（铁臂周）
+   identity: 主角家的护院教头
+   personality: 忠厚老实
+   year: 1720
+   life: 
+
+141. 李公福
+   identity: 保定府李府主人，玩家李三奇的父亲
+   personality: 慈祥持重
+   year: 1705
+   life: 
+
+142. 灵儿
+   identity: 玩家贴身丫鬟（保定李府）
+   personality: 天真活泼
+   year: 1740
+   life: 
+
+143. 赵镖头
+   identity: 沧州飞马镖局镖师（老赵）
+   personality: 豪爽重义
+   year: 1730
+   life: 
+
+144. 于万亭
+   identity: 红花会前任总舵主
+   personality: 刚烈忠义，鞠躬尽瘁
+   year: 1710
+   life: 原为少林俗家弟子；创立红花会以反清复明为己任；夜闯禁宫后发现乾隆身世秘密；遭害后将总舵主之位传于义子陈家洛
+
+145. 木卓伦
+   identity: 回部族长，霍青桐之父
+   personality: 慷慨豪迈，宁死不屈
+   year: 1710
+   life: 回部首领；因《可兰经》被抢与红花会结盟；率回部抗清；女儿香香公主被送入宫后悲愤；最终在抗清战斗中壮烈牺牲
+
+146. 周绮
+   identity: 周仲英之女，俏李逵
+   personality: 泼辣直爽，心地善良
+   year: 1737
+   life: 周仲英之女；因铁胆庄误会与红花会结缘；与徐天宏患难中生情；性格泼辣但心地善良；最终嫁与徐天宏
+
+147. 周英杰
+   identity: 周仲英幼子
+   personality: 天真顽皮
+   year: 1745
+   life: 周仲英老来得子；因无意间泄露文泰来藏身之处；被周仲英失手打死以证清白
+
+148. 马真
+   identity: 武当掌门，张召重师兄
+   personality: 正直迂腐，心慈手软
+   year: 1700
+   life: 武当派掌门；张召重师兄；因心慈手软未能阻止师弟叛变；最终被张召重所害
+
+149. 白振
+   identity: 大内侍卫总管，金爪铁钩
+   personality: 忠于职守，阴沉老辣
+   year: 1715
+   life: 大内侍卫总管；忠于乾隆；奉命围剿红花会；武功阴狠
+
+150. 瑞大林
+   identity: 大内侍卫
+   personality: 阴狠毒辣
+   year: 1720
+   life: 大内侍卫；奉命追捕红花会；手段狠辣
+
+151. 褚圆
+   identity: 御前侍卫，红衣高手
+   personality: 好勇斗狠
+   year: 1720
+   life: 御前侍卫高手；在西湖与陈家洛比武落败；好勇斗狠
+
+152. 龙骏
+   identity: 暗器高手，清廷鹰犬
+   personality: 阴险狡诈
+   year: 1720
+   life: 暗器高手；为清廷效力；以毒蒺藜和飞燕金镖伤人
+
+153. 言伯乾
+   identity: 暗器高手
+   personality: 阴险毒辣
+   year: 1720
+   life: 暗器高手；以飞镖毒针伤人；为清廷效力
+
+154. 蒋四根
+   identity: 红花会十当家，铁塔
+   personality: 憨厚耿直，力大无穷
+   year: 1728
+   life: 红花会十当家；使铁桨；力大无穷；忠心耿耿跟随陈家洛
+
+155. 杨成协
+   identity: 红花会八当家，铁臂罗汉
+   personality: 豪爽刚直
+   year: 1725
+   life: 红花会八当家；铁臂功了得；跟随陈家洛南征北战
+
+156. 卫春华
+   identity: 红花会九当家，独步蟾宫
+   personality: 机敏灵活，勇猛无畏
+   year: 1728
+   life: 红花会九当家；轻功出众；以双钩为兵器；勇猛无畏
+
+157. 章进
+   identity: 红花会十当家（驼子）
+   personality: 脾气暴烈，忠心耿耿
+   year: 1725
+   life: 红花会十当家；身有残疾驼背；铁布衫功夫了得；脾气暴烈但忠心
+
+158. 蒋天寿
+   identity: 红花会六当家
+   personality: 沉稳老练
+   year: 1728
+   life: 红花会六当家；沉稳老练；跟随陈家洛
+
+159. 孟健雄
+   identity: 铁胆庄管家
+   personality: 忠厚老实
+   year: 1728
+   life: 铁胆庄管家；忠心侍奉周仲英；武功平平
+
+160. 安健刚
+   identity: 铁胆庄教师
+   personality: 粗犷直率
+   year: 1728
+   life: 铁胆庄护院教师；粗犷直率；忠于周仲英
+
+161. 万庆澜
+   identity: 清廷奸细
+   personality: 阴险小人，挑拨离间
+   year: 1728
+   life: 清廷奸细；混入铁胆庄挑拨周仲英与红花会关系；导致周英杰之死
+
+162. 滕一雷
+   identity: 辽东大豪，独角龙
+   personality: 凶悍霸道
+   year: 1715
+   life: 辽东大豪；使雷震挡；为利而来；凶悍霸道
+
+163. 顾金标
+   identity: 关东魔头，暗器高手
+   personality: 阴险毒辣
+   year: 1720
+   life: 关东魔头；以飞燕金镖闻名；阴险毒辣
+
+164. 哈合台
+   identity: 蒙古武士
+   personality: 憨直勇猛
+   year: 1740
+   life: 蒙古武士；与滕一雷同行；憨直勇猛；擅长蒙古摔跤
+
+165. 焦文期
+   identity: 镖师，通臂拳好手
+   personality: 圆滑世故
+   year: 1720
+   life: 镖师出身；通臂拳好手；圆滑世故；后被卷入纷争
+
+166. 韩文冲
+   identity: 镖局镖头
+   personality: 谨小慎微
+   year: 1728
+   life: 镖局镖头；谨小慎微；卷入红花会纷争
+
+167. 王维扬
+   identity: 八卦门掌门，王剑英之父，洛阳镇远镖局总镖头
+   personality: 武林名宿，德高望重
+   year: 1690
+   life: 八卦门掌门；王剑英、王剑杰之父；武林名宿；德高望重
+
+168. 阿凡提
+   identity: 新疆智者
+   personality: 幽默智慧，嫉恶如仇
+   year: 1700
+   life: 新疆智者；以智慧化解纷争；与陈家洛交好；嫉恶如仇
+
+169. 霍阿伊
+   identity: 霍青桐之兄
+   personality: 勇敢直率
+   year: 1735
+   life: 回部族长木卓伦之子；霍青桐之兄；勇敢直率；随父抗清
+
+170. 闫世魁
+   identity: 清军将领
+   personality: 刚愎自用
+   year: 1720
+   life: 清军将领；奉命征讨回部；刚愎自用
+
+171. 章虚
+   identity: 少林寺高僧
+   personality: 武学渊博，慈悲为怀
+   year: 1720
+   life: 少林寺高僧；武学渊博；慈悲为怀；曾出手相助红花会
+
+172. 彭三春
+   identity: 江湖武师
+   personality: 趋炎附势
+   year: 1730
+   life: 江湖武师；趋炎附势；依附清廷
+
+173. 沈德潜
+   identity: 清廷文臣，乾隆近臣
+   personality: 圆滑世故，善于逢迎
+   year: 1700
+   life: 清廷文臣；乾隆近臣；善于逢迎；无武功
+
+174. 卓天雄
+   identity: 大内高手
+   personality: 阴狠老辣，恃强凌弱
+   year: 1685
+   life: 大内高手；奉命护送鸳鸯刀；被袁冠南以智计惊走；习得震天三十掌和呼延十八鞭
+
+175. 周威信
+   identity: 威信镖局总镖头，铁鞭盖八方
+   personality: 谨小慎微，圆滑世故
+   year: 1715
+   life: 威信镖局总镖头；奉川陕总督之命押送鸳鸯刀入京；被太岳四侠和各路好手劫镖
+
+176. 逍遥子
+   identity: 太岳四侠之首
+   personality: 虚张声势，好吹牛
+   year: 1710
+   life: 太岳四侠之首；虚张声势武功不济；拦路劫镖闹出笑话；心地不坏
+
+177. 天池怪侠
+   identity: 隐居天池的绝世高手
+   personality: 性情古怪，亦正亦邪
+   year: 1695
+   life: 隐居长白山天池；持有乾隆身世调包的物证；陈家洛为其取证据而登天池；武学造诣深不可测
+
+178. 铁镜
+   identity: 少林寺达摩院首座
+   personality: 慈悲刚正，武学精深
+   year: 1730
+   life: 少林寺达摩院首座；在红花会被困时出手相助；与天虹大师同为少林高僧
+
+179. 常长风
+   identity: 太岳四侠第二
+   personality: 自负搞笑
+   year: 1720
+   life: 
+
+180. 花剑影
+   identity: 太岳四侠之三
+   personality: 自负搞笑
+   year: 1720
+   life: 
+
+181. 盖一鸣
+   identity: 太岳四侠之四
+   personality: 自负搞笑
+   year: 1715
+   life: 
+
+182. 周老茶
+   identity: 马行空故交丨江湖包打听丨真定府外茶棚老板
+   personality: 世故圆滑
+   year: 1720
+   life: 
+
+183. 言达平
+   identity: 梅念笙二徒弟
+   personality: 隐忍狡猾，暗中布局
+   year: 1720
+   life: 弑师后隐姓埋名，化装乞丐暗助狄云三招剑法。破解连城诀密码后在天宁寺被戚长发所杀
+
+184. 凌退思
+   identity: 荆州知府
+   personality: 贪婪阴毒，不择手段
+   year: 1715
+   life: 以女儿凌霜华为饵囚禁丁典多年。在女儿棺上涂金波旬花毒死丁典。活埋亲生女儿。最终在天宁寺抢宝中毒而亡
+
+185. 梅念笙
+   identity: 铁骨墨萼，连城诀持有者
+   personality: 正直洞察，看透人心
+   year: 1700
+   life: 身怀神照功与连城剑法，察觉三徒弟心性歹毒。被三人联手偷袭重伤，跳江逃生后遇丁典，临终倾囊相授
+
+186. 血刀老祖
+   identity: 血刀门掌门
+   personality: 凶残好色，武功高强
+   year: 1710
+   life: 掳水笙逃入大雪山，雪谷中连杀南四奇三人。发现狄云非徒孙后欲杀之，反被狄云神照功所杀
+
+187. 水岱
+   identity: 南四奇之一，冷月剑
+   personality: 正直刚烈，爱女心切
+   year: 1725
+   life: 为救女儿追入大雪山，雪谷中被血刀老祖所杀
+
+188. 花铁干
+   identity: 南四奇之二，双枪将
+   personality: 表面正气，实则怯懦
+   year: 1720
+   life: 雪谷中临危屈膝投降血刀老祖。出谷后反诬水笙狄云苟且。最终在天宁寺抢宝中毒而亡
+
+189. 陆天抒
+   identity: 南四奇之三
+   personality: 豪迈刚直
+   year: 1720
+   life: 追血刀老祖入雪山，雪谷中被杀
+
+190. 刘乘风
+   identity: 南四奇之四
+   personality: 沉稳内敛
+   year: 1720
+   life: 追血刀老祖入雪山，雪谷中被杀
+
+191. 宝象
+   identity: 血刀门弟子
+   personality: 凶残愚蠢
+   year: 1740
+   life: 饥饿欲吃狄云，误食毒老鼠汤而死
+
+192. 汪啸风
+   identity: 铃剑双侠，水笙表兄
+   personality: 正气但多疑
+   year: 1745
+   life: 与水笙并称铃剑双侠。后在天宁寺抢宝中毒而亡
+
+193. 卜垣
+   identity: 万震山弟子
+   personality: 圆滑机灵
+   year: 1730
+   life: 奉命赴湘西邀请戚长发赴宴
+
+194. 吕通
+   identity: 江湖大盗
+   personality: 粗暴直率
+   year: 1730
+   life: 万震山寿宴上寻仇，被狄云打退
+
+195. 空心菜
+   identity: 戚芳与万圭之女
+   personality: 天真无邪
+   year: 1755
+   life: 戚芳小名同名。母亲死后被狄云带往藏边雪谷
+
+196. 吴六奇
+   identity: 天地会红旗香主（已故）
+   personality: 忠义反清
+   year: 1700
+   life: 康熙年间高僧将连城诀线索托交于他，后遇害。连城诀线索由此散落江湖
+
+197. 铁雄
+   identity: 铁门寨寨主，归属清庭后，抢夺鸳鸯刀密宝
+   personality: 阴狠贪婪
+   year: 1710
+   life: 
+
+198. 阮士中
+   identity: 天龙门北宗弟子，田归农师弟
+   personality: 沉稳老练，忠心耿耿
+   year: 1735
+   life: 天龙门北宗好手，随田归农上玉笔峰
+
+199. 殷吉
+   identity: 天龙门南宗掌门
+   personality: 豪爽正直
+   year: 1720
+   life: 天龙门南宗掌门，与北宗田归农对立
+
+200. 熊元献
+   identity: 辽东大豪，使链子枪
+   personality: 粗豪直爽
+   year: 1720
+   life: 辽东武林好手，参与玉笔峰寻宝
+
+201. 郑三娘
+   identity: 辽东女盗，使双刀
+   personality: 泼辣凶悍
+   year: 1720
+   life: 辽东女盗，参与玉笔峰寻宝
+
+202. 陶子安
+   identity: 天龙门弟子，田青文未婚夫
+   personality: 精明干练
+   year: 1740
+   life: 天龙门弟子，与田青文有婚约
+
+203. 刘元鹤
+   identity: 大内侍卫
+   personality: 阴险狡诈
+   year: 1730
+   life: 大内侍卫，奉命追查玉笔峰宝藏
+
+204. 焦蛟
+   identity: 汉水水寨舵主，人称浪里蛟
+   personality: 行事狠辣
+   year: 1710
+   life: 自幼生长于汉水边，水性极佳，少年时曾为渔夫，后因打抱不平杀死恶霸，落草为寇，逐渐创立汉水水寨，成为一方霸主，专劫过往商船，与官府为敌。
+

@@ -203,6 +203,28 @@
             <div class="col-editor">
                 <div id="npc-editor-header" style="display:none" class="editor-pane">
                     <div class="editor-pane-title" id="npc-editor-title">编辑 NPC</div>
+                    <div id="npc-vitality-panel" style="background:#111; border:1px solid #333; border-radius:6px; padding:8px 10px; margin-bottom:8px; font-size:12px;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                            <span style="color:#f66; min-width:32px;">HP</span>
+                            <div style="flex:1; height:10px; background:#300; border-radius:5px; overflow:hidden;">
+                                <div id="npc-hp-bar" style="height:100%; width:100%; background:linear-gradient(90deg,#f44,#f88);"></div>
+                            </div>
+                            <input type="number" id="npc-hp-input" min="-1" max="100" value="100" style="width:56px; background:#111; border:1px solid #444; color:#f88; padding:2px 4px; border-radius:3px;">
+                            <span style="color:#888;">%</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="color:#4af; min-width:32px;">MP</span>
+                            <div style="flex:1; height:10px; background:#003; border-radius:5px; overflow:hidden;">
+                                <div id="npc-mp-bar" style="height:100%; width:100%; background:linear-gradient(90deg,#48f,#8af);"></div>
+                            </div>
+                            <input type="number" id="npc-mp-input" min="0" max="100" value="100" style="width:56px; background:#111; border:1px solid #444; color:#8af; padding:2px 4px; border-radius:3px;">
+                            <span style="color:#888;">%</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
+                            <span style="color:#888;">HP：-1已故 / 0濒死 / 1-30重伤 / 31-70轻伤 / 71-100健康</span>
+                            <button onclick="npcVitalityApply()" class="btn btn-green" style="padding:2px 10px; font-size:11px;">应用到JSON</button>
+                        </div>
+                    </div>
                     <textarea id="npc-editor" class="textarea-code ta-s" placeholder="选择左侧 NPC 开始编辑，或点击「新增 NPC」创建新角色……"></textarea>
                     <div class="btn-row">
                         <button onclick="npcSave()" class="btn btn-green">保存修改</button>

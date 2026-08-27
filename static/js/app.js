@@ -1531,12 +1531,47 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 const data = await res.json();
                 if (data.status === 'success') {
                     document.getElementById('npc-editor').value = JSON.stringify(data.npc, null, 2);
+                    renderNpcVitalityPanel(data.npc);
                 } else {
                     alert('加载失败：' + data.message);
                 }
             } catch(e) {
                 alert('加载失败：' + e);
             }
+        }
+
+        function renderNpcVitalityPanel(npc) {
+            const vit = (npc && npc.vitality && typeof npc.vitality === 'object') ? npc.vitality : {hp: 100, mp: 100, poisoned: false};
+            let hp = parseInt(vit.hp); if (isNaN(hp)) hp = 100;
+            let mp = parseInt(vit.mp); if (isNaN(mp)) mp = 100;
+            const hpInput = document.getElementById('npc-hp-input');
+            const mpInput = document.getElementById('npc-mp-input');
+            const hpBar = document.getElementById('npc-hp-bar');
+            const mpBar = document.getElementById('npc-mp-bar');
+            if (!hpInput || !mpInput || !hpBar || !mpBar) return;
+            hpInput.value = hp;
+            mpInput.value = mp;
+            const hpDisplay = hp < 0 ? 0 : hp;
+            hpBar.style.width = Math.max(0, Math.min(100, hpDisplay)) + '%';
+            hpBar.style.background = hp < 0 ? '#555' : (hp === 0 ? '#833' : 'linear-gradient(90deg,#f44,#f88)');
+            mpBar.style.width = Math.max(0, Math.min(100, mp)) + '%';
+        }
+
+        function npcVitalityApply() {
+            const hp = parseInt(document.getElementById('npc-hp-input').value);
+            const mp = parseInt(document.getElementById('npc-mp-input').value);
+            if (isNaN(hp) || hp < -1 || hp > 100) { alert('HP 范围：-1（已故）~ 100'); return; }
+            if (isNaN(mp) || mp < 0 || mp > 100) { alert('MP 范围：0 ~ 100'); return; }
+            let npcData;
+            try {
+                npcData = JSON.parse(document.getElementById('npc-editor').value);
+            } catch(e) {
+                alert('JSON 格式错误，无法应用：' + e);
+                return;
+            }
+            npcData.vitality = {hp: hp, mp: mp, poisoned: !!(npcData.vitality && npcData.vitality.poisoned)};
+            document.getElementById('npc-editor').value = JSON.stringify(npcData, null, 2);
+            renderNpcVitalityPanel(npcData);
         }
 
         async function npcSave() {

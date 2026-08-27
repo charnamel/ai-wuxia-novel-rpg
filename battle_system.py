@@ -8,6 +8,7 @@ import random
 from config import DEEPSEEK_BASE_URL
 from player_manager import get_player
 from llm_utils import get_llm_content
+import vitality_system
 from dice_system import resolve_check_v4 as dice_resolve_check_v4, detect_martial_skill as dice_detect_martial_skill, detect_martial_skill_classified as dice_detect_martial_skill_classified, ai_judge_dc_only as dice_ai_judge_dc_only, build_active_npcs_brief as dice_build_active_npcs_brief, build_target_npc_line as dice_build_target_npc_line
 
 # 颜色复用（和主程序完全对齐，补全缺失常量）
@@ -127,7 +128,7 @@ def ai_judge_battle_trend(llm_func, battle_process, player_status, npc_status):
     res = get_llm_content(llm_func(judge_prompt, "AI智能分析对战战局走向", temp=0.5))
     return res
 
-def gen_single_battle_round(llm_func, player_data, npc_data, round_num, player_attack_text, last_process, battle_style_desc, dice_constraint="", scene_info=""):
+def gen_single_battle_round(llm_func, player_data, npc_data, round_num, player_attack_text, last_process, battle_style_desc, dice_constraint="", scene_info="", player_name=None, target_npc_name=None, target_npc_persisted=True):
     # 生成单回合对战剧情
     # llm_func: LLM调用函数
     # player_data: 玩家数据
@@ -158,6 +159,41 @@ def gen_single_battle_round(llm_func, player_data, npc_data, round_num, player_a
             skill_lines.append(f"{name}：{s.get('skill_level', '未知')}")
     skill_text = "\n".join(skill_lines)
 
+    # ===== V5：体力面板注入（战斗管线） =====
+    _p_realm_i = calc_realm_index(p_info)
+    _t_info = json.loads(npc_data) if npc_data else {}
+    _t_realm_i = calc_realm_index(_t_info)
+    _realm_diff = _p_realm_i - _t_realm_i
+    _p_realm_s = REALM_ORDER[_p_realm_i]
+    _t_realm_s = REALM_ORDER[_t_realm_i]
+    _vit_block = ""
+    _p_name = player_name or p_info.get("name")
+    _t_name = target_npc_name
+    if _p_name or _t_name:
+        _names = []
+        if _p_name:
+            _names.append(_p_name)
+        if _t_name:
+            _names.append(_t_name)
+        _vit_block = "\n【*气血内力面板*】（HP/MP均为0-100百分比刻度，全员上限都是100）\n" + \
+            vitality_system.render_vitality_block(_p_name, _names if not target_npc_persisted else None) + "\n"
+        # 对战目标若未落盘（临时NPC），用内存缓存单独渲染
+        if _t_name and not target_npc_persisted:
+            _tv = vitality_system.get_temp_vitality(_t_name)
+            _hp_s = "0%（已故）" if _tv["hp"] < 0 else ("0%（濒死锁血）" if _tv["hp"] == 0 else f"{_tv['hp']}%")
+            _t_mp_s = f"{_tv['mp']}%"
+            if _tv["mp"] == 0:
+                _t_mp_s += "（⚠内力枯竭：无法催动武功，招式威力大幅减弱）"
+            _vit_block += f"・{_t_name}：HP {_hp_s} / MP {_t_mp_s}\n"
+        _vit_block += (
+            f"（双方境界：{_p_name or '玩家'}＝{_p_realm_s}，{_t_name or '对手'}＝{_t_realm_s}，相差{abs(_realm_diff)}档。）\n"
+            "（结算规则：每回合末尾必须单独输出一行【体力结算】，格式严格为："
+            "【体力结算】姓名：气血±N，内力±N（正数恢复/获得，负数受伤/消耗，双方都要报，无变化写0）。"
+            "数值由你根据本回合交手激烈程度与双方境界差距自行把握，"
+            "只需遵守方向：境界悬殊时，强者一击可重创弱者，弱者反击难伤强者分毫。"
+            "内力为空者不能催动武功。）\n"
+        )
+
     _scene_block = f"\n【当前场景环境】\n{scene_info}\n" if scene_info else ""
     battle_prompt = f"""
 你正在续写武侠实时对战第{round_num}回合的交手细节，全程遵循金庸写实武侠风格，绝对不得自行终结战斗。
@@ -169,8 +205,7 @@ def gen_single_battle_round(llm_func, player_data, npc_data, round_num, player_a
 {skill_text}
 玩家完整档案：{player_data}
 对手NPC完整档案：{npc_data}
-{_scene_block}
-
+{_scene_block}{_vit_block}
 【回合承接锚点（必须严格承接）】
 上一回合收尾状态：{last_process if last_process else "双方刚摆开架势，初次照面，尚未正式交手"}
 玩家本回合主动出招：{player_attack_text}
@@ -189,12 +224,69 @@ def gen_single_battle_round(llm_func, player_data, npc_data, round_num, player_a
 
 【输出要求】
 - 仅输出本回合完整打斗过程 + 双方当前状态，结合当前双方伤势、气息变化自然融入叙事，同时单独列出双方此刻状态。
+- 最后一行必须是【体力结算】行（双方各一行），这是系统结算气血内力的唯一依据。
 - 结尾停在双方招式交替的间隙（可以是招式碰撞间隙，也可以是完整一招的间隙），留好下一回合的出招空间，不得收束战局。
-- 全文控制在120~180字，凝练有画面感，无多余字段、无总结、无结局。。
+- 全文控制在120~180字，凝练有画面感，无多余字段、无总结、无结局。（【体力结算】行不计入字数）
 
 输出：
 """
     return get_llm_content(llm_func(battle_prompt, "生成单回合武侠对战剧情", temp=0.8))
+
+
+# ===== V5：境界档位与体力结算数值校正 =====
+REALM_ORDER = ["无武功", "初学入门", "初窥门径", "略有小成", "略有所成", "渐入佳境",
+               "融会贯通", "登堂入室", "炉火纯青", "出神入化", "登峰造极",
+               "超凡入圣", "返璞归真", "天人合一", "破碎虚空"]
+
+
+def _realm_text_index(txt):
+    for i, r in enumerate(REALM_ORDER):
+        if r in (txt or ""):
+            return i
+    return None
+
+
+def calc_realm_index(entity_info):
+    """从玩家/NPC档案推算最高境界档位索引
+    兼容字段：martial_skill_list[].skill_level > martial_skill_list[].exp推算 >
+    martial_skills[].skill_level（临时NPC） > overall_martial_level / level / overall_realm
+    """
+    from player_manager import Player
+    best = 0
+    info = entity_info or {}
+    for s in info.get("martial_skill_list", []):
+        idx = _realm_text_index(s.get("skill_level", ""))
+        if idx is None and "exp" in s:
+            idx = _realm_text_index(Player.get_realm(s.get("exp", 0)))
+        if idx is not None:
+            best = max(best, idx)
+    for s in info.get("martial_skills", []):
+        idx = _realm_text_index(s.get("skill_level", ""))
+        if idx is not None:
+            best = max(best, idx)
+    for field in ("overall_martial_level", "level", "overall_realm"):
+        idx = _realm_text_index(info.get(field, ""))
+        if idx is not None:
+            best = max(best, idx)
+    return best
+
+
+def settle_battle_round_vitality(round_plot, player_name, target_name, target_persisted=True):
+    """从单回合对战剧情中解析【体力结算】行并结算（AI报什么数值就用什么数值，不做强制校正）。
+    返回结算日志字符串（空串表示无变化）。
+    战斗中的临时对手若未落盘，走内存缓存结算。
+    """
+    changes = vitality_system.parse_vitality_regex(round_plot or "")
+    if not changes:
+        return ""
+    scene_names = [target_name] if (target_name and not target_persisted) else None
+    results = vitality_system.settle_vitality(
+        changes,
+        player_name=player_name,
+        scene_npc_names=scene_names,
+        user_action="对战回合",
+    )
+    return vitality_system.format_settle_log(results)
 
 # 最终对战收尾结局生成（纯AI剧情结算，无手动输入）
 def gen_battle_final_end(llm_func, all_process, battle_style_desc, player_status="", npc_status=""):
@@ -552,6 +644,19 @@ def run_battle_system(
             # 累加对战记录
             total_battle_process += f"\n【第{current_round}回合】{round_plot}"
             last_round_process = round_plot
+
+            # ===== V5：CLI对战每回合体力结算（与web端一致） =====
+            try:
+                _vit_log = settle_battle_round_vitality(
+                    round_plot,
+                    player_name=player_obj.name if player_obj else None,
+                    target_name=target_npc.get("name"),
+                    target_persisted=target_npc.get("name") in db_npc_name_map,
+                )
+                if _vit_log:
+                    print(_vit_log)
+            except Exception as _ve:
+                print(f"{COLOR_WARN}[WARN] 对战体力结算异常: {_ve}{COLOR_END}")
 
             # 打印本回合对战剧情
             print(f"\n{COLOR_BATTLE}【第{current_round}回合 对战剧情】{COLOR_END}")

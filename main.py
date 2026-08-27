@@ -14,6 +14,8 @@ from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 import dice_system
 from dice_system import should_skip as dice_should_skip
 from dice_system import resolve_check_v4 as dice_resolve_check_v4, clear_web_state_v4 as dice_clear_web_state_v4
+# ===== 气血内力系统 V5（百分比版，最小侵入导入） =====
+import vitality_system as vit_sys
 # 在 main.py 文件顶部（其他 import 之后）
 from task_manager import create_task, list_tasks, complete_task, delete_task,update_task_progress,set_task_type,get_active_tasks,toggle_task_suspend,get_task_brief_for_ai,get_task_info
 from save_manager import save_game, load_game, list_saves, delete_save
@@ -2465,6 +2467,17 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
                                             print(f"{COLOR_WARN}🪦 NPC「{name}」被标记为已故，死因：{desc}{COLOR_END}")
                                     npc["body_status"] = status
                                     npc["body_status_desc"] = desc.strip()
+                                    # ===== V5：AI报死亡/濒死时同步写哨兵HP（HP为唯一真相源）=====
+                                    vit_npc = npc.get("vitality") or {"hp": 100, "mp": 100, "poisoned": False}
+                                    if status == "deceased":
+                                        vit_npc["hp"] = -1
+                                        npc["vitality"] = vit_npc
+                                    elif status == "dying":
+                                        vit_npc["hp"] = 0
+                                        npc["vitality"] = vit_npc
+                                    elif status == "poisoned":
+                                        vit_npc["poisoned"] = True
+                                        npc["vitality"] = vit_npc
                                     append_npc_memory(name, user_action, npc_data=npc_data)
                                     tool_updated_npcs.add(name)
                                     # 打印日志（和原函数保持一致）
@@ -2596,7 +2609,7 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
     }
     status_rules = [
         ("normal", ["伤势痊愈", "恢复如初", "已然痊愈", "毒已解", "伤势大好", "身体恢复", "伤愈"]),
-        ("deceased", ["身亡", "毙命", "当场死去", "气绝身亡", "不治身亡", "已死", "死去", "丧命"]),
+        ("deceased", ["身亡", "毙命", "当场死去", "气绝身亡", "不治身亡", "已死", "死去", "丧命", "亡故", "咽气", "断了气", "没了气息", "气绝", "力竭而亡", "战死", "香消玉殒", "当场毙命", "再无声息"]),
         ("dying", ["性命垂危", "奄奄一息", "濒死", "只剩一口气", "危在旦夕"]),
         ("heavy_injured", ["身受重伤", "重伤", "伤势不轻", "遍体鳞伤", "断了", "碎了","呕血", "口吐鲜血"]),
         ("light_injured", ["受了轻伤", "轻伤", "擦破", "划伤", "皮肉伤"]),
@@ -2652,6 +2665,15 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
                     break
                 npc["body_status"] = status
                 npc["body_status_desc"] = kw
+                # ===== V5：正则兜底检测到死亡/濒死/中毒时同步哨兵HP =====
+                vit_npc = npc.get("vitality") or {"hp": 100, "mp": 100, "poisoned": False}
+                if status == "deceased":
+                    vit_npc["hp"] = -1
+                elif status == "dying":
+                    vit_npc["hp"] = 0
+                elif status == "poisoned":
+                    vit_npc["poisoned"] = True
+                npc["vitality"] = vit_npc
                 print(f"{COLOR_GREEN}✅ NPC「{name}」状态已设为：{status_cn[status]}（{kw}）{COLOR_END}")
                 break
 
@@ -3204,7 +3226,12 @@ def handle_admin_commands(user_input: str):
 示例：设置NPC状态 仪琳 dying 被从二楼掷下，全身重伤
 
 治愈NPC 角色名 [描述]
-示例：治愈NPC 仪琳 伤势痊愈"""
+示例：治愈NPC 仪琳 伤势痊愈
+
+恢复NPC 角色名（HP/MP全部重置为100%，可复活已故/濒死角色）
+示例：恢复NPC 仪琳
+
+恢复主角（主角HP/MP全部重置为100%）"""
         return True, help_msg
     # 1. 设置NPC身体状态
     if user_input.startswith("设置NPC状态"):
@@ -3234,6 +3261,20 @@ def handle_admin_commands(user_input: str):
                 return True, "❌ 治愈失败，未找到该NPC"
         else:
             return True, "⚠️ 用法：治愈NPC 角色名"
+
+    # 2.5 气血内力全恢复（V5：无视哨兵值，HP/MP重置100）
+    if user_input.startswith("恢复NPC"):
+        parts = user_input.split(maxsplit=1)
+        if len(parts) >= 2:
+            name = parts[1].strip()
+            success, msg = vit_sys.restore_npc_full(name)
+            return True, f"✅ {msg}" if success else f"❌ {msg}"
+        else:
+            return True, "⚠️ 用法：恢复NPC 角色名（HP/MP全部重置为100%）"
+
+    if user_input.strip() == "恢复主角":
+        success, msg = vit_sys.restore_player_full()
+        return True, f"✅ {msg}" if success else f"❌ {msg}"
     
     # 未命中任何管理指令
     return False, ""
@@ -3732,7 +3773,9 @@ def process_one_round(user_input: str, is_web: bool = False):
                 "大家", "各位", "兄弟", "朋友", "老兄", "小姐", "公子", "少侠", "女侠", "掌门",
                 "师父", "徒儿", "师叔", "师伯", "师侄", "师兄弟", "师姐妹", "总镖头", "镖师",
                 "店小二", "掌柜", "老板", "客人", "大侠", "高手", "前辈", "后生", "晚辈",
-                "好说", "请坐", "多谢", "失陪", "告辞", "保重", "慢走","继续剧情"
+                "好说", "请坐", "多谢", "失陪", "告辞", "保重", "慢走","继续剧情",
+                "确认", "取消", "跳过", "掷骰", "再来", "重新", "继续", "结束",
+                "对战", "切磋", "比武", "死斗", "偷袭", "退出", "判局"
             }
             for name in potential_names:
                 if name not in all_npc_set and name not in exclude_words:
@@ -3886,6 +3929,8 @@ def process_one_round(user_input: str, is_web: bool = False):
                                 "required": ["name", "relation"]
                             }
                         },
+                        # ========== 新增：气血内力结算字段（V5百分比版） ==========
+                        "vitality_change": vit_sys.VITALITY_TOOL_SCHEMA,
                         # ========== 新增：主角自身状态字段 ==========
                         "self_state": {
                             "type": "string",
@@ -4577,6 +4622,21 @@ def process_one_round(user_input: str, is_web: bool = False):
         _task_display = task_brief_section if task_brief_section.strip() else "【*当前任务目标*】\n（暂无活跃任务）\n\n"
         _special_block = f"【!特殊指令!】\n{mainline_force_instruction}\n\n" if mainline_force_instruction.strip() else ""
 
+        # ===== 气血内力状态块（V5百分比版）=====
+        _vit_scene_names = [n for n in active_names if n]
+        _vitality_block = vit_sys.render_vitality_block(player_obj.name if player_obj else None, _vit_scene_names)
+        _vitality_section = (
+            f"【*气血内力面板*】（HP/MP均为0-100百分比刻度，全员上限都是100）\n"
+            f"{_vitality_block}\n"
+            f"（结算规则：每轮交手后通过工具vitality_change上报变化量，未变化可省略。"
+            f"数值由你根据剧情自行把握，只需遵守方向："
+            f"境界悬殊时，强者一击可重创弱者，弱者反击难伤强者分毫；"
+            f"疗伤/传功/吸取内力等要如实反映在双方数值上。"
+            f"HP归0即濒死，不得再降；内力为空者不能催动武功。"
+            f"若无法调用工具，必须在正文末尾单独输出【体力结算】行兜底："
+            f"【体力结算】姓名：气血±N，内力±N）\n"
+        )
+
         dynamic_info = f"""
 【*L3-1 全局剧情脉络*】
 ・1-{cache.get('last_l3_gen_round', 0)}章剧情脉络：{full_summary}
@@ -4602,6 +4662,7 @@ def process_one_round(user_input: str, is_web: bool = False):
 ・天气：{current_weather}
 ・日期：{novel_node_info}
 
+{_vitality_section}
 {_task_display}{character_panel}
 
 【*L4-1 NPC个人记忆*】
@@ -4982,6 +5043,45 @@ __L4_MERGE_SLOT__
         # 先更新玩家和NPC状态，再写入上下文，避免摘要与实际状态错位一轮
         _player_update_info = parse_and_update_player_state(reply, tool_calls)
         parse_and_update_npc_state(reply, tool_calls, user_action=actual_user_action)
+
+        # ===== 气血内力结算（V5：工具优先 + 正则兜底）=====
+        _vit_changes = []
+        if tool_calls:
+            for tc in tool_calls:
+                if tc.function.name == "update_game_state":
+                    try:
+                        _vtargs = json.loads(tc.function.arguments)
+                        _vit_list = _vtargs.get("vitality_change", [])
+                        if isinstance(_vit_list, list):
+                            _vit_changes.extend(_vit_list)
+                    except Exception:
+                        pass
+        if not _vit_changes:
+            _vit_changes = vit_sys.parse_vitality_regex(reply)
+        if _vit_changes:
+            _p_name = player_obj.name if player_obj else None
+            _vit_results = vit_sys.settle_vitality(
+                _vit_changes,
+                player_name=_p_name,
+                scene_npc_names=_vit_scene_names,
+                user_action=actual_user_action,
+            )
+            _vit_log = vit_sys.format_settle_log(_vit_results)
+            if _vit_log:
+                print(f"{COLOR_GREEN}{_vit_log}{COLOR_END}")
+                # ★ 先剥离AI模仿输出中已带的结算行（防重复），再追加正式结算 ★
+                plot_content = re.sub(r'^❤️‍🩹[^\n]*$\n?', '', plot_content, flags=re.M).rstrip()
+                # ★ web端也展示体力结算（追加到剧情文本末尾）★
+                plot_content = f"{plot_content}\n{_vit_log}"
+            # ★ 结算后同步回内存单例，防止后续 player_obj.save() 用旧数据覆盖文件 ★
+            if player_obj and _p_name and _p_name in _vit_results:
+                _pv = _vit_results[_p_name]
+                _cur_v = vit_sys.get_player_vitality()
+                player_obj._data["vitality"] = {
+                    "hp": _pv["hp"], "mp": _pv["mp"],
+                    "poisoned": _cur_v.get("poisoned", False),
+                }
+                player_obj.save()
         update_context_cache(plot_content, actual_user_action)
 
         # 推进进度
@@ -5889,4 +5989,11 @@ def ensure_archive_dir():
         
 if __name__ == "__main__":
     ensure_archive_dir()
+    # ===== V5：启动时迁移旧存档（为无vitality字段的NPC补全） =====
+    try:
+        _migrated = vit_sys.migrate_all_npcs()
+        if _migrated > 0:
+            print(f"{COLOR_SYSTEM}✅ 气血内力系统：已为 {_migrated} 个NPC补全vitality字段（按body_status推导HP）{COLOR_END}")
+    except Exception as _e:
+        print(f"{COLOR_WARN}⚠️ 气血内力迁移失败：{_e}{COLOR_END}")
     game_core_loop()

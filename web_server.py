@@ -196,7 +196,8 @@ from main import (
 )
 # 导入配图和战斗模块组件
 from image_generator import draw_ascii
-from battle_system import gen_single_battle_round, ai_judge_battle_trend, gen_battle_final_end, ai_check_battle_status
+from battle_system import gen_single_battle_round, ai_judge_battle_trend, gen_battle_final_end, ai_check_battle_status, settle_battle_round_vitality
+import vitality_system
 
 CURRENT_PLOT_TEXT = ""
 # ======= 骰子待确认状态（Web端专用） =======
@@ -647,6 +648,17 @@ def handle_battle_action(web_input: str, dice_confirm=None):
         _slim_player = WEB_BATTLE_STATE["player_data_raw"] or {}
 
     try:
+        # ===== V5：判断对手是否落盘NPC（决定体力结算路径） =====
+        _vit_target_persisted = False
+        try:
+            _all_npcs_v = load_json(NPC_AGENT_FILE) or {}
+            _vit_target_persisted = any(
+                n.get("name") == WEB_BATTLE_STATE.get("target_name")
+                for n in _all_npcs_v.get("npc_list", [])
+            )
+        except Exception:
+            pass
+
         round_plot = gen_single_battle_round(
             llm_func=llm_call_common,
             player_data=json.dumps(_slim_player, ensure_ascii=False),
@@ -656,8 +668,30 @@ def handle_battle_action(web_input: str, dice_confirm=None):
             last_process=WEB_BATTLE_STATE["last_round"],
             battle_style_desc=WEB_BATTLE_STATE["battle_style"],
             dice_constraint=_dice_constraint,
-            scene_info=WEB_BATTLE_STATE.get("scene_info", "")
+            scene_info=WEB_BATTLE_STATE.get("scene_info", ""),
+            player_name=_fresh_player.name if _fresh_player else _slim_player.get("name"),
+            target_npc_name=WEB_BATTLE_STATE.get("target_name"),
+            target_npc_persisted=_vit_target_persisted,
         )
+        # ===== V5：体力结算（每回合解析【体力结算】行并落盘） =====
+        _vit_log = ""
+        try:
+            _vit_log = settle_battle_round_vitality(
+                round_plot,
+                player_name=_fresh_player.name if _fresh_player else _slim_player.get("name"),
+                target_name=WEB_BATTLE_STATE.get("target_name"),
+                target_persisted=_vit_target_persisted,
+            )
+            # 结算后同步内存单例，防后续 player_obj.save() 旧数据覆盖
+            if _vit_log and _fresh_player:
+                _pv = vitality_system.get_player_vitality()
+                _fresh_player._data["vitality"] = dict(_pv)
+                _fresh_player.save()
+            if _vit_log:
+                print(f"{_vit_log}")
+                round_plot = f"{round_plot}\n{_vit_log}"
+        except Exception as _ve:
+            print(f"[WARN] 对战体力结算异常: {_ve}")
         if round_plot:
             WEB_BATTLE_STATE["total_process"] += f"\n【第{WEB_BATTLE_STATE['round_num']}回合】{round_plot}"
             WEB_BATTLE_STATE["last_round"] = round_plot
@@ -2467,6 +2501,8 @@ def api_npc_get():
         npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
         for npc in npc_data.get("npc_list", []):
             if npc.get("name") == name:
+                # V5：统一读取vitality（含迁移+亡故哨兵刷新），保证前端拿到百分比
+                npc["vitality"] = vitality_system.read_npc_vitality(npc)
                 return jsonify({"status": "success", "npc": npc})
         return jsonify({"status": "error", "message": f"NPC「{name}」不存在"})
     except Exception as e:
@@ -2481,6 +2517,11 @@ def api_npc_update():
     if not name or not npc_new:
         return jsonify({"status": "error", "message": "参数不完整"})
     try:
+        # V5：规范化 vitality 字段（T3 手动编辑），并按HP同步body_status
+        if "vitality" in npc_new:
+            vit = vitality_system._normalize_vitality(npc_new.get("vitality"))
+            npc_new["vitality"] = vit
+            npc_new["body_status"] = vitality_system.hp_to_status(vit["hp"])
         npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
         found = False
         for i, npc in enumerate(npc_data.get("npc_list", [])):
@@ -4521,6 +4562,14 @@ def api_faction_ai_generate():
 
 # ======= 启动局域网服务器 =======
 if __name__ == '__main__':
+    # ===== V5：气血内力系统 T0 迁移（补全vitality字段+亡故哨兵刷新） =====
+    try:
+        _migrated = vitality_system.migrate_all_npcs()
+        if _migrated > 0:
+            print(f"{COLOR_SYSTEM}✅ 气血内力系统：已为 {_migrated} 个NPC补全/刷新vitality字段{COLOR_END}")
+    except Exception as _vit_e:
+        print(f"[WARN] 气血内力迁移失败（不影响主功能）: {_vit_e}")
+
     # ===== 世界书索引预初始化（零侵入：web端启动时即构建，不等首次search） =====
     try:
         import worldbook as _wb_bootstrap
