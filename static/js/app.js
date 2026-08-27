@@ -726,12 +726,46 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 const data = await res.json();
                 if(data.status === 'success') {
                     document.getElementById('player_json_editor').value = JSON.stringify(data.data, null, 2);
+                    renderPlayerVitalityPanel(data.data);
                 } else {
                     alert('读取失败：' + data.message);
                 }
             } catch(e) {
                 alert('网络错误：' + e);
             }
+        }
+
+        function renderPlayerVitalityPanel(playerData) {
+            const vit = (playerData && playerData.vitality && typeof playerData.vitality === 'object') ? playerData.vitality : {hp: 100, mp: 100, poisoned: false};
+            let hp = parseInt(vit.hp); if (isNaN(hp)) hp = 100;
+            let mp = parseInt(vit.mp); if (isNaN(mp)) mp = 100;
+            const hpInput = document.getElementById('player-hp-input');
+            const mpInput = document.getElementById('player-mp-input');
+            const hpBar = document.getElementById('player-hp-bar');
+            const mpBar = document.getElementById('player-mp-bar');
+            if (!hpInput || !mpInput || !hpBar || !mpBar) return;
+            hpInput.value = hp;
+            mpInput.value = mp;
+            hpBar.style.width = Math.max(0, Math.min(100, hp)) + '%';
+            hpBar.style.background = hp === 0 ? '#833' : 'linear-gradient(90deg,#f44,#f88)';
+            mpBar.style.width = Math.max(0, Math.min(100, mp)) + '%';
+        }
+
+        function playerVitalityApply() {
+            const hp = parseInt(document.getElementById('player-hp-input').value);
+            const mp = parseInt(document.getElementById('player-mp-input').value);
+            if (isNaN(hp) || hp < 0 || hp > 100) { alert('HP 范围：0 ~ 100'); return; }
+            if (isNaN(mp) || mp < 0 || mp > 100) { alert('MP 范围：0 ~ 100'); return; }
+            let playerData;
+            try {
+                playerData = JSON.parse(document.getElementById('player_json_editor').value);
+            } catch(e) {
+                alert('JSON 格式错误，无法应用：' + e);
+                return;
+            }
+            playerData.vitality = {hp: hp, mp: mp, poisoned: !!(playerData.vitality && playerData.vitality.poisoned)};
+            document.getElementById('player_json_editor').value = JSON.stringify(playerData, null, 2);
+            renderPlayerVitalityPanel(playerData);
         }
 
         // ======= 装备管理器 JavaScript =======

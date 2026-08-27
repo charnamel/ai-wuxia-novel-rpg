@@ -546,6 +546,28 @@
             <button onclick="savePlayerRaw()" class="btn">保存修改</button>
             <button onclick="closeEditor()" class="btn btn-ghost">关闭</button>
         </div>
+        <div id="player-vitality-panel" style="background:#111; border:1px solid #333; border-radius:6px; padding:8px 10px; margin-bottom:8px; font-size:12px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span style="color:#f66; min-width:32px;">HP</span>
+                <div style="flex:1; height:10px; background:#300; border-radius:5px; overflow:hidden;">
+                    <div id="player-hp-bar" style="height:100%; width:100%; background:linear-gradient(90deg,#f44,#f88);"></div>
+                </div>
+                <input type="number" id="player-hp-input" min="0" max="100" value="100" style="width:56px; background:#111; border:1px solid #444; color:#f88; padding:2px 4px; border-radius:3px;">
+                <span style="color:#888;">%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="color:#4af; min-width:32px;">MP</span>
+                <div style="flex:1; height:10px; background:#003; border-radius:5px; overflow:hidden;">
+                    <div id="player-mp-bar" style="height:100%; width:100%; background:linear-gradient(90deg,#48f,#8af);"></div>
+                </div>
+                <input type="number" id="player-mp-input" min="0" max="100" value="100" style="width:56px; background:#111; border:1px solid #444; color:#8af; padding:2px 4px; border-radius:3px;">
+                <span style="color:#888;">%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
+                <span style="color:#888;">HP：0濒死 / 1-30重伤 / 31-70轻伤 / 71-100健康</span>
+                <button onclick="playerVitalityApply()" class="btn btn-green" style="padding:2px 10px; font-size:11px;">应用到JSON</button>
+            </div>
+        </div>
         <textarea id="player_json_editor" class="textarea-code ta-l"></textarea>
         <div class="modal-hint">直接修改 JSON 内容后点保存，立即生效。谨慎修改，建议先备份。</div>
     </div>
