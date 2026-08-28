@@ -4,7 +4,7 @@ import re
 import random
 import time
 from openai import OpenAI
-from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT
+from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, thinking_extra_body
 from player_manager import get_player
 
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
@@ -32,7 +32,7 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=0.7, retry_times=2):
                 top_p=1.0,
                 stream=False,
                 timeout=COMMON_TIMEOUT,
-                extra_body={"thinking": {"type": "disabled"}}
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
             )
             result = resp.choices[0].message.content.strip()
             if result:

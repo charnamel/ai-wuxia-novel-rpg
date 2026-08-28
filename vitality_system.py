@@ -257,9 +257,9 @@ def apply_delta(hp, mp, hp_d, mp_d):
 
     old_hp = hp
     hp = hp + hp_d
-    # 濒死锁血：不会再降到 0 以下，但也不允许一口气从濒死直接回复到高位
+    # HP>0受伤：最低降到0（濒死）；HP=0再受伤：直接亡故（-1）
     if hp < 0:
-        hp = 0
+        hp = -1 if old_hp == 0 else 0
     if hp > 100:
         hp = 100
 
@@ -273,7 +273,9 @@ def apply_delta(hp, mp, hp_d, mp_d):
     if mp < 0:
         mp = 0
 
-    if hp == 0 and old_hp > 0:
+    if hp == -1 and old_hp == 0:
+        event = "角色伤重不治身亡！AI 应当撰写死亡收场剧情"
+    elif hp == 0 and old_hp > 0:
         event = "角色濒死！AI 应当撰写结局或重创收场剧情"
     return hp, mp, event
 

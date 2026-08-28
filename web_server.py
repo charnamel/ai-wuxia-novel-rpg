@@ -3306,6 +3306,7 @@ def generate_task_summary(task_name, stage_hist):
 
 输出："""
         print(f"[DEBUG 任务总结] Prompt长度: {len(summary_prompt)} 字")
+        from config import thinking_extra_body as _teb
         resp = client.chat.completions.create(
             model=DEEPSEEK_MODEL,
             messages=[
@@ -3313,7 +3314,7 @@ def generate_task_summary(task_name, stage_hist):
                 {"role": "user", "content": summary_prompt}
             ],
             max_tokens=400, temperature=0.4, timeout=60,
-            extra_body={"thinking": {"type": "disabled"}}
+            extra_body=_teb(DEEPSEEK_MODEL)
         )
         # 安全检查：message.content 可能为 None
         content = getattr(resp.choices[0].message, 'content', '') or ''

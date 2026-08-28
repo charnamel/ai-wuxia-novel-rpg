@@ -7,7 +7,7 @@ import textwrap
 import colorama
 import threading
 # 在 main.py 中删除原来的定义，改为导入
-from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, CLOUD_MEM_SLOT_ID
+from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, CLOUD_MEM_SLOT_ID, thinking_extra_body
 from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node #导入作弊器代码
 from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 # ===== 骰子检定系统（最小侵入导入） =====
@@ -196,7 +196,7 @@ STATIC_SYSTEM_PROMPT = """
 4. 武功经验类：skill_exp_gain（武学经验增长时填写，按照日常勤练、战斗厮杀、月余苦练、数年苦修、顿悟突破、奇遇机缘等不同场景分别给出合理数值）、skill_exp_update（感悟更新）、bottleneck_progress_delta（瓶颈增量）。
 5. 任务进度类：task（任务进展，name优先传完整任务名，单轮涨幅≤5%）。
 6. 武功学习类：new_skills（习得新武功时填写）。
-7. NPC状态类：npc_status_update（状态变化时填写；normal=恢复健康；deceased=仅限战斗结算或主线明确死亡，必须填desc说明死因，严禁普通交互中随意使用）、npc_favor_update（好感实质变化时填写，单次±1~±8；施恩/契合性格则增，冒犯/违背立场则减，闲聊不触发）、npc_relationship_update（关系标签4字内）。
+7. NPC状态类：npc_favor_update（好感实质变化时填写，单次±1~±8；施恩/契合性格则增，冒犯/违背立场则减，闲聊不触发）、npc_relationship_update（关系标签4字内）。NPC身体状态一律通过 vitality_change 的HP数值体现，禁止通过文本或其它字段直接标记NPC死亡。
 8. 主角状态类：self_state（身体/精神状态变化时填写，30字内）。
 9. 小说节点类：novel_node（必须以“YYYY年M季，”开头，如“1751年春，萧半和寿宴在即”；无变化时填空字符串）。
 
@@ -513,14 +513,14 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=0.65, retry_times=3,
                 kwargs["tools"] = tools
                 kwargs["tool_choice"] = tool_choice
                 print(f"[DEBUG 工具调用] 已注入tools，tool_choice = {tool_choice}")
-            # 显式关闭思考模式：保证 temperature/top_p 生效，提升小说创作自然度、降低成本、加速推理
+            # 思考模式按模型分派：GLM-5.3系列强制开启（disabled会400），其余关闭
             # max_tokens 与 max_completion_tokens 互斥：MiMo 用后者，DeepSeek 用前者，同时发会触发 400
             _is_mimo = "mimo" in (model or DEEPSEEK_MODEL).lower()
             if _is_mimo:
                 kwargs.pop("max_tokens", None)
                 kwargs["extra_body"] = {"thinking": {"type": "disabled"}, "max_completion_tokens": max_tokens}
             else:
-                kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
+                kwargs["extra_body"] = thinking_extra_body(model or DEEPSEEK_MODEL)
             _client = OpenAI(api_key=api_key, base_url=base_url) if (api_key and base_url) else client
 
             # ===== DEBUG 诊断日志（LLM_DEBUG=1 开启）=====
@@ -696,7 +696,7 @@ def llm_call_npc_gen(sys_prompt: str, user_prompt: str, temp=0.5, retry_times=2)
                 temperature=temp,
                 stream=False,
                 timeout=NPC_GEN_TIMEOUT,
-                extra_body={"thinking": {"type": "disabled"}}
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
             )
             # 安全检查：message.content 可能为 None
             _msg = resp.choices[0].message
@@ -1158,7 +1158,7 @@ def _background_generate_l3(new_round):
                     {"role": "user", "content": full_prompt}
                 ],
                 max_tokens=2000, temperature=0.3, timeout=75,
-                extra_body={"thinking": {"type": "disabled"}}
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
             )
             # 安全检查：message.content 可能为 None
             content = getattr(resp.choices[0].message, 'content', '') or ''
@@ -1175,7 +1175,7 @@ def _background_generate_l3(new_round):
                                 {"role": "user", "content": f"以下剧情概述当前{len(full_summary)}字，必须压缩到600字以内（含标点）：\n- 保留优先级从高到低：主线关键事件与结局、人物关系变化、未解伏笔；先删战斗过程与招式细节、日常相处、风物描写\n- 允许大幅合并改写、句式极简，信息要点尽量保留但表述精炼\n- 600字是硬性上限，宁可多删不得超出\n\n{full_summary}"}
                             ],
                             max_tokens=1200, temperature=0.3, timeout=60,
-                            extra_body={"thinking": {"type": "disabled"}}
+                            extra_body=thinking_extra_body(DEEPSEEK_MODEL)
                         )
                         compressed = (getattr(resp2.choices[0].message, 'content', '') or '').strip()
                         if compressed and len(compressed) < len(full_summary):
@@ -1227,7 +1227,7 @@ def _background_generate_l3(new_round):
                 {"role": "user", "content": bio_prompt}
             ],
             max_tokens=2000, temperature=0.3, timeout=75,
-            extra_body={"thinking": {"type": "disabled"}}
+            extra_body=thinking_extra_body(DEEPSEEK_MODEL)
         )
         # 安全检查：message.content 可能为 None
         content = getattr(resp.choices[0].message, 'content', '') or ''
@@ -1380,7 +1380,7 @@ def _distill_npc_memories(new_round):
                     {"role": "user", "content": distill_prompt}
                 ],
                 max_tokens=800, temperature=0.3, timeout=30,
-                extra_body={"thinking": {"type": "disabled"}}
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
             )
             content = getattr(resp.choices[0].message, 'content', '') or ''
             content = content.strip()
@@ -1558,7 +1558,7 @@ def update_context_cache(new_plot, user_action=""):
                 temperature=0.3,
                 max_tokens=400,
                 timeout=45,
-                extra_body={"thinking": {"type": "disabled"}}
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
             )
             # 安全检查：message.content 可能为 None
             content = getattr(compress_resp.choices[0].message, 'content', '') or ''
@@ -1832,10 +1832,6 @@ def format_tool_calls_summary(tool_calls):
                 favors = args.get("npc_favor_update", [])
                 if favors:
                     lines.append("- NPC好感：" + "，".join(f"{f.get('name','?')}{'+' if f.get('delta',0)>=0 else ''}{f.get('delta',0)}" for f in favors))
-                statuses = args.get("npc_status_update", [])
-                if statuses:
-                    sm = {"light_injured":"轻伤","heavy_injured":"重伤","dying":"濒死","deceased":"死亡","poisoned":"中毒","normal":"正常"}
-                    lines.append("- NPC状态：" + "，".join(f"{s.get('name','?')}{sm.get(s.get('status',''),'?')}" for s in statuses))
                 rels = args.get("npc_relationship_update", [])
                 if rels:
                     lines.append("- NPC关系：" + "，".join(f"{r.get('name','?')}{r.get('relation','')}" for r in rels))
@@ -2446,58 +2442,7 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
             if tc.function.name == "update_game_state":
                 try:
                     args = json.loads(tc.function.arguments)
-                    # 读取身体情况
-                    status_list = args.get("npc_status_update", [])
-                    if status_list and isinstance(status_list, list):
-                        for item in status_list:
-                            name = item.get("name", "").strip()
-                            status = item.get("status", "")
-                            desc = item.get("desc", "")
-                            if not name or not status:
-                                continue
-                            # 直接修改内存中的NPC数据
-                            for npc in npc_data["npc_list"]:
-                                if npc["name"] == name:
-                                    # ===== 新增：已故NPC禁止任何状态变更 =====
-                                    if npc.get("body_status") == "deceased":
-                                        print(f"{COLOR_WARN}⚠️ 已故NPC「{name}」禁止更改状态，忽略本次更新{COLOR_END}")
-                                        break
-                                    if status == "deceased":
-                                        if not desc or not desc.strip():
-                                            print(f"{COLOR_WARN}⚠️ NPC「{name}」被标记为已故但未提供死因，已拦截{COLOR_END}")
-                                            break
-                                        if npc.get("body_status") in ("normal", None):
-                                            print(f"{COLOR_WARN}🪦 [突变警告] NPC「{name}」从健康直接标记为已故，死因：{desc}{COLOR_END}")
-                                        else:
-                                            print(f"{COLOR_WARN}🪦 NPC「{name}」被标记为已故，死因：{desc}{COLOR_END}")
-                                    npc["body_status"] = status
-                                    npc["body_status_desc"] = desc.strip()
-                                    # ===== V5：AI报死亡/濒死时同步写哨兵HP（HP为唯一真相源）=====
-                                    vit_npc = npc.get("vitality") or {"hp": 100, "mp": 100, "poisoned": False}
-                                    if status == "deceased":
-                                        vit_npc["hp"] = -1
-                                        npc["vitality"] = vit_npc
-                                    elif status == "dying":
-                                        vit_npc["hp"] = 0
-                                        npc["vitality"] = vit_npc
-                                    elif status == "poisoned":
-                                        vit_npc["poisoned"] = True
-                                        npc["vitality"] = vit_npc
-                                    append_npc_memory(name, user_action, npc_data=npc_data)
-                                    tool_updated_npcs.add(name)
-                                    # 打印日志（和原函数保持一致）
-                                    status_cn = {
-                                        "normal": "健康",
-                                        "light_injured": "轻伤",
-                                        "heavy_injured": "重伤",
-                                        "dying": "濒死",
-                                        "deceased": "已故",
-                                        "poisoned": "中毒"
-                                    }
-                                    show_desc = f"（{desc}）" if desc else ""
-                                    print(f"{COLOR_GREEN}✅ NPC「{name}」状态已设为：{status_cn.get(status, status)}{show_desc}{COLOR_END}")
-                                    break
-                                                # ========== 新增：NPC好感度更新 ==========
+                    # ========== 新增：NPC好感度更新 ==========
                     favor_list = args.get("npc_favor_update", [])
                     if favor_list and isinstance(favor_list, list):
                         for item in favor_list:
@@ -3212,6 +3157,14 @@ def set_npc_body_status(npc_name, status="normal", desc=""):
         if npc["name"] == npc_name:
             npc["body_status"] = status
             npc["body_status_desc"] = desc.strip()
+            # ===== V5：状态与vitality双向同步（HP是唯一真相源）=====
+            vit_npc = npc.get("vitality") or {"hp": 100, "mp": 100, "poisoned": False}
+            status_hp_map = {"normal": 100, "light_injured": 80, "heavy_injured": 40, "dying": 0, "deceased": -1}
+            if status in status_hp_map:
+                vit_npc["hp"] = status_hp_map[status]
+            elif status == "poisoned":
+                vit_npc["poisoned"] = True
+            npc["vitality"] = vit_npc
             save_json(NPC_AGENT_FILE, npc_all)
             show_desc = f"（{desc}）" if desc else ""
             print(f"{COLOR_GREEN}✅ NPC「{npc_name}」状态已设为：{status_cn[status]}{show_desc}{COLOR_END}")
@@ -3888,24 +3841,6 @@ def process_one_round(user_input: str, is_web: bool = False):
                                     }
                                 },
                                 "required": ["name", "level"]
-                            }
-                        },
-                        # ========== 新增：NPC身体状态更新字段 ==========
-                        "npc_status_update": {
-                            "type": "array",
-                            "description": "NPC身体状态变化列表",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string", "description": "NPC姓名"},
-                                    "status": {
-                                        "type": "string",
-                                        "enum": ["light_injured", "heavy_injured", "dying", "deceased", "poisoned", "normal"],
-                                        "description": "NPC身体状态。normal=恢复健康；light_injured=轻伤；heavy_injured=重伤；dying=濒死；poisoned=中毒；deceased=死亡（仅限战斗结算或主线明确死亡，必须填写desc说明死因，严禁普通交互中随意使用）"
-                                    },
-                                    "desc": {"type": "string", "description": "状态原因"}
-                                },
-                                "required": ["name", "status"]
                             }
                         },
                         # ========== 新增：NPC好感度更新字段 ==========
@@ -5800,7 +5735,7 @@ def game_core_loop():
                                 max_tokens=400,
                                 temperature=0.4,
                                 timeout=60,
-                                extra_body={"thinking": {"type": "disabled"}}
+                                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
                             )
                             # 安全检查：message.content 可能为 None
                             content = getattr(resp.choices[0].message, 'content', '') or ''

@@ -27,10 +27,14 @@ try:
     from config import DEEPSEEK_API_KEY as _FALLBACK_KEY
     from config import DEEPSEEK_BASE_URL as _FALLBACK_URL
     from config import DEEPSEEK_MODEL as _FALLBACK_MODEL
+    from config import thinking_extra_body
 except ImportError:
     _FALLBACK_KEY = os.getenv("DEEPSEEK_API_KEY", "")
     _FALLBACK_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
     _FALLBACK_MODEL = "deepseek-v4-flash"
+
+    def thinking_extra_body(model_name):
+        return {"thinking": {"type": "disabled"}}
 
 _API_KEY = os.getenv("ACTIVE_RETRIEVAL_API_KEY", "") or _FALLBACK_KEY
 _BASE_URL = os.getenv("ACTIVE_RETRIEVAL_BASE_URL", "") or _FALLBACK_URL
@@ -149,7 +153,7 @@ def _call_thinking_model(recent_context, player_input, active_npcs):
         timeout=_THINKING_TIMEOUT,
         tools=[_RETRIEVE_TOOL],
         tool_choice="auto",
-        extra_body={"thinking": {"type": "disabled"}},
+        extra_body=thinking_extra_body(_MODEL),
     )
     msg = resp.choices[0].message
     content = msg.content or ""

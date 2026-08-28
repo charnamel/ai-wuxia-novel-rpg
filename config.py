@@ -98,3 +98,22 @@ SUMMARY_KEEP_RECENT_COUNT = 20
 ACTIVE_RETRIEVAL_API_KEY = _env("ACTIVE_RETRIEVAL_API_KEY", "") or DEEPSEEK_API_KEY
 ACTIVE_RETRIEVAL_BASE_URL = _env("ACTIVE_RETRIEVAL_BASE_URL", "") or DEEPSEEK_BASE_URL
 ACTIVE_RETRIEVAL_MODEL = _env("ACTIVE_RETRIEVAL_MODEL", "") or "deepseek-v4-flash"
+
+
+# ===== thinking参数分派（按模型家族返回extra_body） =====
+# GLM-5.3/GLM-5.3-FLASH 强制思考：thinking.type传disabled直接400报错
+# （官方文档：https://docs.bigmodel.cn/cn/guide/capabilities/thinking）
+# 其余模型保持关闭思考以保证temperature生效、降低成本、加速推理
+GLM_THINKING_EFFORT = _env("GLM_REASONING_EFFORT", "low")  # low/high/max，低成本档
+
+
+def thinking_extra_body(model_name):
+    """按模型名返回thinking相关的extra_body dict。
+
+    - glm-5.3系列：思考强制开启（不可关），用reasoning_effort控制成本
+    - 其他模型：关闭思考（原行为）
+    """
+    _m = (model_name or "").lower()
+    if "glm-5.3" in _m:
+        return {"thinking": {"type": "enabled"}, "reasoning_effort": GLM_THINKING_EFFORT}
+    return {"thinking": {"type": "disabled"}}

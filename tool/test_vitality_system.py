@@ -163,17 +163,14 @@ def test_settlement():
 
 def test_death_and_restore():
     print("\n== 5. 死亡哨兵与恢复命令 ==")
-    # 打死小虾
-    vs.settle_vitality(
-        [{"name": "测试小虾", "hp_pct": -40}, {"name": "测试小虾", "hp_pct": -40}, {"name": "测试小虾", "hp_pct": -40}],
-        player_name="测试主角", scene_npc_names=[],
-    )
+    # 重击打到濒死
+    vs.settle_vitality([{"name": "测试小虾", "hp_pct": -40}], player_name="测试主角", scene_npc_names=[])
     v = vs.get_npc_vitality("测试小虾")
-    check("三连击后HP=0濒死", v["hp"] == 0, str(v))
-    # 正常结算无法再降
+    check("重击后HP=0濒死", v["hp"] == 0, str(v))
+    # 濒死再受伤→亡故(-1)
     vs.settle_vitality([{"name": "测试小虾", "hp_pct": -10}], player_name="测试主角", scene_npc_names=[])
     v = vs.get_npc_vitality("测试小虾")
-    check("濒死后无法继续掉血", v["hp"] == 0, str(v))
+    check("濒死再受伤→亡故(-1)", v["hp"] == -1, str(v))
     # AI报死亡→哨兵-1
     npc_data = load_json(NPC_FILE)
     xia = [n for n in npc_data["npc_list"] if n["name"] == "测试小虾"][0]
