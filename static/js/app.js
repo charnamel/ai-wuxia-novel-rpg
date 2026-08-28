@@ -440,13 +440,10 @@ DC: ${dc.dc}` + (dc.dc_reason ? ` (${dc.dc_reason})` : '') +
                         if (effectList.length > 0) {
                             effectLines = effectList.map(er => {
                                 if (!er) return '';
-                                const triggeredIcon = er.triggered ? '⚡' : '○';
-                                const triggeredText = er.triggered ? '已触发' : '未触发';
-                                const triggeredColor = er.triggered ? '#fa8' : '#888';
                                 const role = er.skill_name === dr.skill_name ? '主武功' : '增幅源';
                                 const hintLine = (er.triggered && er.narrative_hint) ? `\n<span style="color:#fd6">${er.narrative_hint}</span>` : '';
                                 return `
-<span style="color:${triggeredColor}">${triggeredIcon} 特效[${role}·${er.skill_name}]·${er.effect_name}（${er.effect_category}类）→ 触发率 ${er.final_rate}% · ${triggeredText}</span>${hintLine}`;
+<span style="color:#8ac">○ 特效[${role}·${er.skill_name}]·${er.effect_name}（${er.effect_category}类）</span>${hintLine}`;
                             }).join('');
                         }
                         diceResultDiv.innerHTML = `${verdictIcon} <b style="color:${verdictColor}">【${dr.verdict}】</b> 第${vg}档` +
@@ -1566,6 +1563,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 if (data.status === 'success') {
                     document.getElementById('npc-editor').value = JSON.stringify(data.npc, null, 2);
                     renderNpcVitalityPanel(data.npc);
+                    renderNpcEffectPanel(data.npc);
                 } else {
                     alert('加载失败：' + data.message);
                 }
@@ -1606,6 +1604,74 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
             npcData.vitality = {hp: hp, mp: mp, poisoned: !!(npcData.vitality && npcData.vitality.poisoned)};
             document.getElementById('npc-editor').value = JSON.stringify(npcData, null, 2);
             renderNpcVitalityPanel(npcData);
+        }
+
+        // ===== NPC特效反手面板（effect_triggers 编辑，复用武功书特效清单） =====
+        let npcEffectCatalog = null;  // [{id, name, category, desc}]
+
+        async function npcLoadEffectCatalog() {
+            if (npcEffectCatalog) return npcEffectCatalog;
+            try {
+                const res = await fetch('/martial/list_effect');
+                const data = await res.json();
+                npcEffectCatalog = (data.effects || []).filter(e => e.id);
+            } catch(e) {
+                npcEffectCatalog = [];
+            }
+            return npcEffectCatalog;
+        }
+
+        async function renderNpcEffectPanel(npc) {
+            const box = document.getElementById('npc-effect-list');
+            if (!box) return;
+            const catalog = await npcLoadEffectCatalog();
+            if (!catalog.length) {
+                box.innerHTML = '<span style="color:#666;">特效清单加载失败</span>';
+                return;
+            }
+            const triggers = (npc && npc.effect_triggers && typeof npc.effect_triggers === 'object') ? npc.effect_triggers : {};
+            let html = '';
+            catalog.forEach(e => {
+                const cur = triggers[e.id];
+                const on = !!cur;
+                const tgtSelf = (cur && typeof cur === 'object' && cur.target === 'self');
+                html += `
+                    <label style="display:inline-flex; align-items:center; gap:3px; cursor:pointer; color:${on ? '#fd6' : '#889'};">
+                        <input type="checkbox" id="npc-eff-chk-${e.id}" ${on ? 'checked' : ''} title="${escapeHtml(e.desc || '')}">
+                        ${escapeHtml(e.name)}
+                        <select id="npc-eff-tgt-${e.id}" style="background:#111; border:1px solid #444; color:#fd6; padding:1px 2px; border-radius:3px; font-size:11px;">
+                            <option value="opponent" ${tgtSelf ? '' : 'selected'}>打玩家</option>
+                            <option value="self" ${tgtSelf ? 'selected' : ''}>NPC自增益</option>
+                        </select>
+                    </label>
+                `;
+            });
+            box.innerHTML = html;
+        }
+
+        function npcEffectApply() {
+            let npcData;
+            try {
+                npcData = JSON.parse(document.getElementById('npc-editor').value);
+            } catch(e) {
+                alert('JSON 格式错误，无法应用：' + e);
+                return;
+            }
+            const triggers = {};
+            (npcEffectCatalog || []).forEach(e => {
+                const chk = document.getElementById('npc-eff-chk-' + e.id);
+                if (chk && chk.checked) {
+                    const tgt = document.getElementById('npc-eff-tgt-' + e.id).value;
+                    triggers[e.id] = {"target": tgt};
+                }
+            });
+            if (Object.keys(triggers).length) {
+                npcData.effect_triggers = triggers;
+            } else {
+                delete npcData.effect_triggers;
+            }
+            document.getElementById('npc-editor').value = JSON.stringify(npcData, null, 2);
+            renderNpcEffectPanel(npcData);
         }
 
         async function npcSave() {
@@ -1791,6 +1857,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 const data = await res.json();
                 if (data.status === 'success') {
                     ta.value = JSON.stringify(data.npc, null, 2);
+                    renderNpcEffectPanel(data.npc);
                     npcCurrentName = null;  // 草稿模式，保存时走新增
                     document.getElementById('npc-editor-title').textContent = 'AI生成草稿（未保存）：请审核后点「💾 保存修改」';
                     alert('AI 生成完成！请审核 JSON 内容，确认无误后点「保存修改」（将作为新NPC入库）');
@@ -2013,7 +2080,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
         let martialCurrentName = null;
         let martialMeta = {grade_system: {}, category_list: []};
         let martialEffectsList = [];   // 特效列表（来自 /martial/list_effect）
-        let martialEffectDefaultRate = {attack:5, internal:8, lightfoot:6, special:4};
         const MARTIAL_GRADE_BONUS = {9:7, 8:6, 7:5, 6:4, 5:3, 4:2, 3:1, 2:0, 1:-1};
         const MARTIAL_CAT_NAMES = {
             internal:'内功', sword:'剑法', blade:'刀法', palm:'掌法', staff:'棍枪',
@@ -2067,7 +2133,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 const data = await res.json();
                 if (data.status !== 'success') return;
                 martialEffectsList = data.effects || [];
-                martialEffectDefaultRate = data.default_base_rate || martialEffectDefaultRate;
                 // 按 effects 顺序追加（首项已是"无特效"）
                 martialEffectsList.forEach(eff => {
                     if (eff.id === '') return; // 跳过占位项（HTML已默认）
@@ -2086,7 +2151,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
         function martialOnEffectChange() {
             const sel = document.getElementById('martial-edit-effect-type');
             const descDiv = document.getElementById('martial-effect-desc');
-            const rateInput = document.getElementById('martial-edit-base-rate');
             const selectedId = sel.value;
             // 找到选中项的元数据
             const eff = martialEffectsList.find(e => e.id === selectedId);
@@ -2094,15 +2158,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 descDiv.textContent = '📖 ' + eff.desc;
             } else {
                 descDiv.textContent = '';
-            }
-            // 自动填充默认基础率（仅当当前基础率为空或与上次默认一致时）
-            if (eff && eff.category && martialEffectDefaultRate[eff.category] !== undefined) {
-                const defaultRate = martialEffectDefaultRate[eff.category];
-                // 如果输入框为空或是上次默认值,自动更新为新类别的默认值
-                const cur = parseInt(rateInput.value) || 0;
-                if (!cur || Object.values(martialEffectDefaultRate).includes(cur)) {
-                    rateInput.value = defaultRate;
-                }
             }
         }
 
@@ -2234,9 +2289,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 document.getElementById('martial-edit-brief').value = a.brief_desc || '';
                 // 特效回填
                 const effectType = (a.effect && a.effect.type) ? a.effect.type : '';
-                const baseRate = (a.effect && a.effect.base_rate) ? a.effect.base_rate : 5;
                 document.getElementById('martial-edit-effect-type').value = effectType;
-                document.getElementById('martial-edit-base-rate').value = baseRate;
                 const snEl = document.getElementById('martial-edit-special-name');
                 const sdEl = document.getElementById('martial-edit-special-desc');
                 if (snEl) snEl.value = a.special_move_name || '';
@@ -2286,10 +2339,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     // 特效配置自动选择
                     const effectType = (a.effect && a.effect.type) ? a.effect.type : '';
                     document.getElementById('martial-edit-effect-type').value = effectType;
-                    if (a.effect && a.effect.base_rate) {
-                        document.getElementById('martial-edit-base-rate').value = a.effect.base_rate;
-                    }
-                    martialOnEffectChange();  // 刷新特效说明和默认基础率
+                    martialOnEffectChange();  // 刷新特效说明
 
                     // 特技名称/描述自动填写
                     document.getElementById('martial-edit-special-name').value = a.special_move_name || '';
@@ -2317,7 +2367,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
             document.getElementById('martial-edit-brief').value = '';
             // 清空特效
             document.getElementById('martial-edit-effect-type').value = '';
-            document.getElementById('martial-edit-base-rate').value = 5;
             const snEl2 = document.getElementById('martial-edit-special-name');
             const sdEl2 = document.getElementById('martial-edit-special-desc');
             if (snEl2) snEl2.value = '';
@@ -2340,7 +2389,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
             document.getElementById('martial-edit-brief').value = '';
             // 清空特效
             document.getElementById('martial-edit-effect-type').value = '';
-            document.getElementById('martial-edit-base-rate').value = 5;
             const snEl3 = document.getElementById('martial-edit-special-name');
             const sdEl3 = document.getElementById('martial-edit-special-desc');
             if (snEl3) snEl3.value = '';
@@ -2356,10 +2404,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
             const newName = document.getElementById('martial-edit-name').value.trim();
             if (!newName) { alert('武功名不能为空'); return; }
             const effectType = document.getElementById('martial-edit-effect-type').value.trim();
-            let baseRate = parseInt(document.getElementById('martial-edit-base-rate').value);
-            if (!baseRate || isNaN(baseRate)) baseRate = 5;
-            if (baseRate < 1) baseRate = 1;
-            if (baseRate > 20) baseRate = 20;
             const payload = {
                 name: newName,
                 grade: parseInt(document.getElementById('martial-edit-grade').value),
@@ -2368,7 +2412,6 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                 note: document.getElementById('martial-edit-note').value.trim(),
                 brief_desc: document.getElementById('martial-edit-brief').value.trim(),
                 effect_type: effectType,
-                base_rate: baseRate,
                 special_move_name: document.getElementById('martial-edit-special-name').value.trim(),
                 special_move_desc: document.getElementById('martial-edit-special-desc').value.trim()
             };

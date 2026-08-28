@@ -31,6 +31,8 @@ AI 协议（挂载在 update_game_state 工具上）：
 """
 
 import re
+import os
+import json
 from file_utils import save_json, load_json
 
 NPC_AGENT_FILE = "data/npc_agents.json"
@@ -82,9 +84,75 @@ VITALITY_TOOL_SCHEMA = {
 }
 
 
+# ---------- 状态上报schema（tool字段，两条管线共用；须在BATTLE_VITALITY_TOOL前定义） ----------
+EFFECT_UPDATE_SCHEMA = {
+    "type": "array",
+    "description": (
+        "状态变化上报列表（武侠状态：中毒/被封内力/点穴/醉酒等，状态库见【气血内力面板】）。"
+        "本轮有角色获得或解除状态才报，无变化省略。"
+        "effect_id只能从状态库列出的id中选，乱编会被系统忽略"
+    ),
+    "items": {
+        "type": "object",
+        "properties": {
+            "op": {"type": "string", "enum": ["add", "remove"],
+                   "description": "add=获得状态 remove=解除状态"},
+            "target": {"type": "string", "description": "角色姓名（玩家名或NPC名）"},
+            "effect_id": {"type": "string", "description": "状态id（从状态库中选）"},
+            "stacks": {"type": "integer", "description": "层数（默认1，上限按状态库）"},
+            "rounds": {"type": "integer", "description": "持续回合数（默认按状态库）"},
+            "source": {"type": "string", "description": "施加者（可选）"},
+        },
+        "required": ["op", "target", "effect_id"],
+    },
+}
+
+# ---------- 对战专用极简工具（battle管线：tool优先，正则兜底） ----------
+BATTLE_VITALITY_TOOL = {
+    "type": "function",
+    "function": {
+        "name": "battle_settle_vitality",
+        "description": (
+            "对战回合气血内力结算工具。每回合交手后必须调用一次，"
+            "上报双方（玩家与对手）本回合的变化量；双方都要报，无变化写0。"
+            "若无法调用工具，才在正文末尾单独输出【体力结算】行兜底。"
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "vitality_change": VITALITY_TOOL_SCHEMA,
+                "effect_update": EFFECT_UPDATE_SCHEMA,
+            },
+            "required": ["vitality_change"],
+        },
+    },
+}
+
+
+def parse_vitality_tool_calls(tool_calls):
+    """从 tool_calls 中提取气血内力变化列表（兼容 battle_settle_vitality / update_game_state）。
+    返回 [{name, hp_pct, mp_pct}]，无有效数据返回空列表。"""
+    changes = []
+    if not tool_calls:
+        return changes
+    for tc in tool_calls:
+        try:
+            fname = getattr(getattr(tc, "function", None), "name", "") or ""
+            if fname not in ("battle_settle_vitality", "update_game_state"):
+                continue
+            raw_args = tc.function.arguments
+            args = raw_args if isinstance(raw_args, dict) else json.loads(raw_args or "{}")
+            _list = args.get("vitality_change", [])
+            if isinstance(_list, list):
+                changes.extend(_list)
+        except Exception:
+            continue
+    return changes
+
+
 # ---------- 正则兜底 ----------
 # 【体力结算】张三：气血-5，内力+0（兼容数值后带括号注释，如：气血-2（被掌风扫中））
-_V_NUM = r"[+-]?\d+(?:[（(][^）)]*[）)])?"
+_V_NUM = r"[+−-]?\d+(?:\s*%)?(?:[（(][^）)]*[）)])?"
 VITALITY_REGEX = re.compile(
     r"【体力结算】\s*([^：:，,\s（(]+)\s*[：:]\s*气血\s*(" + _V_NUM + r")\s*[,，]\s*内力\s*(" + _V_NUM + r")"
 )
@@ -95,8 +163,10 @@ VITALITY_LINE_REGEX = re.compile(
 
 
 def _to_int(raw):
-    """'−2（注释）' → -2：截取数值部分转int，失败返回None"""
-    m = re.match(r"^\s*([+-]?\d+)", raw or "")
+    """'−2%'/'-2（注释）' → -2：统一全角减号、截取数值部分转int，失败返回None"""
+    if raw is None:
+        return None
+    m = re.match(r"^\s*([+−-]?\d+)", str(raw).replace("−", "-"))
     return int(m.group(1)) if m else None
 
 
@@ -491,6 +561,14 @@ def render_vitality_block(player_name, scene_npc_names=None, max_npcs=8):
 
     if len(lines) <= 1:
         lines.append("・（本场景暂无其他角色）")
+    # ===== 状态词条简报（effects：给剧情AI看的中毒/受制等词条，无状态不占行） =====
+    try:
+        _eff_brief = render_effects_brief(player_name, scene_npc_names=scene_npc_names, max_npcs=max_npcs)
+        if _eff_brief:
+            lines.append("・――― 状态词条 ―――")
+            lines.append(_eff_brief)
+    except Exception:
+        pass
     return "\n".join(lines)
 
 
@@ -565,10 +643,10 @@ def natural_regen(round_num):
 
 
 # ---------- 对战回合回气 ----------
-BATTLE_REGEN_MP = 5   # 对战每回合双方回气
+BATTLE_REGEN_MP = 3   # 对战每回合双方回气
 
 def battle_regen_mp(player_name, npc_names):
-    """对战回合回气：双方 MP+5%（上限100）。
+    """对战回合回气：双方 MP+3%（上限100）。
     只回MP不动HP（战斗中活血不现实）；已故(-1)冻结；
     落盘NPC批量改一次落盘，临时NPC（未落盘）走内存缓存。
     返回恢复日志（空串=无变化）。"""
@@ -638,4 +716,540 @@ def format_settle_log(results, user_action=""):
         if r.get("event"):
             line += f" ⚠️{r['event']}"
         parts.append(line)
+    return "\n".join(parts)
+
+
+# ==========================================================
+# ---------- 独立状态系统（effects）：挂词条给DC和剧情AI ----------
+# 设计：条目只存运行时数据（id/层数/剩余回合/来源），
+#       名称/描述/dot/回合数/上限全部查 data/effect_config.json。
+# 存储：与vitality同轨 —— 玩家player.json / 落盘NPC npc_agents.json /
+#       临时NPC内存缓存（战斗结束即消失）。
+# 原则：跑不通最多不挂词条，绝不影响主流程。
+# ==========================================================
+EFFECT_CONFIG_FILE = "data/effect_config.json"
+
+# 临时NPC的effects内存缓存（与_TEMP_VITALITY同生命周期）
+_TEMP_EFFECTS = {}
+
+
+def _load_effect_config():
+    """加载状态库配置（带缓存，文件不存在/损坏返回空dict）。
+    下划线开头的键（_version/_default_base_rate等元信息）已过滤，
+    避免混入状态库id清单注入AI上下文。
+    热联动：文件mtime变化自动重载（手改json保存后无需重启）。"""
+    global _EFFECT_CONFIG_CACHE, _EFFECT_CONFIG_MTIME
+    try:
+        mtime = os.path.getmtime(EFFECT_CONFIG_FILE)
+    except Exception:
+        mtime = None
+    try:
+        if _EFFECT_CONFIG_CACHE is not None and _EFFECT_CONFIG_MTIME == mtime:
+            return _EFFECT_CONFIG_CACHE
+    except NameError:
+        pass
+    raw = load_json(EFFECT_CONFIG_FILE) or {}
+    _EFFECT_CONFIG_CACHE = {k: v for k, v in raw.items()
+                            if not str(k).startswith("_") and isinstance(v, dict)}
+    _EFFECT_CONFIG_MTIME = mtime
+    return _EFFECT_CONFIG_CACHE
+
+
+def reload_effect_config():
+    """强制重载状态库配置（mtime热重载下通常无需手动调用，保留兼容）"""
+    global _EFFECT_CONFIG_MTIME
+    _EFFECT_CONFIG_MTIME = None
+    return _load_effect_config()
+
+
+def _effect_exists(effect_id):
+    return effect_id in _load_effect_config()
+
+
+# ---------- effects 读写（三轨分发，内部函数） ----------
+
+def _get_effects_raw(name, player_name):
+    """读取角色effects列表（返回列表引用或None表示不存在该角色）。
+    玩家/落盘NPC返回读到的json列表副本+轨道标记；临时NPC返回内存列表。
+    返回 (effects_list, track) track: "player"/"npc"/"temp"/None
+    """
+    if player_name and name == player_name:
+        data = load_json(PLAYER_FILE)
+        if data:
+            return list(data.get("effects") or []), "player"
+        return None, None
+    # 落盘NPC
+    data = load_json(NPC_AGENT_FILE)
+    if data and "npc_list" in data:
+        for npc in data["npc_list"]:
+            if npc.get("name") == name:
+                return list(npc.get("effects") or []), "npc"
+    # 其余一律视为临时NPC（内存缓存，战斗结束即消失）
+    return list(_TEMP_EFFECTS.get(name) or []), "temp"
+
+
+def _save_effects(name, player_name, effects, track):
+    """把effects列表写回对应轨道"""
+    if track == "player":
+        data = load_json(PLAYER_FILE)
+        if data:
+            data["effects"] = effects
+            save_json(PLAYER_FILE, data)
+            return True
+    elif track == "npc":
+        data = load_json(NPC_AGENT_FILE)
+        if data and "npc_list" in data:
+            for npc in data["npc_list"]:
+                if npc.get("name") == name:
+                    npc["effects"] = effects
+                    save_json(NPC_AGENT_FILE, data)
+                    return True
+    elif track == "temp":
+        _TEMP_EFFECTS[name] = effects
+        return True
+    return False
+
+
+# ---------- 对外四API ----------
+
+def apply_effect(name, effect_id, stacks=1, rounds=None, source="", player_name=None, system=False):
+    """上状态：查库校验 → 已有则叠层（不超上限）并刷新回合 → 没有则新建。
+    库里无此effect_id则忽略（AI乱编的id静默丢弃）。
+    rounds钳制1-5轮；debuff类同角色最多3条（新debuff挤掉最旧一条）。
+    system=True：武功特效程序触发（优先级高于AI上报——AI对system条目的重复add直接忽略）。
+    返回日志字符串（空串=未挂上）。"""
+    cfg = _load_effect_config().get(effect_id)
+    if not cfg:
+        return ""
+    effects, track = _get_effects_raw(name, player_name)
+    if track is None:
+        return ""
+    max_stacks = int(cfg.get("max_stacks", 1) or 1)
+    stacks = max(1, min(int(stacks or 1), max_stacks))
+    remain = int(rounds) if rounds is not None else int(cfg.get("default_rounds", 3) or 3)
+    remain = max(1, min(remain, 5))  # 钳制1-5轮
+    entry = None
+    for e in effects:
+        if e.get("id") == effect_id:
+            entry = e
+            break
+    evicted_log = ""
+    if entry:
+        # 优先级规则：程序特效挂的词条，AI的重复add不刷新不叠层（主动触发 > AI调tool）
+        if not system and entry.get("source") == "system":
+            return ""
+        # 叠层：层数封顶，回合刷新为本次remain（同名单刷不叠时长）
+        old_s = entry.get("stacks", 1)
+        entry["stacks"] = max(old_s, stacks)
+        entry["remain_rounds"] = remain
+        if system:
+            entry["source"] = "system"
+        else:
+            entry.setdefault("source", source)
+    else:
+        # debuff叠层上限：同角色最多3条debuff，超出挤掉最旧一条
+        if str(cfg.get("type", "")) == "debuff":
+            cfg_all = _load_effect_config()
+            debuff_idx = [i for i, e in enumerate(effects)
+                          if str((cfg_all.get(e.get("id")) or {}).get("type", "")) == "debuff"]
+            if len(debuff_idx) >= 3:
+                _old_i = debuff_idx[0]
+                _old = effects.pop(_old_i)
+                _old_name = (cfg_all.get(_old.get("id")) or {}).get("name", _old.get("id"))
+                evicted_log = f"；旧状态「{_old_name}」被挤下"
+        entry = {"id": effect_id, "stacks": stacks, "remain_rounds": remain,
+                 "source": "system" if system else source}
+        effects.append(entry)
+    _save_effects(name, player_name, effects, track)
+    n = cfg.get("name", effect_id)
+    log = f"【状态触发】{name} 获得「{n}」×{entry['stacks']}（{remain}轮）"
+    desc = str(cfg.get("desc", "")).strip()
+    if desc:
+        log += f"·{desc}"
+    return log + evicted_log
+
+
+def remove_effects_by_prefix(name, prefix, player_name=None):
+    """按id前缀批量移除状态（解毒特效用：清掉 poison/cold_poison 等毒类条目）。
+    返回日志字符串（空串=本来就没有）。"""
+    if not prefix:
+        return ""
+    effects, track = _get_effects_raw(name, player_name)
+    if track is None:
+        return ""
+    removed = [e for e in effects if str(e.get("id", "")).startswith(prefix)]
+    if not removed:
+        return ""
+    kept = [e for e in effects if not str(e.get("id", "")).startswith(prefix)]
+    _save_effects(name, player_name, kept, track)
+    cfg_all = _load_effect_config()
+    names = "、".join(cfg_all.get(e.get("id"), {}).get("name", e.get("id")) for e in removed)
+    return f"【状态】{name} 的「{names}」已被驱散"
+
+
+def mount_martial_effect_triggers(effect_results, player_name, opponent_name):
+    """武功特效程序触发挂状态（优先级最高的入口，先于AI生成剧情）。
+    effect_results: dice_system.compute_effect_trigger 的结果列表（含未触发的）。
+    只处理状态库中带 martial_trigger 字段的条目，其余忽略。
+    返回日志字符串（挂载结果，供注入constraint_text让AI知道状态已挂）。"""
+    logs = []
+    try:
+        cfg_all = _load_effect_config()
+        for r in effect_results or []:
+            if not isinstance(r, dict) or not r.get("triggered"):
+                continue
+            etype = str(r.get("effect_type", "")).strip()
+            trig = (cfg_all.get(etype) or {}).get("martial_trigger")
+            if not trig:
+                continue
+            op = str(trig.get("op", "add")).strip()
+            who = str(trig.get("target", "opponent")).strip()
+            target = player_name if who == "self" else opponent_name
+            if not target:
+                continue
+            if op == "add":
+                log = apply_effect(target, etype, source="system",
+                                   player_name=player_name, system=True)
+                # 附加效果（仅支持also带effect_id=同时挂词条；数值直转结算已废弃，
+                # 扣多少由AI经vitality_change体现）
+                also = trig.get("also") or {}
+                also_id = str(also.get("effect_id", "")).strip()
+                t2 = player_name if str(also.get("target", "opponent")) == "self" else opponent_name
+                if also_id and t2:
+                    log2 = apply_effect(t2, also_id, source="system",
+                                         player_name=player_name, system=True)
+                    if log2:
+                        logs.append(log2)
+            elif op == "remove_prefix":
+                log = remove_effects_by_prefix(target, str(trig.get("prefix", "")),
+                                                player_name=player_name)
+            else:
+                continue
+            if log:
+                logs.append(log)
+    except Exception:
+        pass
+    return "\n".join(logs)
+
+
+def mount_npc_effect_triggers(effect_results, player_name, npc_name):
+    """NPC特效程序触发挂状态（目标=玩家，与玩家侧mount_martial_effect_triggers对称）。
+    effect_results: dice_system.compute_npc_effect_trigger 的结果列表（仅含已触发条目）。
+    状态库martial_trigger的self/opponent语义从NPC视角：self=NPC自己，opponent=玩家。
+    增量设计：无结果/无玩家名/库里无配置 → 静默返回空串，零影响。"""
+    logs = []
+    try:
+        if not player_name or not npc_name:
+            return ""
+        cfg_all = _load_effect_config()
+        for r in effect_results or []:
+            if not isinstance(r, dict) or not r.get("triggered"):
+                continue
+            etype = str(r.get("effect_type", "")).strip()
+            cfg = cfg_all.get(etype) or {}
+            trig = cfg.get("martial_trigger")
+            if not trig:
+                continue
+            op = str(trig.get("op", "add")).strip()
+            # NPC配置的target(反手招语义)优先，状态库默认值兜底
+            who = str(r.get("target", "")).strip() or \
+                str(trig.get("target", "opponent")).strip()
+            # NPC视角: self=NPC自己, opponent=玩家
+            target = npc_name if who == "self" else player_name
+            if not target:
+                continue
+            if op == "add":
+                log = apply_effect(target, etype, source="system",
+                                   player_name=player_name, system=True)
+                # 附加效果（NPC视角: self=NPC, opponent=玩家；数值直转结算已废弃）
+                also = trig.get("also") or {}
+                also_id = str(also.get("effect_id", "")).strip()
+                t2 = npc_name if str(also.get("target", "opponent")) == "self" else player_name
+                if also_id and t2:
+                    log2 = apply_effect(t2, also_id, source="system",
+                                         player_name=player_name, system=True)
+                    if log2:
+                        logs.append(log2)
+            elif op == "remove_prefix":
+                log = remove_effects_by_prefix(target, str(trig.get("prefix", "")),
+                                                player_name=player_name)
+            else:
+                continue
+            if log:
+                logs.append(log)
+    except Exception:
+        pass
+    return "\n".join(logs)
+
+
+def remove_effect(name, effect_id, player_name=None):
+    """下状态（解毒/驱散/清场统一出口）。返回日志字符串（空串=本来就没有）。"""
+    effects, track = _get_effects_raw(name, player_name)
+    if track is None:
+        return ""
+    before = len(effects)
+    effects = [e for e in effects if e.get("id") != effect_id]
+    if len(effects) == before:
+        return ""
+    _save_effects(name, player_name, effects, track)
+    n = _load_effect_config().get(effect_id, {}).get("name", effect_id)
+    return f"【状态】{name} 的「{n}」已解除"
+
+
+def tick_effects(name, player_name=None, scene_npc_names=None):
+    """每轮结算（V5纯播报制）：到点播报状态警讯 → 剩余回合-1 → 到期移除。
+    程序不再做任何数值结算——损血扣蓝的具体数值由AI经vitality_change单写者通道
+    在下一轮剧情中体现。已故角色冻结跳过。返回日志字符串（空串=无效果在身/无变化）。"""
+    effects, track = _get_effects_raw(name, player_name)
+    if track is None or not effects:
+        return ""
+    cfg_all = _load_effect_config()
+    # 亡故冻结
+    if track == "player":
+        vit = get_player_vitality()
+    elif track == "npc":
+        vit = get_npc_vitality(name)
+    else:
+        vit = get_temp_vitality(name)
+    if vit and vit.get("hp") == -1:
+        return ""
+
+    changed = False
+    kept = []
+    active_parts = []
+    expired_parts = []
+    for e in effects:
+        cfg = cfg_all.get(e.get("id"))
+        if not cfg:
+            changed = True  # 库里已删的孤儿条目直接清除
+            continue
+        stacks = int(e.get("stacks", 1) or 1)
+        # 持续性状态到点警讯（仅播报，无数值——扣多少由AI剧情决定）
+        if str(cfg.get("type", "")) == "debuff":
+            active_parts.append(f"{cfg.get('name', e.get('id'))}×{stacks}发作")
+        remain = int(e.get("remain_rounds", 1) or 1) - 1
+        if remain > 0:
+            e["remain_rounds"] = remain
+            kept.append(e)
+            changed = True  # 回合递减也需落盘
+        else:
+            changed = True
+            expired_parts.append(f"{cfg.get('name', e.get('id'))}×{stacks}效果结束")
+    _save_effects(name, player_name, kept, track)
+    parts = []
+    for e in kept:
+        cfg = cfg_all.get(e.get("id"), {})
+        parts.append(f"{cfg.get('name', e.get('id'))}×{e.get('stacks', 1)}·剩{e.get('remain_rounds')}轮")
+    if not parts and not expired_parts and not active_parts:
+        return ""
+    tag = "（临时）" if track == "temp" else ""
+    segments = []
+    if parts:
+        segments.append("，".join(parts))
+    if active_parts:
+        segments.append("，".join(active_parts))
+    if expired_parts:
+        segments.append("，".join(expired_parts))
+    return f"☠️ {name}{tag} 状态结算：" + "；".join(segments)
+
+
+def render_effects_line(name, player_name=None):
+    """渲染角色身上的状态文本行（给DC裁判和剧情AI注入用）。
+    兼容旧poisoned布尔：读时视作通用中毒条目（不改存档）。
+    返回如 "【化功散之毒×1·剩3轮·内力絮乱】"，无状态返回空串。"""
+    effects, track = _get_effects_raw(name, player_name)
+    if track is None:
+        return ""
+    cfg_all = _load_effect_config()
+    parts = []
+    for e in effects:
+        cfg = cfg_all.get(e.get("id"))
+        if not cfg or not cfg.get("visible_to_ai", True):
+            continue
+        seg = cfg.get("name", e.get("id"))
+        stacks = int(e.get("stacks", 1) or 1)
+        if stacks > 1:
+            seg += f"×{stacks}"
+        remain = e.get("remain_rounds")
+        if remain is not None:
+            seg += f"·剩{remain}轮"
+        desc = cfg.get("desc", "")
+        if desc:
+            seg += f"·{desc}"
+        hint = cfg.get("dc_hint", "")
+        if hint:
+            seg += f"（{hint}）"
+        parts.append(seg)
+    # 旧poisoned布尔读兼容（渲染层面视作中毒条目，不写回存档）
+    if not any(e.get("id", "").startswith("poison") for e in effects):
+        if track == "player":
+            vit = get_player_vitality()
+        elif track == "npc":
+            vit = get_npc_vitality(name)
+        else:
+            vit = get_temp_vitality(name)
+        if vit and vit.get("poisoned"):
+            parts.append("中毒·余毒未清")
+    if not parts:
+        return ""
+    return "【" + "】【".join(parts) + "】"
+
+
+def clear_temp_effects(name=None):
+    """清除临时NPC的状态（战斗结束清场用，与clear_temp_vitality对齐）"""
+    if name is None:
+        _TEMP_EFFECTS.clear()
+    else:
+        _TEMP_EFFECTS.pop(name, None)
+
+
+# ---------- 状态上报解析（tool字段，两条管线共用） ----------
+
+
+def parse_effect_tool_calls(tool_calls):
+    """从tool_calls中提取effect_update列表（兼容battle_settle_vitality/update_game_state）。
+    返回 [effect_update条目]，无有效数据返回空列表。"""
+    updates = []
+    if not tool_calls:
+        return updates
+    for tc in tool_calls:
+        try:
+            fname = getattr(getattr(tc, "function", None), "name", "") or ""
+            if fname not in ("battle_settle_vitality", "update_game_state"):
+                continue
+            raw_args = tc.function.arguments
+            args = raw_args if isinstance(raw_args, dict) else json.loads(raw_args or "{}")
+            _list = args.get("effect_update", [])
+            if isinstance(_list, list):
+                updates.extend([u for u in _list if isinstance(u, dict)])
+        except Exception:
+            continue
+    return updates
+
+
+def apply_effect_updates(updates, player_name=None, self_name=None, opponent_name=None):
+    """执行一批effect_update上报（add/remove分发）。
+    target支持相对标记"self"/"opponent"（正则兜底产出的格式）：
+      有self_name/opponent_name时翻译成真实角色名（self=叙述主角视角，
+      battle管线下传入者视角=玩家）；无映射时该条静默跳过。
+    返回日志字符串（空串=无变化）。任何条目异常单独跳过，不阻塞其他。"""
+    if not updates:
+        return ""
+    logs = []
+    for u in updates:
+        try:
+            op = str(u.get("op", "")).strip()
+            target = str(u.get("target", "")).strip()
+            effect_id = str(u.get("effect_id", "")).strip()
+            if not target or not effect_id:
+                continue
+            _t_low = target.lower()
+            if target in ("自己", "自身") or _t_low in ("self", "player"):
+                if not self_name:
+                    continue
+                target = self_name
+            elif target in ("对手", "敌方") or _t_low in ("opponent", "npc"):
+                if not opponent_name:
+                    continue
+                target = opponent_name
+            if op == "add":
+                log = apply_effect(
+                    target, effect_id,
+                    stacks=u.get("stacks", 1),
+                    rounds=u.get("rounds"),
+                    source=str(u.get("source", "") or ""),
+                    player_name=player_name,
+                )
+            elif op == "remove":
+                log = remove_effect(target, effect_id, player_name=player_name)
+            else:
+                continue
+            if log:
+                logs.append(log)
+        except Exception:
+            continue
+    return "\n".join(logs)
+
+
+# ---------- 状态上报解析（正则兜底：AI工具调用失败时从正文【状态】标记行解析） ----------
+
+_EFFECT_LINE_RE = None
+
+
+def parse_effect_regex(plot_text, known_names=None):
+    """从AI正文中的状态标记行解析effect_update兜底列表。
+
+    识别行格式（每行一条，op与target可省略，默认add/opponent）：
+        【状态·add·对手·poison·2轮】或【状态·挂·对手·poison】
+        【状态·remove·自己·pursuit】/【状态·下·pursuit】
+    字段顺序不敏感：add/remove/挂/下→op；自己/对手/self/opponent→target；
+    其余token→effect_id（须在状态库白名单内，乱编的静默丢弃）；
+    纯数字+"轮"→rounds。
+
+    Args:
+        plot_text: AI生成的剧情正文
+        known_names: 额外的角色名→（player/npc/temp）判定提示，暂未使用
+
+    Returns:
+        [effect_update条目dict]，无有效条目返回空列表。
+    """
+    global _EFFECT_LINE_RE
+    import re as _re
+    if _EFFECT_LINE_RE is None:
+        _EFFECT_LINE_RE = _re.compile(r"【\s*状态((?:·[^】\n]{1,24})+)】")
+    if not plot_text:
+        return []
+    cfg_all = _load_effect_config()
+    updates = []
+    for m in _EFFECT_LINE_RE.finditer(str(plot_text)):
+        tokens = [t.strip() for t in m.group(1).split("·") if t.strip()]
+        if not tokens:
+            continue
+        op, target, effect_id, rounds = "add", "opponent", None, None
+        for t in tokens:
+            low = t.lower()
+            if low in ("add", "挂", "上", "挂载"):
+                op = "add"
+            elif low in ("remove", "下", "解除", "移除"):
+                op = "remove"
+            elif t in ("自己", "自身") or low in ("self", "player"):
+                target = "self"
+            elif t in ("对手", "敌方") or low in ("opponent", "npc"):
+                target = "opponent"
+            elif t.endswith("轮") and t[:-1].isdigit():
+                rounds = int(t[:-1])
+            elif t in cfg_all:
+                effect_id = t
+            else:
+                # 中文名→id反查（白名单）
+                for eid, cfg in cfg_all.items():
+                    if cfg.get("name") == t:
+                        effect_id = eid
+                        break
+        if not effect_id:
+            continue
+        updates.append({"op": op, "target": target, "effect_id": effect_id})
+        if op == "add" and rounds:
+            updates[-1]["rounds"] = rounds
+    return updates
+
+
+def render_effects_brief(player_name, scene_npc_names=None, max_npcs=8):
+    """渲染多角色状态简报（拼进气血面板/DC上下文用）。
+    返回各角色状态行的拼接文本，无任何状态返回空串。"""
+    scene_npc_names = scene_npc_names or []
+    parts = []
+    if player_name:
+        line = render_effects_line(player_name, player_name)
+        if line:
+            parts.append(f"・{player_name} {line}")
+    # NPC去重（保持顺序）
+    seen = []
+    for n in scene_npc_names:
+        if n and n != player_name and n not in seen:
+            seen.append(n)
+    for n in seen[:max_npcs]:
+        line = render_effects_line(n, player_name)
+        if line:
+            parts.append(f"・{n} {line}")
     return "\n".join(parts)

@@ -22,6 +22,10 @@ logger = logging.getLogger("dice_system")
 # 最近一次DC判定的行动类型（"battle"/"daily"），ai_judge_dc_only 副作用写入，供对战回气等逻辑读取
 _LAST_DC_ACTION_TYPE = "daily"
 
+# 最近一次DC判定的对手境界（None=日常/未知），ai_judge_dc_only 副作用写入，
+# 供 judge_grade_v4 境界差直通使用（preset_dc 路径也能读取）
+_LAST_DC_OPPONENT_REALM = None
+
 
 # ==================== 1. 基础骰子引擎 ====================
 
@@ -131,7 +135,7 @@ def check_d20(modifier: int = 0, dc: int = 10,
 import os as _os
 
 _RULES_FILE = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "dice_rules.json")
-_EFFECT_FILE = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "martial_effects.json")
+_EFFECT_FILE = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "effect_config.json")
 
 # ---- 内置兜底规则（JSON文件缺失/损坏时使用）----
 _BUILTIN_CMD_KEYWORDS = [
@@ -300,16 +304,17 @@ def clear_web_state_v4():
 
 # ---- V4 8档分级判定表 ----
 # (min_delta, grade, name, narrative_template)
-# 方案B: 1档>=18, 8档<-17, 失败侧间距加大(7,5,5,5)
+# V4: 正态形区间——4/5档最宽(中心),3/6档次之,2/7档收窄,1/8档±18帽
+# 中间档位在典型对局(s=-4~-9)中高频出现,极端档位留给nat特判与境界差直通
 _DELTA_GRADE_TABLE = [
-    (18,    1, "完美碾压", "超凡表现,远超自身极限,功力发挥淋漓尽致,对手毫无招架之力,附带巨大额外收益"),
-    (10,    2, "超常发挥", "超过平时水准,动作流畅自如,行云流水般一气呵成,目标顺利达成,附带额外收益"),
-    (4,     3, "正常发挥", "符合预期水准,得心应手,招式熟练,目标顺利达成,一切按部就班"),
-    (-2,    4, "差强人意", "成败只在毫厘之间,勉强撑住场面,过程波折频频,表现差强人意,无额外收益"),
-    (-6,    5, "功亏一篑", "差距显现,功力稍欠,主要目标未能达成,但尚有余力自保"),
-    (-11,   6, "拙于应对", "应对失当,招式生涩,功力未能充分发挥,目标未能达成,身受轻微伤害"),
-    (-17,   7, "力屈受挫", "力有不逮,遭受重挫,目标完全落空,身受中等伤害,尚能脱身但元气受损"),
-    (-9999, 8, "惨败而归", "差距悬殊,大败亏输,身受重创,付出重大代价,衍生恶果"),
+    (18,    1, "完美碾压", "超凡入化,如有神助——招式威力远超平常,对手门户大开毫无还手之力,正是施展压箱底绝学的时机(程序将直挂武学特效)"),
+    (14,    2, "超常发挥", "行云流水,一气呵成,远超平时水准,目标顺利达成且占尽先手——正是趁势施展绝学的良机(程序将随机挂载武学特效)"),
+    (8,     3, "正常发挥", "得心应手,招式熟练,符合自身预期水准,一切按部就班"),
+    (0,     4, "勉强招架", "成败只在毫厘之间,勉强撑住场面未落下风,但过程波折频频,无功而返"),
+    (-7,    5, "功亏一篑", "差距显现,功力稍欠火候,主要目标未能达成,但尚有余力自保,全身而退"),
+    (-13,   6, "拙于应对", "应对失当,招式生涩,破绽频出,目标落空,且自身挂彩受伤"),
+    (-17,   7, "力屈受挫", "力有不逮,遭对手全面压制,目标完全落空,身受明显创伤,元气受损——对手将趁势施展得意反手绝学"),
+    (-9999, 8, "惨败而归", "差距悬殊,大败亏输,门户大开身受重创——对手将趁势施展得意反手绝学,恶果接连而至"),
 ]
 
 
@@ -412,71 +417,56 @@ def compute_amplify_bonus(attack_total: int,
     return total_amplify, detail
 
 
-# ==================== V4 武功特效触发系统 ====================
-# 设计: 完全离线计算,程序掷骰,AI无法干预
-# 公式: 最终触发率 = (基础率 + 境界加成) × 内功轻功增幅系数 + DC档位系数
-# 限制: [0%, 100%]; 1档强制100%, 8档强制0%
-
-# ---- DC档位系数表（加法项）----
-# 1档 +100% | 2档 +30% | 3档 +10% | 4档 +5%
-# 5档 -5%   | 6档 -10% | 7档 -30% | 8档 -100%
-EFFECT_GRADE_COEF = {
-    1: 100, 2: 30, 3: 10, 4: 5,
-    5: -5, 6: -10, 7: -30, 8: -100,
-}
-
-# ---- 境界加成表（每个境界+5%）----
-# 与 player_manager.Player.REALM_LIST 一致（14档）
-_EFFECT_REALM_LIST = [
-    "初学入门", "初窥门径", "略有小成", "略有所成", "渐入佳境",
-    "融会贯通", "登堂入室", "炉火纯青", "出神入化", "登峰造极",
-    "超凡入圣", "返璞归真", "天人合一", "破碎虚空",
-]
-
-
-def _realm_bonus_percent(skill_level: str) -> int:
-    """根据武功境界返回加成百分比（每档+5%, 初学入门为0%）
-
-    Args:
-        skill_level: 境界名称（如"融会贯通"）
-
-    Returns:
-        加成百分比（0~65）
-    """
-    try:
-        idx = _EFFECT_REALM_LIST.index(skill_level)
-        return idx * 5
-    except ValueError:
-        return 0
-
+# ==================== V5 武功特效锚点制（去概率化） ====================
+# 设计: 程序零掷骰零概率。特效是否出现由DC档位锚点+AI剧情裁量决定：
+#   1/2档（完美碾压/超常发挥）→ 玩家武功特效程序直挂（多特效源随机选1条，必兑现大成功）
+#   3-6档                       → 程序不干预，AI通过effect_update工具自行决定挂不挂
+#   7/8档（力屈受挫/惨败而归）→ 对手NPC配了effect_triggers则随机硬挂1条（反手招），
+#                               未配置则指令约束AI必须给自己报一条不利状态
 
 # ---- 特效元数据缓存（模块级）----
 _effect_meta_cache: dict = None
+_effect_meta_mtime = None
 
 
 def _load_effect_meta() -> dict:
-    """加载 martial_effects.json 特效元数据,带缓存
+    """加载 effect_config.json 特效元数据,带缓存
 
     Returns:
-        {"effects": {effect_id: {name, category, desc, narrative_hint}}, ...}
+        {"effects": {effect_id: {name, category, desc, ...}}}
+        （effect_config.json 为平铺结构,这里包装成旧 martial_effects.json 结构,
+          下游 name/category 读取代码零改动;
+          不带category的条目为纯内部状态,不进武功编辑器下拉框）
+        热联动:文件mtime变化自动重载（手改json保存后无需重启）
         文件缺失/损坏时返回空dict
     """
-    global _effect_meta_cache
-    if _effect_meta_cache is not None:
+    global _effect_meta_cache, _effect_meta_mtime
+    try:
+        mtime = _os.path.getmtime(_EFFECT_FILE)
+    except Exception:
+        mtime = None
+    if _effect_meta_cache is not None and _effect_meta_mtime == mtime:
         return _effect_meta_cache
     try:
         with open(_EFFECT_FILE, encoding="utf-8") as f:
-            _effect_meta_cache = json.load(f)
+            raw = json.load(f)
+        _effect_meta_cache = {
+            "effects": {k: v for k, v in raw.items()
+                        if not str(k).startswith("_") and isinstance(v, dict)},
+        }
+        _effect_meta_mtime = mtime
     except Exception as e:
         logger.warning("特效元数据加载失败: %s", e)
         _effect_meta_cache = {"effects": {}}
+        _effect_meta_mtime = mtime
     return _effect_meta_cache
 
 
 def reload_effect_meta() -> bool:
-    """热重载特效元数据（武功书模块编辑后调用）"""
-    global _effect_meta_cache
+    """热重载特效元数据（武功书模块编辑后调用；mtime热重载下通常自动生效）"""
+    global _effect_meta_cache, _effect_meta_mtime
     _effect_meta_cache = None
+    _effect_meta_mtime = None
     meta = _load_effect_meta()
     ok = bool(meta.get("effects"))
     logger.info("特效元数据热重载: %s", "成功" if ok else "失败")
@@ -490,7 +480,7 @@ def lookup_skill_effect(skill_name: str) -> dict | None:
         skill_name: 武功名
 
     Returns:
-        {"type": str, "base_rate": int} 或 None（无特效配置）
+        {"type": str} 或 None（无特效配置）
     """
     if not skill_name:
         return None
@@ -570,18 +560,15 @@ def compute_effect_trigger(
     inner_info: dict = None,
     light_info: dict = None,
 ) -> dict | None:
-    """计算武功特效是否触发并返回结果（完全离线计算）
-
-    公式: 最终触发率 = (基础率 + 境界加成) × 内功轻功增幅系数 + DC档位系数
-    限制: [0, 100]; grade=1强制100%, grade=8强制0%
+    """武功特效锚点制（V5，零概率零掷骰）
 
     Args:
         skill_name: 武功名
-        player_obj: Player对象（用于查武功境界）
-        classified_skills: 分类检测结果（可选,用于回传上下文）
-        grade_result: DC判定档位 1-8（0表示未传入,不应用DC系数）
-        inner_info: 内功 skill_info（用于增幅系数计算）
-        light_info: 轻功 skill_info
+        player_obj: Player对象（锚点制下仅用于存在性校验）
+        classified_skills: 分类检测结果（保留签名兼容,未使用）
+        grade_result: DC判定档位 1-8
+        inner_info: 内功 skill_info（锚点制下不参与计算,未使用）
+        light_info: 轻功 skill_info（未使用）
 
     Returns:
         None: 武功无特效配置
@@ -590,106 +577,49 @@ def compute_effect_trigger(
             "effect_type": str,        # 如 "shock"
             "effect_name": str,        # 如 "震慑"
             "effect_category": str,    # 如 "attack"
-            "triggered": bool,         # 是否触发
-            "final_rate": float,       # 最终触发率(0~100)
-            "detail": {
-                "base_rate": int,
-                "realm_bonus": int,
-                "amplify_coef": float,  # 增幅系数(1.0~1.6)
-                "dc_coef": int,         # DC档位系数
-            },
-            "narrative_hint": str,      # 注入AI的特效文本（触发时填充）
+            "triggered": bool,         # 仅1/2档为True（程序直挂硬锚点）
+            "anchor": str,             # "grade12"（程序直挂）| "ai"（交AI裁量）
+            "narrative_hint": str,     # 1/2档时的⚡绝招叙述行
+            "ref_hint": str,           # 3档以上给AI的优先提示行
         }
     """
     if not skill_name or not player_obj:
         return None
 
-    # 1. 查武功特效配置
     effect_cfg = lookup_skill_effect(skill_name)
     if not effect_cfg:
         return None
 
     effect_type = str(effect_cfg.get("type", "")).strip()
-    base_rate = int(effect_cfg.get("base_rate", 5))
     if not effect_type:
         return None
-    # 限幅基础率
-    base_rate = max(1, min(20, base_rate))
 
-    # 2. 查特效元数据（获取中文名/类别/narrative_hint模板）
     meta = _load_effect_meta()
     effect_meta = meta.get("effects", {}).get(effect_type)
     if not effect_meta:
-        # 元数据缺失,用兜底值
         effect_name = effect_type
         effect_category = "attack"
-        narr_template = f"【特效触发】{{skill}}触发{effect_type}特效。"
     else:
         effect_name = effect_meta.get("name", effect_type)
         effect_category = effect_meta.get("category", "attack")
-        narr_template = effect_meta.get("narrative_hint",
-                                          f"【特效触发】{{skill}}触发{effect_name}特效。")
 
-    # 3. 查武功境界
-    skill_info = player_obj.get_skill_info(skill_name)
-    skill_level = skill_info["skill_level"] if skill_info else "初学入门"
-    realm_bonus = _realm_bonus_percent(skill_level)
+    _grade = int(grade_result)
+    triggered = _grade in (1, 2)
+    anchor = "grade12" if triggered else "ai"
 
-    # 4. 计算内功轻功增幅系数
-    # 系数 = 1 + 内功增幅率 + 轻功增幅率(减半)
-    amplify_coef = 1.0
-    if inner_info:
-        amplify_coef += _compute_amplify_rate(inner_info)
-    if light_info:
-        amplify_coef += _compute_amplify_rate(light_info) / 2.0
-
-    # 5. DC档位系数
-    dc_coef = EFFECT_GRADE_COEF.get(int(grade_result), 0) if grade_result else 0
-
-    # 6. 计算最终触发率
-    base_sum = base_rate + realm_bonus  # (基础率 + 境界加成)
-    amplified = base_sum * amplify_coef  # × 增幅系数
-    final_rate = amplified + dc_coef  # + DC档位系数(加法)
-
-    # 7. 强制规则: 1档必触发, 8档必不触发
-    forced = None
-    if grade_result == 1:
-        final_rate = 100.0
-        forced = "always"  # 1档强制触发
-    elif grade_result == 8:
-        final_rate = 0.0
-        forced = "never"   # 8档强制不触发
-    else:
-        # 限幅到 [0, 100]
-        final_rate = max(0.0, min(100.0, final_rate))
-
-    # 8. 程序掷骰判定是否触发
-    triggered = random.random() * 100 < final_rate
-
-    # 9. 生成 narrative_hint（仅触发时填充,作为AI叙事字条）
     narrative_hint = ""
     if triggered:
-        hint = narr_template.replace("{skill}", skill_name)
-        # 查特技名：有特技时前置"⚡XX特技发动·XX — XX"
         special = lookup_special_move(skill_name)
         if special and special.get("special_move_name"):
-            hint = f"⚡{skill_name}特技发动·{special['special_move_name']} — {special['special_move_desc']}\n{hint}"
-        narrative_hint = hint
+            narrative_hint = f"⚡{skill_name}特技发动·{special['special_move_name']} — {special['special_move_desc']}"
 
-    # ===== DEBUG 输出 =====
-    print(f"\n{'='*60}")
-    print(f"[特效DEBUG] 武功: {skill_name}（{skill_level}）")
-    print(f"  特效类型: {effect_name}({effect_type}, {effect_category}类)")
-    print(f"  基础率: {base_rate}%")
-    print(f"  境界加成: +{realm_bonus}% ({skill_level})")
-    print(f"  增幅系数: ×{amplify_coef:.3f}")
-    if grade_result:
-        print(f"  DC档位系数: {dc_coef:+d}% (第{grade_result}档)")
-    print(f"  计算: ({base_rate}+{realm_bonus})×{amplify_coef:.3f} + ({dc_coef}) = {final_rate:.2f}%")
-    if forced:
-        print(f"  ⚡ 强制规则: {forced}")
-    print(f"  最终触发率: {final_rate:.2f}% → {'✓触发' if triggered else '✗未触发'}")
-    print(f"{'='*60}\n")
+    if _grade in (3, 4):
+        ref_hint = f"参考：玩家武功【{skill_name}】自带特效【{effect_name}】（{effect_category}类），本轮发挥上佳，可顺手演绎出该特效雏形（可选，通过effect_update上报）"
+    else:
+        ref_hint = f"参考：玩家武功【{skill_name}】自带特效【{effect_name}】（{effect_category}类），若剧情合理可挂载（通过effect_update上报）"
+
+    print(f"[特效锚点] {skill_name} → {effect_name}({effect_type}) 第{_grade}档 → "
+          f"{'✓程序直挂' if triggered else '交AI裁量'}")
 
     return {
         "skill_name": skill_name,
@@ -697,33 +627,129 @@ def compute_effect_trigger(
         "effect_name": effect_name,
         "effect_category": effect_category,
         "triggered": triggered,
-        "final_rate": round(final_rate, 2),
-        "detail": {
-            "base_rate": base_rate,
-            "realm_bonus": realm_bonus,
-            "amplify_coef": round(amplify_coef, 3),
-            "dc_coef": dc_coef,
-        },
+        "anchor": anchor,
         "narrative_hint": narrative_hint,
+        "ref_hint": ref_hint,
     }
 
 
-def judge_grade_v4(delta: int, natural: int) -> tuple[int, str, str]:
+# ---- NPC特效反手招（V5锚点制：7档力屈受挫/8档惨败时硬挂） ----
+
+
+def compute_npc_effect_trigger(npc_data: dict, grade_result: int) -> list:
+    """NPC反手招锚点制（零概率）
+
+    仅当玩家DC档位∈{7,8}（力屈受挫/惨败而归）时生效：
+      - NPC配了effect_triggers → 随机选1条硬挂（target语义见配置）
+      - 未配置 → 返回[{"anchor": "directive"}]提示管线走指令兜底
+    其余档位一律返回空列表（交AI剧情裁量）。
+
+    Args:
+        npc_data: NPC完整档案dict（须含 effect_triggers 字段才硬挂）
+        grade_result: 本轮玩家DC检定档位（1-8）
+
+    Returns:
+        结果列表（0或1条）。
+        硬挂条: {"effect_type", "effect_name", "triggered": True, "anchor": "grade78", "target"}
+        指令兜底条: {"anchor": "directive", "npc_name": str}
+    """
+    try:
+        _grade = int(grade_result)
+        if _grade not in (7, 8):
+            return []
+        if not isinstance(npc_data, dict):
+            return [{"anchor": "directive", "npc_name": ""}]
+        triggers = npc_data.get("effect_triggers")
+        if not isinstance(triggers, dict) or not triggers:
+            return [{"anchor": "directive", "npc_name": str(npc_data.get("name", ""))}]
+
+        meta = _load_effect_meta().get("effects", {})
+        candidates = []
+        for eid, conf in triggers.items():
+            eid = str(eid).strip()
+            if not eid:
+                continue
+            if not isinstance(conf, dict):
+                conf = {}
+            effect_meta = meta.get(eid)
+            candidates.append({
+                "effect_type": eid,
+                "effect_name": (effect_meta or {}).get("name", eid),
+                "triggered": True,
+                "anchor": "grade78",
+                "target": str(conf.get("target", "opponent")).strip() or "opponent",
+            })
+        if not candidates:
+            return [{"anchor": "directive", "npc_name": str(npc_data.get("name", ""))}]
+        pick = random.choice(candidates)
+        print(f"[NPC反手招] {npc_data.get('name','?')} 第{_grade}档硬挂 "
+              f"{pick['effect_name']}({pick['effect_type']}) target={pick['target']}")
+        return [pick]
+    except Exception as e:
+        logger.debug("NPC反手招计算异常(已忽略): %s", e)
+        return []
+
+
+def compute_npc_effect_hint(npc_data: dict) -> str:
+    """NPC反手招2-6档优先提示（零概率，纯提示不挂载）
+
+    把NPC配置的effect_triggers列成一行提示注入constraint_text，
+    让NPC招牌特效在非7/8档也有剧情存在感（AI按剧情裁量是否体现）。
+
+    Args:
+        npc_data: NPC完整档案dict
+
+    Returns:
+        str: 提示行（无配置返回空串）
+    """
+    try:
+        if not isinstance(npc_data, dict):
+            return ""
+        triggers = npc_data.get("effect_triggers")
+        if not isinstance(triggers, dict) or not triggers:
+            return ""
+        meta = _load_effect_meta().get("effects", {})
+        names = []
+        for eid in triggers:
+            eid = str(eid).strip()
+            if eid:
+                names.append((meta.get(eid) or {}).get("name", eid))
+        if not names:
+            return ""
+        npc_name = str(npc_data.get("name", "")).strip() or "对手"
+        eff_part = "、".join(f"【{n}】" for n in names)
+        return (f"参考：对手【{npc_name}】惯用反手{eff_part}，"
+                "若剧情合理可让NPC主动施展（通过effect_update上报）")
+    except Exception as e:
+        logger.debug("NPC反手招提示异常(已忽略): %s", e)
+        return ""
+
+
+def judge_grade_v4(delta: int, natural: int,
+                  player_realm_idx: int = None,
+                  opponent_realm_idx: int = None) -> tuple[int, str, str]:
     """V4 8档分级判定
 
     Args:
         delta: 判定差值 = (d20 + 总修正) - DC
         natural: d20自然值
+        player_realm_idx: 玩家境界索引（REALM_ORDER中的序号，None=未知）
+        opponent_realm_idx: 对手境界索引（None=日常行动/未知）
 
     Returns:
         (grade, grade_name, narrative_template)
 
-    V3规则:
-        1档(完美碾压) 仅 natural=20 触发, 否则降为2档
-        8档(惨败而归) 仅 natural=1 触发, 否则升为7档
-        natural 20: 升2档(但1档需nat20,所以最高到2档除非nat20)
-        natural 1:  降2档(但8档需nat1,所以最低到7档除非nat1)
+    V4规则:
+        1档(完美碾压) 保持条件: natural=20 或 玩家境界≥对手境界+6档（境界差直通）
+        8档(惨败而归) 保持条件: natural=1 或 对手境界≥玩家境界+6档（境界差直通）
+        natural 20: 升2档 / natural 1: 降2档
     """
+    # 境界差直通：±6档及以上的绝对碾压，允许突破nat限制进入1/8档
+    _player_dominates = (player_realm_idx is not None and opponent_realm_idx is not None
+                         and player_realm_idx - opponent_realm_idx >= 6)
+    _opponent_dominates = (player_realm_idx is not None and opponent_realm_idx is not None
+                           and opponent_realm_idx - player_realm_idx >= 6)
+
     # 先按差值定基础档位
     base_grade = 8
     base_name = "惨败而归"
@@ -742,12 +768,12 @@ def judge_grade_v4(delta: int, natural: int) -> tuple[int, str, str]:
     elif natural == 1:
         final_grade = min(8, base_grade + 2)
 
-    # V3: 1档/8档限定natural触发
-    # 1档: 仅natural=20时可保持, 否则降为2档
-    if final_grade == 1 and natural != 20:
+    # V4: 1档/8档保持条件（nat特判 或 境界差直通）
+    # 1档: natural=20 或 玩家境界碾压对手6档以上时保持, 否则降为2档
+    if final_grade == 1 and natural != 20 and not _player_dominates:
         final_grade = 2
-    # 8档: 仅natural=1时可保持, 否则升为7档
-    if final_grade == 8 and natural != 1:
+    # 8档: natural=1 或 对手境界碾压玩家6档以上时保持, 否则升为7档
+    if final_grade == 8 and natural != 1 and not _opponent_dominates:
         final_grade = 7
 
     # 如果档位变了，重新查名称
@@ -1161,9 +1187,47 @@ def _clamp_dc(dc: int) -> int:
     return max(5, min(30, dc))
 
 
+def _vit_text_for_npc(npc: dict, player_name: str = None) -> str:
+    """生成NPC的HP/MP文本（供DC判定行内标注）。
+    优先读档案vitality字段（落盘NPC），无则读临时缓存（临时NPC）。
+    追加身上状态词条（effects），DC裁判可见中毒/受制等。
+    返回如 "HP 45%/MP 0%（⚠内力枯竭）【化功散之毒×1·剩3轮】"，数据缺失返回空串。
+    """
+    try:
+        import vitality_system as _vs
+        name = str(npc.get("name", "")).strip()
+        vit = npc.get("vitality")
+        if not isinstance(vit, dict) or "hp" not in vit:
+            vit = _vs.get_temp_vitality(name) if name else None
+        if not vit:
+            vit_text = ""
+        else:
+            hp, mp = vit.get("hp", 100), vit.get("mp", 100)
+            if hp == -1:
+                vit_text = "HP 已故"
+            else:
+                vit_text = f"HP {hp}%/MP {mp}%"
+                if mp == 0:
+                    vit_text += "（⚠内力枯竭：无法催动武功）"
+                elif hp == 0:
+                    vit_text += "（濒死锁血）"
+        # 状态词条（跑不通最多不显示，不影响HP/MP部分）
+        eff_text = ""
+        try:
+            eff_text = _vs.render_effects_line(name, player_name=player_name)
+        except Exception:
+            eff_text = ""
+        if eff_text:
+            vit_text = (vit_text + " " + eff_text).strip()
+        return vit_text
+    except Exception:
+        return ""
+
+
 def build_active_npcs_brief(npc_list_data, user_action: str,
                             recent_plot: str = "",
-                            extra_npcs: list = None) -> str:
+                            extra_npcs: list = None,
+                            player_name: str = None) -> str:
     """构建活跃NPC精简摘要（供DC判定用）
 
     活跃判定: NPC名出现在 user_action 或 recent_plot 中
@@ -1218,12 +1282,14 @@ def build_active_npcs_brief(npc_list_data, user_action: str,
             if sk_name:
                 skill_parts.append(f"{sk_name}·{sk_level}" if sk_level else sk_name)
         skill_text = "、".join(skill_parts) if skill_parts else "武功不详"
-        lines.append(f"{name}（{identity}）：{skill_text} [{status}]（注:此为完全体档案数据,需结合场景判断当前实际境界）")
+        _vit = _vit_text_for_npc(npc, player_name=player_name)
+        _vit_part = f" {_vit}" if _vit else ""
+        lines.append(f"{name}（{identity}）：{skill_text} [{status}]{_vit_part}（注:此为完全体档案数据,需结合场景判断当前实际境界）")
 
     return "\n".join(lines)
 
 
-def build_target_npc_line(npc: dict) -> str:
+def build_target_npc_line(npc: dict, player_name: str = None) -> str:
     """构建对战对手档案行（供DC判定的对手锚定块）。
     格式与 build_active_npcs_brief 一致，level 与主武功境界都列出。
     """
@@ -1250,8 +1316,10 @@ def build_target_npc_line(npc: dict) -> str:
     skill_text = "、".join(skill_parts) if skill_parts else (level or "武功不详")
     if level and level not in skill_text:
         skill_text = f"{skill_text}（当前境界：{level}）"
+    _vit = _vit_text_for_npc(npc, player_name=player_name)
+    _vit_part = f" {_vit}" if _vit else ""
     id_part = f"（{identity}）" if identity else ""
-    return f"{name}{id_part}：{skill_text} [{status}]（注:此为完全体档案数据,需结合场景判断当前实际境界）"
+    return f"{name}{id_part}：{skill_text} [{status}]{_vit_part}（注:此为完全体档案数据,需结合场景判断当前实际境界）"
 
 
 # ========== V5 分量制 DC：AI 分项给值，程序加总 ==========
@@ -1264,6 +1332,14 @@ REALM_DC_TABLE = {
 }
 
 _REALM_ENUM = list(REALM_DC_TABLE.keys())
+
+
+def realm_idx(realm_name: str) -> int:
+    """境界名 → REALM_DC_TABLE 顺序索引（0=无武功 ... 14=破碎虚空），未知返回 None"""
+    try:
+        return _REALM_ENUM.index(realm_name)
+    except (ValueError, TypeError):
+        return None
 
 # 分量制 tool schema：AI 只分项填值，最终 DC 由程序 compute_final_dc() 加总
 DC_COMPONENT_TOOL = {
@@ -1405,7 +1481,7 @@ def build_v4_dc_judge_prompt(scene: str, user_action: str,
   无武功5·初学入门7·初窥门径9·略有小成11·略有所成13·渐入佳境15·融会贯通17·登堂入室19·炉火纯青21·出神入化23·登峰造极25·超凡入圣27·返璞归真28·天人合一29·破碎虚空30
   日常=行动固有难度：喝水吃饭5·日常行走8·普通施展10·演练熟练12·演练生疏14·突破瓶颈16·强行运功18·疗重伤20
 ■ environment_mod(-8~+8)天时地利（对玩家有利为负）：黑暗+2·雨雪湿滑+1~+2·地形险峻+1~+2·天时不利+1~+2·开阔有利-1
-■ situation_mod(-3~+3)人和战况（对玩家有利为负）：偷袭得手-1~-3·对手负伤-1~-3·群战围杀-1~-3·对手受制-1~-3·以一敌多+1~+3·玩家带伤+1~+3·玩家受制+1~+3·心神不宁+1~+2
+■ situation_mod(-3~+3)人和战况（对玩家有利为负）：偷袭得手-1~-3·对手负伤-1~-3·群战围杀-1~-3·对手受制-1~-3·以一敌多+1~+3·玩家带伤+1~+3·玩家受制+1~+3·心神不宁+1~+2。双方当前HP/MP见档案行：对手HP≤30%按负伤降档·对手MP=0（内力枯竭）按受制降档·玩家HP≤30%或MP=0按带伤加档
 ■ equipment_mod(-1~+1)装备利钝（对玩家有利为负，参考【玩家装备】自行判断利钝）：神兵利刃且用对应武功或精良防具-1·对手持神兵或徒手对兵刃+1·装备与行动无关填0
 ■ 各reason字段：说明数值来历（面向玩家展示，句式自由）。base_reason 必须写明对手当前境界名，如"对手登堂入室，独臂带伤"；日常行动写明难度档，如"演练生疏武功"；其余reason说明来源即可，如"他中我一掌正在踉跄，所以-2"。修正为0时如实填"无碍/无"之类
 
@@ -1418,7 +1494,25 @@ def build_v4_dc_judge_prompt(scene: str, user_action: str,
 只返回严格JSON，不要任何解释文字：
 {{"action_type":"battle","opponent_realm":"登堂入室","base_dc":19,"base_reason":"对手武功境界登堂入室，所以是19","environment_mod":0,"environment_reason":"月色清朗，无碍","situation_mod":-2,"situation_reason":"他中我一掌正在踉跄，所以-2","equipment_mod":-1,"equipment_reason":"我持韩王青刀削铁如泥，所以-1","mod_factors":["对手负伤"]}}"""
 
+    # 玩家当前HP/MP（带伤/内力枯竭可见，供situation_mod判断）
+    player_vit_text = ""
+    try:
+        import vitality_system as _vs
+        _pv = _vs.get_player_vitality()
+        if _pv["hp"] == -1:
+            player_vit_text = "已故"
+        else:
+            player_vit_text = f"HP {_pv['hp']}%/MP {_pv['mp']}%"
+            if _pv["mp"] == 0:
+                player_vit_text += "（⚠内力枯竭：无法催动武功，行动大打折扣）"
+            elif _pv["hp"] == 0:
+                player_vit_text += "（濒死锁血）"
+    except Exception:
+        player_vit_text = ""
+
     user_prompt = f"""【玩家整体境界】{overall_realm}
+
+【玩家当前状态】{player_vit_text or "（未知，视为满状态）"}
 
 【玩家装备】
 {equipment_text}
@@ -1608,10 +1702,12 @@ def ai_judge_dc_only(llm_func, scene: str, user_action: str,
     Returns:
         (dc: int, reason: str) reason=分项解释明细（每个分量自带文字说明）
         四级兜底：①tool call分量 ②文本JSON分量 ③正则提取 ④兜底分量
-        副作用：把本次判定的 action_type 存入 _LAST_DC_ACTION_TYPE（供回气等逻辑读取）
+        副作用：把本次判定的 action_type 存入 _LAST_DC_ACTION_TYPE（供回气等逻辑读取），
+        对手境界存入 _LAST_DC_OPPONENT_REALM（供 judge_grade_v4 境界差直通读取）
     """
-    global _LAST_DC_ACTION_TYPE
+    global _LAST_DC_ACTION_TYPE, _LAST_DC_OPPONENT_REALM
     _LAST_DC_ACTION_TYPE = "daily"
+    _LAST_DC_OPPONENT_REALM = None
     if not llm_func:
         return _fallback_dc(user_action), ""
 
@@ -1652,7 +1748,9 @@ def ai_judge_dc_only(llm_func, scene: str, user_action: str,
             logger.warning("V5 DC分量解析全部失败，使用兜底DC=%d", _fb)
             return _fb, ""
         result = compute_final_dc(comp, user_action)
-        _LAST_DC_ACTION_TYPE = (result.get("components") or {}).get("action_type", "daily")
+        _comp = result.get("components") or {}
+        _LAST_DC_ACTION_TYPE = _comp.get("action_type", "daily")
+        _LAST_DC_OPPONENT_REALM = _comp.get("opponent_realm") or None
         print(f"[DC分量] {result['breakdown']}")
         return result["dc"], result["breakdown"]
     except Exception as e:
@@ -1905,7 +2003,9 @@ def resolve_check_v4(player_obj, user_action: str, l1_scene: str = "",
                      llm_func=None, preset_skill_name: str = None,
                      preset_dc: int = None, preset_dc_reason: str = None,
                      active_npcs_text: str = "",
-                     classified_skills: dict = None) -> dict | None:
+                     classified_skills: dict = None,
+                     effect_opponent_name: str = None,
+                     effect_opponent_data: dict = None) -> dict | None:
     """V4 完整检定流程 - 对外主入口
 
     流程:
@@ -2046,9 +2146,14 @@ def resolve_check_v4(player_obj, user_action: str, l1_scene: str = "",
     # Step 4: 掷骰
     dice_result, _ = check_d20(modifier=total_modifier, dc=dc)
 
-    # Step 5: 8档分级判定
+    # Step 5: 8档分级判定（含境界差直通：±6档境界差可突破nat限制）
     delta = dice_result["total"] - dc
-    verdict_grade, verdict_name, verdict_narr = judge_grade_v4(delta, dice_result["natural"])
+    _p_idx = realm_idx(overall_realm)
+    _o_idx = realm_idx(_LAST_DC_OPPONENT_REALM) if _LAST_DC_OPPONENT_REALM else None
+    verdict_grade, verdict_name, verdict_narr = judge_grade_v4(
+        delta, dice_result["natural"],
+        player_realm_idx=_p_idx, opponent_realm_idx=_o_idx
+    )
 
     # Step 6: 生成约束文本
     constraint_text = build_constraint_text_v4(
@@ -2100,10 +2205,8 @@ def resolve_check_v4(player_obj, user_action: str, l1_scene: str = "",
             )
             if effect_result:
                 effect_results.append(effect_result)
-                if effect_result.get("triggered") and effect_result.get("narrative_hint"):
-                    constraint_text = constraint_text + "\n" + effect_result["narrative_hint"]
 
-            # 2) 增幅源·内功特效（增幅系数=1.0,避免自我增幅）
+            # 2) 增幅源·内功特效
             if _inner_name and _inner_name != skill_name:
                 _inner_effect = compute_effect_trigger(
                     skill_name=_inner_name,
@@ -2115,10 +2218,8 @@ def resolve_check_v4(player_obj, user_action: str, l1_scene: str = "",
                 )
                 if _inner_effect:
                     effect_results.append(_inner_effect)
-                    if _inner_effect.get("triggered") and _inner_effect.get("narrative_hint"):
-                        constraint_text = constraint_text + "\n" + _inner_effect["narrative_hint"]
 
-            # 3) 增幅源·轻功特效（增幅系数=1.0）
+            # 3) 增幅源·轻功特效
             if _light_name and _light_name != skill_name:
                 _light_effect = compute_effect_trigger(
                     skill_name=_light_name,
@@ -2130,12 +2231,82 @@ def resolve_check_v4(player_obj, user_action: str, l1_scene: str = "",
                 )
                 if _light_effect:
                     effect_results.append(_light_effect)
-                    if _light_effect.get("triggered") and _light_effect.get("narrative_hint"):
-                        constraint_text = constraint_text + "\n" + _light_effect["narrative_hint"]
+
+            # 4) 锚点分流：1/2档随机直挂1条 / 3-7档提示注入
+            if effect_results and verdict_grade in (1, 2, 3, 4, 5, 6, 7):
+                if verdict_grade in (1, 2):
+                    _picked = random.choice(effect_results)
+                    for _r in effect_results:
+                        _r["triggered"] = (_r is _picked)
+                    if _picked.get("narrative_hint"):
+                        constraint_text = constraint_text + "\n" + _picked["narrative_hint"]
+                else:
+                    _ref_lines = "\n".join(
+                        _r["ref_hint"] for _r in effect_results if _r.get("ref_hint"))
+                    if _ref_lines:
+                        constraint_text = constraint_text + "\n" + _ref_lines + \
+                            "\n（以上仅为优先参考，是否挂载由你按剧情合理性决定，通过effect_update上报）"
+
+            # ===== Step 6.6: 1/2档特效直挂→挂状态词条 =====
+            # 仅triggered=True（1/2档选中那条）的条目挂载；挂载日志注入constraint_text
+            effect_mount_log = None
+            try:
+                import vitality_system as _vs_eff
+                _mount_log = _vs_eff.mount_martial_effect_triggers(
+                    effect_results,
+                    player_name=getattr(player_obj, "name", None),
+                    opponent_name=effect_opponent_name,
+                )
+                if _mount_log:
+                    effect_mount_log = _mount_log
+                    constraint_text = constraint_text + "\n" + _mount_log + \
+                        "（系统已挂载状态词条，本回合剧情必须体现该状态的效果）"
+            except Exception as _me:
+                logger.debug("特效挂状态异常(已忽略): %s", _me)
     except Exception as _e:
         logger.warning("特效触发计算异常(已忽略): %s", _e)
         effect_result = None
         effect_results = []
+
+    # ===== Step 6.7: NPC反手招锚点（7档力屈受挫/8档惨败时生效） =====
+    # NPC配了effect_triggers → 随机选1条硬挂（target=self给NPC上buff /
+    #   target=opponent给玩家上debuff）；未配置 → 指令兜底约束AI必报一条不利状态
+    # 2-6档：仅注入招牌特效优先提示（AI按剧情裁量），7/8档硬挂逻辑不变
+    # 失效保障：没传/异常 → 静默跳过，零影响
+    npc_effect_results = []
+    try:
+        if effect_opponent_data and verdict_grade:
+            if verdict_grade not in (7, 8):
+                _npc_hint = compute_npc_effect_hint(effect_opponent_data)
+                if _npc_hint:
+                    constraint_text = constraint_text + "\n" + _npc_hint
+            else:
+                npc_effect_results = compute_npc_effect_trigger(
+                    effect_opponent_data, verdict_grade)
+                if npc_effect_results:
+                    _npc_pick = npc_effect_results[0]
+                    if _npc_pick.get("anchor") == "grade78":
+                        import vitality_system as _vs_npc
+                        _npc_mount_log = _vs_npc.mount_npc_effect_triggers(
+                            npc_effect_results,
+                            player_name=getattr(player_obj, "name", None),
+                            npc_name=effect_opponent_data.get("name"),
+                        )
+                        if _npc_mount_log:
+                            effect_mount_log = (effect_mount_log + "\n" + _npc_mount_log
+                                                if effect_mount_log else _npc_mount_log)
+                            constraint_text = constraint_text + "\n" + _npc_mount_log + \
+                                "（系统已挂载状态词条，本回合剧情必须体现该状态的效果）"
+                    elif _npc_pick.get("anchor") == "directive":
+                        _npc_name = _npc_pick.get("npc_name") or "对手"
+                        _grade_label = "惨败而归（第8档）" if verdict_grade == 8 \
+                            else "力屈受挫（第7档）"
+                        constraint_text = constraint_text + (
+                            f"\n指令：本轮玩家{_grade_label}，{_npc_name}的反击必须给玩家"
+                            "造成一条不利状态（如【受伤】【中毒】【震慑】等，从状态库选），"
+                            "必须通过effect_update上报；若对手明显弱于玩家，可酌情豁免。")
+    except Exception as _ne:
+        logger.debug("NPC反手招挂状态异常(已忽略): %s", _ne)
 
     return {
         "required": True,
@@ -2161,5 +2332,7 @@ def resolve_check_v4(player_obj, user_action: str, l1_scene: str = "",
         "constraint_text": constraint_text,
         "effect_result": effect_result,
         "effect_results": effect_results,
+        "npc_effect_results": npc_effect_results,
+        "effect_mount_log": effect_mount_log,
     }
 

@@ -187,12 +187,30 @@ def gen_single_battle_round(llm_func, player_data, npc_data, round_num, player_a
             _vit_block += f"・{_t_name}：HP {_hp_s} / MP {_t_mp_s}\n"
         _vit_block += (
             f"（双方境界：{_p_name or '玩家'}＝{_p_realm_s}，{_t_name or '对手'}＝{_t_realm_s}，相差{abs(_realm_diff)}档。）\n"
-            "（结算规则：每回合末尾必须单独输出一行【体力结算】，格式严格为："
-            "【体力结算】姓名：气血±N，内力±N（正数恢复/获得，负数受伤/消耗，双方都要报，无变化写0）。"
+            "（结算规则：每回合交手后必须调用工具battle_settle_vitality上报双方变化量"
+            "（正数恢复/获得，负数受伤/消耗，双方都要报，无变化写0）。"
+            "若无法调用工具，才在正文末尾单独输出【体力结算】行兜底："
+            "【体力结算】姓名：气血±N，内力±N。"
             "数值由你根据本回合交手激烈程度与双方境界差距自行把握，"
             "只需遵守方向：境界悬殊时，强者一击可重创弱者，弱者反击难伤强者分毫。"
             "内力为空者不能催动武功。）\n"
         )
+        # ===== 状态库清单（effect_update可选上报的id，跑不通不挂词条而已） =====
+        try:
+            _eff_cfg = vitality_system._load_effect_config()
+            if _eff_cfg:
+                _eff_ids = "、".join(
+                    f"{eid}（{cfg.get('name', '')}）" for eid, cfg in _eff_cfg.items()
+                    if cfg.get("visible_to_ai", True)
+                )
+                if _eff_ids:
+                    _vit_block += (
+                        f"（状态上报：若本回合出现状态变化（中毒/受制等），在battle_settle_vitality工具的"
+                        f"effect_update字段上报：op=add/remove、target=角色名、effect_id从状态库选"
+                        f"[{_eff_ids}]；无状态变化则省略该字段。）\n"
+                    )
+        except Exception:
+            pass
 
     _scene_block = f"\n【当前场景环境】\n{scene_info}\n" if scene_info else ""
     battle_prompt = f"""
@@ -224,13 +242,18 @@ def gen_single_battle_round(llm_func, player_data, npc_data, round_num, player_a
 
 【输出要求】
 - 仅输出本回合完整打斗过程 + 双方当前状态，结合当前双方伤势、气息变化自然融入叙事，同时单独列出双方此刻状态。
-- 最后一行必须是【体力结算】行（双方各一行），这是系统结算气血内力的唯一依据。
+- 气血内力结算优先通过工具battle_settle_vitality上报（双方各报，无变化写0）；仅在无法调用工具时，才在最后一行输出【体力结算】行兜底（双方各一行）。
 - 结尾停在双方招式交替的间隙（可以是招式碰撞间隙，也可以是完整一招的间隙），留好下一回合的出招空间，不得收束战局。
 - 全文控制在120~180字，凝练有画面感，无多余字段、无总结、无结局。（【体力结算】行不计入字数）
 
 输出：
 """
-    return get_llm_content(llm_func(battle_prompt, "生成单回合武侠对战剧情", temp=0.8))
+    # ★ V5.1：挂载对战专用体力结算工具（tool优先，正则兜底）
+    _resp = llm_func(battle_prompt, "生成单回合武侠对战剧情", temp=0.8,
+                     tools=[vitality_system.BATTLE_VITALITY_TOOL])
+    _content = get_llm_content(_resp)
+    _tool_calls = _resp.get("tool_calls") if isinstance(_resp, dict) else None
+    return _content, _tool_calls
 
 
 # ===== V5：境界档位与体力结算数值校正 =====
@@ -271,12 +294,15 @@ def calc_realm_index(entity_info):
     return best
 
 
-def settle_battle_round_vitality(round_plot, player_name, target_name, target_persisted=True):
-    """从单回合对战剧情中解析【体力结算】行并结算（AI报什么数值就用什么数值，不做强制校正）。
+def settle_battle_round_vitality(round_plot, player_name, target_name, target_persisted=True, tool_calls=None):
+    """对战回合体力结算：tool优先（battle_settle_vitality），正则兜底（正文【体力结算】行）。
+    AI报什么数值就用什么数值，不做强制校正。
     返回结算日志字符串（空串表示无变化）。
     战斗中的临时对手若未落盘，走内存缓存结算。
     """
-    changes = vitality_system.parse_vitality_regex(round_plot or "")
+    changes = vitality_system.parse_vitality_tool_calls(tool_calls)
+    if not changes:
+        changes = vitality_system.parse_vitality_regex(round_plot or "")
     if not changes:
         return ""
     scene_names = [target_name] if (target_name and not target_persisted) else None
@@ -287,6 +313,37 @@ def settle_battle_round_vitality(round_plot, player_name, target_name, target_pe
         user_action="对战回合",
     )
     return vitality_system.format_settle_log(results)
+
+
+def settle_battle_round_effects(player_name, target_name, target_persisted=True, tool_calls=None, round_plot=""):
+    """对战回合状态处理：effect_update上报（工具优先+正则【状态·】兜底）+ 轮次结算。
+    跑不通不挂词条而已，任何异常静默跳过。返回日志字符串。"""
+    log_parts = []
+    try:
+        updates = vitality_system.parse_effect_tool_calls(tool_calls)
+        if not updates:
+            updates = vitality_system.parse_effect_regex(round_plot or "")
+        if updates:
+            log = vitality_system.apply_effect_updates(
+                updates, player_name=player_name,
+                self_name=player_name, opponent_name=target_name)
+            if log:
+                log_parts.append(log)
+    except Exception:
+        pass
+    # 轮次结算：对玩家和对手各tick一轮（先上报新状态，再到期播报，时序与主循环一致）
+    try:
+        scene_names = [target_name] if (target_name and not target_persisted) else []
+        for name in [player_name, target_name]:
+            if not name:
+                continue
+            log = vitality_system.tick_effects(name, player_name=player_name,
+                                               scene_npc_names=scene_names)
+            if log:
+                log_parts.append(log)
+    except Exception:
+        pass
+    return "\n".join(log_parts)
 
 # 最终对战收尾结局生成（纯AI剧情结算，无手动输入）
 def gen_battle_final_end(llm_func, all_process, battle_style_desc, player_status="", npc_status=""):
@@ -588,10 +645,14 @@ def run_battle_system(
                         _extra_npcs = [target_npc] if target_npc else []
                         _active_npcs_brief = dice_build_active_npcs_brief(
                             npc_data_raw, player_attack, last_round_process or "",
-                            extra_npcs=_extra_npcs
+                            extra_npcs=_extra_npcs,
+                            player_name=player_obj.name if player_obj else None,
                         )
                         # 对手锚定：防止场景残留其他NPC名导致DC判定对象跑偏
-                        _target_line = dice_build_target_npc_line(target_npc) if target_npc else ""
+                        _target_line = dice_build_target_npc_line(
+                            target_npc,
+                            player_name=player_obj.name if player_obj else None,
+                        ) if target_npc else ""
                         _dc, _dc_reason = dice_ai_judge_dc_only(
                             llm_func=llm_common_func,
                             scene=last_round_process or "",
@@ -614,6 +675,8 @@ def run_battle_system(
                             preset_dc=_dc,
                             preset_dc_reason=_dc_reason,
                             classified_skills=_classified,
+                            effect_opponent_name=target_npc.get("name") if target_npc else None,
+                            effect_opponent_data=target_npc,
                         )
                         if _check_result and _check_result.get("constraint_text"):
                             _dice_constraint = "\n" + _check_result["constraint_text"]
@@ -624,8 +687,8 @@ def run_battle_system(
             except Exception as _e:
                 print(f"{COLOR_WARN}[骰子] 对战检定异常: {_e}{COLOR_END}")
 
-            # 生成本回合打斗
-            round_plot = gen_single_battle_round(
+            # 生成本回合打斗（返回：剧情文本 + 体力结算tool_calls）
+            round_plot, _round_tool_calls = gen_single_battle_round(
                 llm_func=llm_common_func,
                 player_data=json.dumps(player_data_raw, ensure_ascii=False),
                 npc_data=json.dumps(target_npc, ensure_ascii=False),
@@ -645,17 +708,33 @@ def run_battle_system(
             total_battle_process += f"\n【第{current_round}回合】{round_plot}"
             last_round_process = round_plot
 
-            # ===== V5：CLI对战每回合体力结算（与web端一致） =====
+            # ===== V5.1：CLI对战每回合体力结算（tool优先 + 正则兜底，与web端一致） =====
             try:
                 _vit_log = settle_battle_round_vitality(
                     round_plot,
                     player_name=player_obj.name if player_obj else None,
                     target_name=target_npc.get("name"),
                     target_persisted=target_npc.get("name") in db_npc_name_map,
+                    tool_calls=_round_tool_calls,
                 )
                 if _vit_log:
                     print(_vit_log)
-                # ===== 对战回合回气：双方 MP+5%（先结算掉蓝再回气） =====
+                    # ★ 结算日志拼入对战记录（下一轮AI与战报存档可见）★
+                    total_battle_process += f"\n{_vit_log}"
+                    last_round_process += f"\n{_vit_log}"
+                # ===== 武侠状态：effect_update上报 + 轮次结算（跑不通不挂词条而已） =====
+                _eff_log = settle_battle_round_effects(
+                    player_name=player_obj.name if player_obj else None,
+                    target_name=target_npc.get("name"),
+                    target_persisted=target_npc.get("name") in db_npc_name_map,
+                    tool_calls=_round_tool_calls,
+                    round_plot=round_plot,
+                )
+                if _eff_log:
+                    print(_eff_log)
+                    total_battle_process += f"\n{_eff_log}"
+                    last_round_process += f"\n{_eff_log}"
+                # ===== 对战回合回气：双方 MP+3%（先结算掉蓝再回气） =====
                 _regen_log = vitality_system.battle_regen_mp(
                     player_obj.name if player_obj else None,
                     [target_npc.get("name")] if target_npc.get("name") else [],

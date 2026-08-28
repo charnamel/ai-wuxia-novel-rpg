@@ -75,6 +75,15 @@ def test_regex():
     check("无标记返回空", r2 == [])
     r3 = vs.parse_vitality_regex("【体力结算】坏人：气血-3，内力0")
     check("内力无符号解析", len(r3) == 1 and r3[0]["mp_pct"] == 0, str(r3))
+    # 带百分号+全角减号（web实战复现的失配bug）
+    r4 = vs.parse_vitality_regex("【体力结算】李三奇李三奇：气血-2%，内力-5%")
+    check("带%号解析", r4 == [{"name": "李三奇李三奇", "hp_pct": -2, "mp_pct": -5}], str(r4))
+    r5 = vs.parse_vitality_regex("【体力结算】李三奇：气血−2，内力−5")
+    check("全角减号解析", r5 == [{"name": "李三奇", "hp_pct": -2, "mp_pct": -5}], str(r5))
+    # 续行带%也容忍
+    r6 = vs.parse_vitality_regex(
+        "【体力结算】李三奇：气血-2，内力-5\n十几名漕帮人：气血-4%，内力-1%")
+    check("续行带%解析", len(r6) == 2 and r6[1]["hp_pct"] == -4, str(r6))
 
 
 def test_clamp_and_sentinel():

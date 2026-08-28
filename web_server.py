@@ -130,20 +130,14 @@ def _parse_effect_from_payload(payload):
 
     payload字段:
         effect_type: 特效ID(如 "shock"),空串表示无特效
-        base_rate: 基础率 1-20
 
     Returns:
-        {"type": str, "base_rate": int} 或 None
+        {"type": str} 或 None
     """
     effect_type = str(payload.get('effect_type', '') or '').strip()
     if not effect_type:
         return None
-    try:
-        base_rate = int(payload.get('base_rate', 5))
-    except (ValueError, TypeError):
-        base_rate = 5
-    base_rate = max(1, min(20, base_rate))
-    return {"type": effect_type, "base_rate": base_rate}
+    return {"type": effect_type}
 
 def _reload_effect_meta_safe():
     """安全重载特效元数据缓存（武功书增删改后调用）"""
@@ -196,7 +190,7 @@ from main import (
 )
 # 导入配图和战斗模块组件
 from image_generator import draw_ascii
-from battle_system import gen_single_battle_round, ai_judge_battle_trend, gen_battle_final_end, ai_check_battle_status, settle_battle_round_vitality
+from battle_system import gen_single_battle_round, ai_judge_battle_trend, gen_battle_final_end, ai_check_battle_status, settle_battle_round_vitality, settle_battle_round_effects
 import vitality_system
 
 CURRENT_PLOT_TEXT = ""
@@ -457,6 +451,7 @@ def handle_battle_action(web_input: str, dice_confirm=None):
     _dice_pending = WEB_BATTLE_STATE.get("dice_pending")
     _dice_constraint = ""
     _dice_result = None
+    _mount_log = ""
 
     if _dice_pending and dice_confirm is True:
         # 步骤B: 玩家确认掷骰 → 执行检定
@@ -472,9 +467,11 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                 preset_dc=_dice_pending.get("dc"),
                 preset_dc_reason=_dice_pending.get("dc_reason"),
                 classified_skills=_dice_pending.get("classified_skills"),
+                effect_opponent_name=WEB_BATTLE_STATE.get("target_name"),
             )
             if _check_result and _check_result.get("constraint_text"):
                 _dice_constraint = "\n" + _check_result["constraint_text"]
+                _mount_log = _check_result.get("effect_mount_log") or ""
                 # ★ DC续传锚定：记录本轮DC判定+掷骰战果，供下一轮DC判定参考
                 try:
                     _vn = _check_result.get("verdict_narr") or _check_result.get("verdict") or ""
@@ -659,7 +656,7 @@ def handle_battle_action(web_input: str, dice_confirm=None):
         except Exception:
             pass
 
-        round_plot = gen_single_battle_round(
+        round_plot, _round_tool_calls = gen_single_battle_round(
             llm_func=llm_call_common,
             player_data=json.dumps(_slim_player, ensure_ascii=False),
             npc_data=json.dumps(WEB_BATTLE_STATE["target_npc"], ensure_ascii=False),
@@ -673,7 +670,10 @@ def handle_battle_action(web_input: str, dice_confirm=None):
             target_npc_name=WEB_BATTLE_STATE.get("target_name"),
             target_npc_persisted=_vit_target_persisted,
         )
-        # ===== V5：体力结算（每回合解析【体力结算】行并落盘） =====
+        # ★ 特效挂载日志拼入回合剧情（网页可见，含1轮特效的当轮挂载提示）★
+        if _mount_log:
+            round_plot = f"{round_plot}\n{_mount_log}"
+        # ===== V5.1：体力结算（tool优先 + 正则兜底，解析后落盘） =====
         _vit_log = ""
         try:
             _vit_log = settle_battle_round_vitality(
@@ -681,6 +681,7 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                 player_name=_fresh_player.name if _fresh_player else _slim_player.get("name"),
                 target_name=WEB_BATTLE_STATE.get("target_name"),
                 target_persisted=_vit_target_persisted,
+                tool_calls=_round_tool_calls,
             )
             # 结算后同步内存单例，防后续 player_obj.save() 旧数据覆盖
             if _vit_log and _fresh_player:
@@ -692,6 +693,44 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                 round_plot = f"{round_plot}\n{_vit_log}"
         except Exception as _ve:
             print(f"[WARN] 对战体力结算异常: {_ve}")
+        # ===== 武侠状态：effect_update上报 + 轮次结算（跑不通不挂词条而已） =====
+        try:
+            _eff_log = settle_battle_round_effects(
+                player_name=_fresh_player.name if _fresh_player else _slim_player.get("name"),
+                target_name=WEB_BATTLE_STATE.get("target_name"),
+                target_persisted=_vit_target_persisted,
+                tool_calls=_round_tool_calls,
+                round_plot=round_plot,
+            )
+            if _eff_log:
+                print(_eff_log)
+                round_plot = f"{round_plot}\n{_eff_log}"
+        except Exception as _ee:
+            print(f"[WARN] 对战状态结算异常: {_ee}")
+        # ===== 状态快照：每轮末尾显示双方身上挂的特效（网页可见） =====
+        try:
+            _snap_p = _fresh_player.name if _fresh_player else _slim_player.get("name")
+            _snap_t = WEB_BATTLE_STATE.get("target_name")
+            _snap_lines = []
+            for _sn in filter(None, dict.fromkeys([_snap_p, _snap_t])):
+                _sl = vitality_system.render_effects_line(_sn, player_name=_snap_p)
+                if _sl:
+                    _snap_lines.append(f"・{_sn} {_sl}")
+            if _snap_lines:
+                _snap = "【⚔当前状态】" + "；".join(_snap_lines)
+                round_plot = f"{round_plot}\n{_snap}"
+        except Exception as _se:
+            print(f"[WARN] 状态快照渲染异常: {_se}")
+        # ===== 对战回合回气：双方 MP+3%（先结算掉蓝再回气，与CLI/main管线一致） =====
+        try:
+            _regen_log = vitality_system.battle_regen_mp(
+                _fresh_player.name if _fresh_player else _slim_player.get("name"),
+                [WEB_BATTLE_STATE.get("target_name")] if WEB_BATTLE_STATE.get("target_name") else [],
+            )
+            if _regen_log:
+                print(_regen_log)
+        except Exception as _re:
+            print(f"[WARN] 对战回气异常: {_re}")
         if round_plot:
             WEB_BATTLE_STATE["total_process"] += f"\n【第{WEB_BATTLE_STATE['round_num']}回合】{round_plot}"
             WEB_BATTLE_STATE["last_round"] = round_plot
@@ -1799,6 +1838,21 @@ def chat():
                 # 执行 V4 检定（传入预设武功名和DC，跳过重复AI判定）
                 _pobj = get_player()
                 _l1_scene = CURRENT_PLOT_TEXT[-300:] if CURRENT_PLOT_TEXT else ""
+                # 特效挂状态的对手：从玩家输入中匹配NPC名（首个命中者）
+                _eff_opp = None
+                _eff_opp_full = None
+                try:
+                    _npc_all_w = load_json("data/npc_agents.json") or {}
+                    for _n in _npc_all_w.get("npc_list", []):
+                        _nm = _n.get("name", "")
+                        if _nm and _nm != (_pobj.name if _pobj else None) \
+                                and _nm in (pending["original_action"] or ""):
+                            _eff_opp = _nm
+                            _eff_opp_full = _n
+                            break
+                except Exception:
+                    _eff_opp = None
+                    _eff_opp_full = None
                 try:
                     _check_result = dice_resolve_check_v4(
                         player_obj=_pobj,
@@ -1809,6 +1863,8 @@ def chat():
                         preset_dc=pending.get("dc"),
                         preset_dc_reason=pending.get("dc_reason"),
                         classified_skills=pending.get("classified_skills"),
+                        effect_opponent_name=_eff_opp,
+                        effect_opponent_data=_eff_opp_full,
                     )
                 except Exception as _e:
                     print(f"[骰子V4] 检定异常: {_e}")
@@ -1837,6 +1893,7 @@ def chat():
                         "verdict_narr": _check_result["verdict_narr"],
                         "effect_result": _check_result.get("effect_result"),
                         "effect_results": _check_result.get("effect_results"),
+                        "effect_mount_log": _check_result.get("effect_mount_log"),
                     }
                     print(f"[骰子V4] 玩家确认掷骰，检定结果: {_check_result['verdict']}（第{_check_result['verdict_grade']}档）")
                 else:
@@ -2617,8 +2674,16 @@ def api_npc_ai_generate():
   "body_status": "normal",
   "body_status_desc": "",
   "relation_to_player": "",
-  "year": 出生年份整数
+  "year": 出生年份整数,
+  "effect_triggers": {"特效id": {"target": "self或opponent"}}
 }
+
+effect_triggers 说明（可选字段，NPC反手招）：
+- 仅当玩家与该NPC对战且DC判定为第8档（惨败而归）时，系统才会随机硬挂其中一条
+- key 必须从以下id中选: poison(剧毒) cold_poison(寒毒) fire_poison(火毒) internal_injury(内伤) external_wound(外伤) weakness(虚弱) acupoint_seal(点穴) shock(震慑) disarm(缴械) sound_attack(音攻) illusion(幻象) heal(治疗) purify(解毒) absorb(吸纳) dissolve(化功) shield(护体) reverse(反弹) dodge(闪避) pursuit(追击) surprise(奇袭) counter(反击) heart_seizure(摄心)
+- target="self" 表示NPC给自己的增益（如 shield护体），target="opponent" 表示NPC反击玩家的减益（如 poison剧毒）
+- 按武功特性选 1-3 个（如用毒高手配 poison反手；无反手招设定则省略整个字段）
+- 无需任何概率数值
 
 要求：
 1. initial_favor 范围 -100 ~ 100，默认 15，敌对/仇家/恩人可适当调整
@@ -2685,6 +2750,26 @@ def api_npc_ai_generate():
             npc_data["relation_to_player"] = ""
         if not isinstance(npc_data.get("martial_skills"), list):
             npc_data["martial_skills"] = []
+        # effect_triggers 校验：非法条目剔除（增量设计：字段缺失/为空均合法）
+        # 兼容两种值：{"target": "self|opponent"}（新语义）和 整数（旧概率值→按类型转默认target）
+        _et = npc_data.get("effect_triggers")
+        if isinstance(_et, dict) and _et:
+            _valid_ids = set(dice_system._load_effect_meta().get("effects", {}).keys())
+            _et_clean = {}
+            for _k, _v in _et.items():
+                _k = str(_k).strip()
+                if _k not in _valid_ids:
+                    continue
+                if isinstance(_v, dict):
+                    _t = str(_v.get("target", "opponent")).strip().lower()
+                    _et_clean[_k] = {"target": _t if _t in ("self", "opponent") else "opponent"}
+                else:
+                    _et_clean[_k] = {"target": "opponent"}
+            npc_data["effect_triggers"] = _et_clean
+            if not npc_data["effect_triggers"]:
+                npc_data.pop("effect_triggers", None)
+        else:
+            npc_data.pop("effect_triggers", None)
 
         return jsonify({"status": "success", "npc": npc_data})
     except Exception as e:
@@ -3607,8 +3692,7 @@ def api_martial_list_effect():
             "effects": [
                 {"id": "internal_injury", "name": "内伤", "category": "attack", "desc": "..."},
                 ...
-            ],
-            "default_base_rate": {"attack": 5, "internal": 8, "lightfoot": 6, "special": 4}
+            ]
         }
     """
     try:
@@ -3632,9 +3716,6 @@ def api_martial_list_effect():
         return jsonify({
             "status": "success",
             "effects": effects_list,
-            "default_base_rate": meta.get("_default_base_rate", {
-                "attack": 5, "internal": 8, "lightfoot": 6, "special": 4
-            }),
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
@@ -3658,7 +3739,7 @@ def api_martial_ai_generate():
   "category": "sword",
   "source": "来源门派/人物",
   "brief_desc": "一句话简述",
-  "effect": {"type": "shock", "base_rate": 10},
+  "effect": {"type": "shock"},
   "special_move_name": "绝招名称",
   "special_move_desc": "绝招描述"
 }
@@ -3672,8 +3753,8 @@ def api_martial_ai_generate():
    内功类：heal(治疗), purify(解毒), absorb(吸纳), dissolve(化功), shield(护体), reverse(反弹)
    轻功类：dodge(闪避), pursuit(追击), surprise(奇袭)
    特殊类：illusion(幻象), control(摄心), counter(反击)
-4. effect.base_rate：1-20整数，表示特效基础触发率%
-5. special_move_name/special_move_desc：该武功的招牌绝招名称和描述，建议填写
+4. special_move_name/special_move_desc：该武功的招牌绝招名称和描述，建议填写
+5. 特效触发由战斗DC档位决定（1档完美碾压/2档超常发挥时程序直挂），无需任何概率数值
 6. 只输出纯JSON，不要任何解释文字"""
 
         user_prompt = f"请根据以下描述生成武功设定：\n{desc}"
@@ -3746,12 +3827,7 @@ def api_martial_ai_generate():
                          "dodge", "pursuit", "surprise", "illusion", "control", "counter"]
         effect = art_data.get("effect")
         if isinstance(effect, dict) and effect.get("type") in valid_effects:
-            try:
-                base_rate = int(effect.get("base_rate", 5))
-            except Exception:
-                base_rate = 5
-            base_rate = max(1, min(20, base_rate))
-            art_data["effect"] = {"type": effect["type"], "base_rate": base_rate}
+            art_data["effect"] = {"type": effect["type"]}
         else:
             art_data["effect"] = None
 

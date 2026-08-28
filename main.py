@@ -3936,6 +3936,8 @@ def process_one_round(user_input: str, is_web: bool = False):
                         },
                         # ========== 新增：气血内力结算字段（V5百分比版） ==========
                         "vitality_change": vit_sys.VITALITY_TOOL_SCHEMA,
+                        # ========== 新增：武侠状态上报表（中毒/点穴等，挂词条给DC和剧情AI） ==========
+                        "effect_update": vit_sys.EFFECT_UPDATE_SCHEMA,
                         # ========== 新增：主角自身状态字段 ==========
                         "self_state": {
                             "type": "string",
@@ -4653,6 +4655,22 @@ def process_one_round(user_input: str, is_web: bool = False):
             f"若无法调用工具，必须在正文末尾单独输出【体力结算】行兜底："
             f"【体力结算】姓名：气血±N，内力±N）\n"
         )
+        # ===== 状态库清单（effect_update可选上报的id，跑不通不挂词条而已） =====
+        try:
+            _eff_cfg = vit_sys._load_effect_config()
+            if _eff_cfg:
+                _eff_ids = "、".join(
+                    f"{_eid}（{_ecfg.get('name', '')}）" for _eid, _ecfg in _eff_cfg.items()
+                    if _ecfg.get("visible_to_ai", True)
+                )
+                if _eff_ids:
+                    _vitality_section += (
+                        f"（状态上报：剧情中出现状态变化（中毒/受制等）时，在update_game_state工具的"
+                        f"effect_update字段上报：op=add/remove、target=角色名、effect_id从状态库选"
+                        f"[{_eff_ids}]；无状态变化则省略该字段。）\n"
+                    )
+        except Exception:
+            pass
 
         dynamic_info = f"""
 【*L3-1 全局剧情脉络*】
@@ -4738,12 +4756,30 @@ __L4_MERGE_SLOT__
 
                 # AI 判定（始终启用，场景为空时AI仍能根据行动判断）
                 _active_npcs_brief = dice_system.build_active_npcs_brief(
-                    npc_full_data, pure_user_action, l1_scene
+                    npc_full_data, pure_user_action, l1_scene,
+                    player_name=player_obj.name if player_obj else None,
                 )
                 # 分类检测武功（支持内功轻功增幅检定）
                 _classified_skills = dice_system.detect_martial_skill_classified(
                     pure_user_action, player_obj.martial_skill_list, player_obj
                 )
+                # 特效挂状态的对手：从玩家输入中匹配活跃NPC名（首个命中者）
+                _effect_opponent = None
+                _effect_opponent_full = None
+                try:
+                    for _an in (active_names or []):
+                        if _an and _an != (player_obj.name if player_obj else None) \
+                                and _an in pure_user_action:
+                            _effect_opponent = _an
+                            break
+                    if _effect_opponent:
+                        for _n in npc_full_data.get("npc_list", []):
+                            if _n.get("name") == _effect_opponent:
+                                _effect_opponent_full = _n
+                                break
+                except Exception:
+                    _effect_opponent = None
+                    _effect_opponent_full = None
                 _check_result = dice_resolve_check_v4(
                     player_obj=player_obj,
                     user_action=pure_user_action,
@@ -4751,6 +4787,8 @@ __L4_MERGE_SLOT__
                     llm_func=llm_call_common,
                     active_npcs_text=_active_npcs_brief,
                     classified_skills=_classified_skills,
+                    effect_opponent_name=_effect_opponent,
+                    effect_opponent_data=_effect_opponent_full,
                 )
                 _dc_check_result = _check_result
 
@@ -5103,7 +5141,73 @@ __L4_MERGE_SLOT__
                 }
                 player_obj.save()
 
-        # ===== 对战回合回气（仅本轮DC判定为对战类时：双方 MP+5%，先结算掉蓝再回气） =====
+        # ===== 特效挂载日志拼入剧情（网页可见，含1轮特效的当轮挂载提示） =====
+        try:
+            _mount_log_txt = (_dc_check_result or {}).get("effect_mount_log")
+            if _mount_log_txt:
+                plot_content = f"{plot_content}\n{_mount_log_txt}"
+        except Exception:
+            pass
+
+        # ===== 武侠状态上报（effect_update：工具优先 + 正则【状态·】标记行兜底） =====
+        try:
+            _eff_updates = vit_sys.parse_effect_tool_calls(tool_calls)
+            if not _eff_updates:
+                _eff_updates = vit_sys.parse_effect_regex(plot_content)
+            if _eff_updates:
+                _p_eff = player_obj.name if player_obj else None
+                # 相对标记翻译：self=玩家；opponent=场景中首个出现在用户动作里的NPC，兜底场景首位
+                _opp_eff = None
+                try:
+                    for _n in (_vit_scene_names or []):
+                        if _n != _p_eff and _n in (actual_user_action or ""):
+                            _opp_eff = _n
+                            break
+                    if not _opp_eff:
+                        _opp_eff = next(
+                            (_n for _n in (_vit_scene_names or [])
+                             if _n and _n != _p_eff), None)
+                except Exception:
+                    _opp_eff = None
+                _eff_log = vit_sys.apply_effect_updates(
+                    _eff_updates, player_name=_p_eff,
+                    self_name=_p_eff, opponent_name=_opp_eff
+                )
+                if _eff_log:
+                    print(f"{COLOR_GREEN}{_eff_log}{COLOR_END}")
+                    plot_content = f"{plot_content}\n{_eff_log}"
+        except Exception as _efe:
+            print(f"{COLOR_WARN}⚠️ 状态上报异常：{_efe}{COLOR_END}")
+
+        # ===== 状态轮次结算（每轮：到点播报到期/发作警讯；数值由AI在vitality_change体现） =====
+        try:
+            _p_name0 = player_obj.name if player_obj else None
+            _tick_names = ([_p_name0] if _p_name0 else []) + list(_vit_scene_names or [])
+            for _tick_name in _tick_names:
+                _t_log = vit_sys.tick_effects(_tick_name, player_name=_p_name0,
+                                              scene_npc_names=_vit_scene_names)
+                if _t_log:
+                    print(f"{COLOR_GREEN}{_t_log}{COLOR_END}")
+                    plot_content = f"{plot_content}\n{_t_log}"
+        except Exception as _te:
+            print(f"{COLOR_WARN}⚠️ 状态轮次结算异常：{_te}{COLOR_END}")
+
+        # ===== 状态快照：每轮末尾显示全员身上挂的特效（含玩家，网页/CLI可见） =====
+        try:
+            _snap_parts = []
+            _p_name1 = player_obj.name if player_obj else None
+            for _sn in filter(None, dict.fromkeys([_p_name1] + list(_vit_scene_names or []))):
+                _sl = vit_sys.render_effects_line(_sn, player_name=_p_name1)
+                if _sl:
+                    _snap_parts.append(f"・{_sn} {_sl}")
+            if _snap_parts:
+                _snap_txt = "【⚔当前状态】" + "；".join(_snap_parts)
+                print(f"{COLOR_GREEN}{_snap_txt}{COLOR_END}")
+                plot_content = f"{plot_content}\n{_snap_txt}"
+        except Exception as _snp_e:
+            print(f"{COLOR_WARN}⚠️ 状态快照异常：{_snp_e}{COLOR_END}")
+
+        # ===== 对战回合回气（仅本轮DC判定为对战类时：双方 MP+3%，先结算掉蓝再回气） =====
         try:
             if _dc_check_result and _dc_check_result.get("action_type") == "battle":
                 _br_log = vit_sys.battle_regen_mp(

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""测试：对战回合回气 battle_regen_mp（MP+5%）
+"""测试：对战回合回气 battle_regen_mp（MP+3%）
 验证：玩家回气 / 落盘NPC回气 / 临时NPC回气 / 已故冻结 / 满血不写盘 / daily不触发（main侧逻辑）
 """
 import sys, os, json, shutil, time

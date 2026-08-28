@@ -68,8 +68,7 @@
       "source": "大理段氏/段誉",
       "brief_desc": "大理段氏最高武学 以指力化剑气隔空伤敌",
       "effect": {
-        "type": "internal_injury",
-        "base_rate": 15
+        "type": "internal_injury"
       },
       "special_move_name": "六脉齐发",
       "special_move_desc": "六脉剑气齐发，无形剑气纵横四方"
@@ -80,8 +79,7 @@
       "category": "internal",
       "source": "侠客岛/石破天",
       "effect": {
-        "type": "illusion",
-        "base_rate": 20
+        "type": "illusion"
       },
       "brief_desc": "李白侠客行诗演化武学 藏于荒岛蝌蚪文中",
       "special_move_name": "太玄归真",
@@ -94,8 +92,7 @@
       "source": "华山派/独孤求败、令狐冲、风清扬",
       "brief_desc": "独孤求败所创 以无招破有招破尽天下武学",
       "effect": {
-        "type": "counter",
-        "base_rate": 15
+        "type": "counter"
       },
       "special_move_name": "破尽万法",
       "special_move_desc": "独孤九剑破尽天下武学，一剑封喉"
@@ -107,8 +104,7 @@
       "source": "少林寺/达摩祖师",
       "brief_desc": "达摩祖师所传三大绝技 一指禅千手法伏魔神功",
       "effect": {
-        "type": "shock",
-        "base_rate": 15
+        "type": "shock"
       },
       "special_move_name": "达摩三绝",
       "special_move_desc": "三绝合一，指剑掌齐发破万法"
@@ -119,8 +115,7 @@
       "category": "internal",
       "source": "少林寺/觉远、张无忌",
       "effect": {
-        "type": "heal",
-        "base_rate": 18
+        "type": "heal"
       },
       "brief_desc": "少林藏经阁四卷梵文经书 至高内功天下阳功之首",
       "special_move_name": "九阳焚天",
@@ -133,8 +128,7 @@
       "source": "九阴真经/黄裳、王重阳、郭靖、周伯通",
       "brief_desc": "黄裳所编天下武学总纲 上下两册无所不包",
       "effect": {
-        "type": "control",
-        "base_rate": 16
+        "type": "control"
       },
       "special_move_name": "九阴摄魂",
       "special_move_desc": "九阴内力如潮水般涌出，阴柔变幻莫测"
@@ -145,8 +139,7 @@
       "category": "internal",
       "source": "明教/张无忌",
       "effect": {
-        "type": "reverse",
-        "base_rate": 18
+        "type": "reverse"
       },
       "brief_desc": "明教镇教武学 主旨牵引转移劲力变幻莫测",
       "special_move_name": "挪移乾坤",
@@ -158,8 +151,7 @@
       "category": "internal",
       "source": "全真教/王重阳",
       "effect": {
-        "type": "shield",
-        "base_rate": 16
+        "type": "shield"
       },
       "brief_desc": "全真教镇教绝学 王重阳凭此夺天下第一",
       "special_move_name": "先天一气",
@@ -171,8 +163,7 @@
       "category": "internal",
       "source": "逍遥派/无崖子、段誉",
       "effect": {
-        "type": "absorb",
-        "base_rate": 10
+        "type": "absorb"
       },
       "brief_desc": "逍遥派至高内功 可吸他人内力化为北冥真气",
       "special_move_name": "北冥吞海",
@@ -185,8 +176,7 @@
       "source": "逍遥派/灵鹫宫/天山童姥",
       "brief_desc": "天山童姥所习逍遥派内功 威力霸道但返老还童",
       "effect": {
-        "type": "shield",
-        "base_rate": 16
+        "type": "shield"
       },
       "special_move_name": "长春不老",
       "special_move_desc": "长春真气生生不息，容颜不老气脉长春"
@@ -197,8 +187,7 @@
       "category": "internal",
       "source": "逍遥派/无崖子、鸠摩智",
       "effect": {
-        "type": "illusion",
-        "base_rate": 16
+        "type": "illusion"
       },
       "brief_desc": "逍遥派内功根基 可模仿各家武学",
       "special_move_name": "无相化形",
@@ -210,8 +199,7 @@
       "category": "internal",
       "source": "少林寺/达摩祖师",
       "effect": {
-        "type": "heal",
-        "base_rate": 18
+        "type": "heal"
       },
       "brief_desc": "少林达摩祖师所创最高内功 洗髓伐毛脱胎换骨",
       "special_move_name": "洗髓易筋",
@@ -224,8 +212,7 @@
       "source": "大理段氏/天龙寺/枯荣长老",
       "brief_desc": "大理段氏天龙寺的武学 又简称枯禅",
       "effect": {
-        "type": "shield",
-        "base_rate": 14
+        "type": "shield"
       },
       "special_move_name": "枯荣禅定",
       "special_move_desc": "枯荣禅功真气如草木枯荣，生生灭灭轮回不息"
@@ -236,8 +223,7 @@
       "category": "internal",
       "source": "少林寺/达摩祖师",
       "effect": {
-        "type": "purify",
-        "base_rate": 16
+        "type": "purify"
       },
       "brief_desc": "少林达摩祖师所创内功 与易筋经并称少林两大神功",
       "special_move_name": "洗髓伐脉",
@@ -251,8 +237,7 @@
       "brief_desc": "独孤九剑残缺本 总决式+破剑式等基本剑式 威力虽减仍属顶级",
       "_note": "残版降一级",
       "effect": {
-        "type": "counter",
-        "base_rate": 12
+        "type": "counter"
       },
       "special_move_name": "后发先至",
       "special_move_desc": "后发制人，先一步反击"
@@ -263,8 +248,7 @@
       "category": "internal",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "heal",
-        "base_rate": 14
+        "type": "heal"
       },
       "brief_desc": "张三丰由武当九阳功再行研创的道家内功心法",
       "special_move_name": "纯阳无极",
@@ -276,8 +260,7 @@
       "category": "internal",
       "source": "少林寺/石破天",
       "effect": {
-        "type": "shield",
-        "base_rate": 16
+        "type": "shield"
       },
       "brief_desc": "少林高僧所创内功 集佛家内功精奥需摒绝杂念",
       "special_move_name": "伏魔金身",
@@ -290,8 +273,7 @@
       "source": "日月神教/东方不败",
       "brief_desc": "前朝太监所创欲练此功必先自宫的绝世武学",
       "effect": {
-        "type": "surprise",
-        "base_rate": 20
+        "type": "surprise"
       },
       "special_move_name": "葵花向日",
       "special_move_desc": "葵花真气如烈日当空，速影如电不可捉摸"
@@ -302,8 +284,7 @@
       "category": "sword",
       "source": "越国/阿青",
       "effect": {
-        "type": "disarm",
-        "base_rate": 12
+        "type": "disarm"
       },
       "brief_desc": "阿青所创古剑法 韩小莹传承 剑法如流水行云",
       "special_move_name": "越女浣纱",
@@ -315,8 +296,7 @@
       "category": "internal",
       "source": "少林寺/空见",
       "effect": {
-        "type": "shield",
-        "base_rate": 12
+        "type": "shield"
       },
       "brief_desc": "少林七十二绝技之一 空见练成可反震敌劲",
       "special_move_name": "金刚不坏",
@@ -328,8 +308,7 @@
       "category": "internal",
       "source": "金轮寺/金轮法王",
       "effect": {
-        "type": "shock",
-        "base_rate": 16
+        "type": "shock"
       },
       "brief_desc": "密宗至高护法神功 十三层每层增一龙一象之力",
       "special_move_name": "雷霆万钧",
@@ -341,8 +320,7 @@
       "category": "finger",
       "source": "大理段氏/段智兴(一灯)、段誉",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 12
+        "type": "acupoint_seal"
       },
       "brief_desc": "大理段氏家传指法 点穴伤敌可克蛤蟆功",
       "special_move_name": "一阳破空",
@@ -354,8 +332,7 @@
       "category": "internal",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "brief_desc": "桃花岛/黄药师所传武学",
       "special_move_name": "横扫千军",
@@ -367,8 +344,7 @@
       "category": "lightfoot",
       "source": "逍遥派/段誉",
       "effect": {
-        "type": "dodge",
-        "base_rate": 8
+        "type": "dodge"
       },
       "brief_desc": "逍遥派轻功 依伏羲六十四卦步法闪避",
       "special_move_name": "凌波踏浪",
@@ -389,8 +365,7 @@
       "category": "internal",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "dissolve",
-        "base_rate": 12
+        "type": "dissolve"
       },
       "brief_desc": "丁春秋绝技 以毒物化人内力无法引为己用",
       "special_move_name": "化功散气",
@@ -403,8 +378,7 @@
       "source": "少林寺/方证",
       "brief_desc": "少林七十二绝技之一 方证掌法变幻莫测",
       "effect": {
-        "type": "weakness",
-        "base_rate": 5
+        "type": "weakness"
       },
       "special_move_name": "千手如来",
       "special_move_desc": "千手如来掌幻化千手，掌影重重难辨"
@@ -415,8 +389,7 @@
       "category": "special",
       "source": "全真教/周伯通",
       "effect": {
-        "type": "surprise",
-        "base_rate": 8
+        "type": "surprise"
       },
       "brief_desc": "周伯通自创 左手画圆右手画方双手同出",
       "special_move_name": "双手互搏",
@@ -428,8 +401,7 @@
       "category": "internal",
       "source": "日月神教/任我行",
       "effect": {
-        "type": "absorb",
-        "base_rate": 14
+        "type": "absorb"
       },
       "brief_desc": "任我行绝技 吸人真气化己用但有内力冲突缺陷",
       "special_move_name": "吸星夺魄",
@@ -441,8 +413,7 @@
       "category": "special",
       "source": "明教/张无忌",
       "effect": {
-        "type": "surprise",
-        "base_rate": 10
+        "type": "surprise"
       },
       "brief_desc": "山中老人霍山毕生精华 刻于圣火令上奇幻诡异",
       "special_move_name": "圣火焚天",
@@ -455,8 +426,7 @@
       "source": "逍遥派/灵鹫宫/天山童姥",
       "brief_desc": "逍遥派掌法 阳刚暗藏阴柔可化生死符",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 10
+        "type": "acupoint_seal"
       },
       "special_move_name": "六阳融雪",
       "special_move_desc": "六阳掌力如烈日融雪，至阳至刚"
@@ -468,8 +438,7 @@
       "source": "逍遥派/灵鹫宫/天山童姥",
       "brief_desc": "逍遥派上乘武学 三路掌法三路擒拿可化各种兵器招式",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 10
+        "type": "acupoint_seal"
       },
       "special_move_name": "折梅三弄",
       "special_move_desc": "折梅手三弄连环，如折梅枝般精巧绝伦"
@@ -487,8 +456,7 @@
       "category": "fist",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "counter",
-        "base_rate": 10
+        "type": "counter"
       },
       "brief_desc": "武当张三丰晚年所创 以柔克刚借力打力",
       "special_move_name": "借力反打",
@@ -500,8 +468,7 @@
       "category": "finger",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "disarm",
-        "base_rate": 10
+        "type": "disarm"
       },
       "brief_desc": "黄药师绝学 弹指发劲伤人于无形",
       "special_move_name": "脱手穿云",
@@ -513,8 +480,7 @@
       "category": "staff",
       "source": "丐帮/洪七公、黄蓉、乔峰",
       "effect": {
-        "type": "disarm",
-        "base_rate": 12
+        "type": "disarm"
       },
       "brief_desc": "丐帮帮主传承棒法 轻灵绝妙",
       "special_move_name": "打狗棒法",
@@ -526,8 +492,7 @@
       "category": "special",
       "source": "丐帮/乔峰",
       "effect": {
-        "type": "disarm",
-        "base_rate": 10
+        "type": "disarm"
       },
       "brief_desc": "丐帮百年无人练成的神功 具有隔空移物之能",
       "special_move_name": "缴械无形",
@@ -540,8 +505,7 @@
       "source": "姑苏慕容氏/慕容复、慕容博",
       "brief_desc": "姑苏慕容一家世传绝技 由慕容家前代高手慕容龙城所创",
       "effect": {
-        "type": "reverse",
-        "base_rate": 20
+        "type": "reverse"
       },
       "special_move_name": "星移斗转",
       "special_move_desc": "借力打力，以彼之道还施彼身"
@@ -552,8 +516,7 @@
       "category": "palm",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 6
+        "type": "acupoint_seal"
       },
       "brief_desc": "桃花岛/黄药师所传武学",
       "special_move_name": "点穴截脉",
@@ -565,8 +528,7 @@
       "category": "palm",
       "source": "吐蕃/鸠摩智",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 12
+        "type": "fire_poison"
       },
       "brief_desc": "鸠摩智以密宗内力化刀刃劲力隔空伤人",
       "special_move_name": "烈焰焚身",
@@ -578,8 +540,7 @@
       "category": "staff",
       "source": "白驼山庄/欧阳锋",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "欧阳锋的兵器招数 杖法中夹杂棒法、棍法的套路",
       "special_move_name": "五毒噬心",
@@ -592,8 +553,7 @@
       "source": "玄冥派/鹿杖客、鹤笔翁",
       "brief_desc": "鹤笔翁、鹿杖客所练就的一种威力巨大的阴毒掌力",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 7
+        "type": "cold_poison"
       },
       "special_move_name": "玄冰刺骨",
       "special_move_desc": "玄冰寒气刺入骨髓，冰封经脉"
@@ -604,8 +564,7 @@
       "category": "sword",
       "source": "独孤求败/杨过",
       "effect": {
-        "type": "shock",
-        "base_rate": 10
+        "type": "shock"
       },
       "brief_desc": "杨过持玄铁重剑所悟剑法 重剑无锋大巧不工",
       "special_move_name": "玄铁重剑",
@@ -617,8 +576,7 @@
       "category": "internal",
       "source": "古墓派/林朝英、小龙女",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "古墓派至高内功 林朝英创需男子辅助修习",
       "special_move_name": "生生不息",
@@ -630,8 +588,7 @@
       "category": "sword",
       "source": "古墓派/小龙女、杨过",
       "effect": {
-        "type": "disarm",
-        "base_rate": 10
+        "type": "disarm"
       },
       "brief_desc": "古墓派剑法 需爱侣分使全真玉女两剑合璧",
       "special_move_name": "素心双剑",
@@ -644,8 +601,7 @@
       "source": "逍遥派/灵鹫宫/天山童姥",
       "brief_desc": "逍遥派暗学 阴寒内力凝冰打穴求生不得求死不能",
       "effect": {
-        "type": "control",
-        "base_rate": 4
+        "type": "control"
       },
       "special_move_name": "生死由我",
       "special_move_desc": "生死符中，由我掌控"
@@ -656,8 +612,7 @@
       "category": "palm",
       "source": "逍遥派/李秋水",
       "effect": {
-        "type": "internal_injury",
-        "base_rate": 10
+        "type": "internal_injury"
       },
       "brief_desc": "逍遥派武学 是李秋水的武功 发出掌力曲直如意 可变化方向",
       "special_move_name": "白虹贯日",
@@ -676,8 +631,7 @@
       "category": "special",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "sound_attack",
-        "base_rate": 10
+        "type": "sound_attack"
       },
       "brief_desc": "黄药师的一门绝技 箫声有如海潮变幻",
       "special_move_name": "龙吟虎啸",
@@ -689,8 +643,7 @@
       "category": "lightfoot",
       "source": "铁剑门/木桑道人、袁承志",
       "effect": {
-        "type": "dodge",
-        "base_rate": 12
+        "type": "dodge"
       },
       "brief_desc": "木桑道人的绝顶轻功 藉由教导温青青 再间接授予袁承志",
       "special_move_name": "百变无踪",
@@ -702,8 +655,7 @@
       "category": "internal",
       "source": "少林寺/游坦之",
       "effect": {
-        "type": "heal",
-        "base_rate": 14
+        "type": "heal"
       },
       "brief_desc": "天竺高人所创内功经文 游坦之偶得修炼",
       "special_move_name": "神足通天",
@@ -716,8 +668,7 @@
       "source": "全真教/周伯通",
       "brief_desc": "周伯通被困桃花岛悟出 至柔拳法以虚击实",
       "effect": {
-        "type": "disarm",
-        "base_rate": 5
+        "type": "disarm"
       },
       "special_move_name": "空明一拳",
       "special_move_desc": "空明拳一拳如空明，无招胜有招"
@@ -728,8 +679,7 @@
       "category": "internal",
       "source": "华山派/岳不群",
       "effect": {
-        "type": "shield",
-        "base_rate": 10
+        "type": "shield"
       },
       "brief_desc": "华山派最上乘内功 华山九功第一紫霞",
       "special_move_name": "紫气东来",
@@ -741,8 +691,7 @@
       "category": "internal",
       "source": "白驼山庄/欧阳锋",
       "effect": {
-        "type": "shock",
-        "base_rate": 10
+        "type": "shock"
       },
       "brief_desc": "欧阳锋绝学 蓄劲如蛤蟆一击致命",
       "special_move_name": "蛤蟆蓄势",
@@ -754,8 +703,7 @@
       "category": "sword",
       "source": "福威镖局/林远图、林平之",
       "effect": {
-        "type": "surprise",
-        "base_rate": 10
+        "type": "surprise"
       },
       "brief_desc": "林远图从葵花宝典悟出 需自宫修炼的诡异剑法",
       "special_move_name": "辟邪惊魂",
@@ -767,8 +715,7 @@
       "category": "palm",
       "source": "铁掌帮/裘千仞",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 8
+        "type": "external_wound"
       },
       "brief_desc": "“铁掌水上飘”为裘千仞的成名绝技",
       "special_move_name": "铁掌开碑",
@@ -780,8 +727,7 @@
       "category": "palm",
       "source": "丐帮/乔峰、洪七公、郭靖",
       "effect": {
-        "type": "shock",
-        "base_rate": 12
+        "type": "shock"
       },
       "brief_desc": "丐帮镇帮绝学 天下第一刚猛掌法萧峰洪七公所擅",
       "special_move_name": "亢龙有悔",
@@ -794,8 +740,7 @@
       "source": "古墓派/杨过",
       "brief_desc": "杨过思小龙女所创掌法 十七式凄绝刚猛",
       "effect": {
-        "type": "weakness",
-        "base_rate": 10
+        "type": "weakness"
       },
       "special_move_name": "黯然销魂",
       "special_move_desc": "黯然销魂者唯别而已，掌力如心碎断肠"
@@ -820,8 +765,7 @@
       "category": "fist",
       "source": "崆峒派/木灵子、谢逊",
       "effect": {
-        "type": "internal_injury",
-        "base_rate": 10
+        "type": "internal_injury"
       },
       "brief_desc": "崆峒派镇山绝学 先伤己后伤人的一路拳法 一练七伤摧肝肠",
       "special_move_name": "七伤裂心",
@@ -856,8 +800,7 @@
       "category": "lightfoot",
       "source": "襄阳/郭靖",
       "effect": {
-        "type": "dodge",
-        "base_rate": 8
+        "type": "dodge"
       },
       "brief_desc": "当世会者极少的轻功身法 全凭一口气提起身子",
       "special_move_name": "瞬息千里",
@@ -897,8 +840,7 @@
       "category": "finger",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 8
+        "type": "acupoint_seal"
       },
       "brief_desc": "黄药师点穴手法 指如兰花拂穴制敌",
       "special_move_name": "兰花拂穴",
@@ -911,8 +853,7 @@
       "source": "华山派/岳不群",
       "brief_desc": "岳不群所传剑法 气宗剑法中正",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "锋芒毕露",
       "special_move_desc": "劲力凝聚锋芒，一击见血"
@@ -972,8 +913,7 @@
       "source": "南少林寺/火工头陀",
       "brief_desc": "又简称金刚指 少林七十二绝技之一",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "大力金刚",
       "special_move_desc": "大力金刚指指力如金刚，一指点碎石破天惊"
@@ -984,8 +924,7 @@
       "category": "palm",
       "source": "嵩山派/左冷禅",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 6
+        "type": "cold_poison"
       },
       "brief_desc": "大嵩阳神掌为嵩山派的掌法。",
       "special_move_name": "大嵩阳掌",
@@ -1021,8 +960,7 @@
       "source": "少林寺/玄慈",
       "brief_desc": "少林七十二绝技之一 少林寺第十一代通字辈的六位高僧",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "大金刚拳",
       "special_move_desc": "大金刚拳拳如金刚，一拳之下山崩地裂"
@@ -1060,8 +998,7 @@
       "category": "internal",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "reverse",
-        "base_rate": 12
+        "type": "reverse"
       },
       "brief_desc": "张三丰百岁所创内家心法 内外合一",
       "special_move_name": "太极浑圆",
@@ -1083,8 +1020,7 @@
       "source": "姑苏慕容氏/包不同",
       "brief_desc": "少林七十二绝技之一 一腿既出 第二腿如影随形 紧跟攻击",
       "effect": {
-        "type": "weakness",
-        "base_rate": 5
+        "type": "weakness"
       },
       "special_move_name": "如影随形",
       "special_move_desc": "如影随形腿如影子般跟随，腿法如影不离不弃"
@@ -1105,8 +1041,7 @@
       "source": "嵩山派/左冷禅",
       "brief_desc": "左冷禅所修寒性内功 可冰封敌人",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 10
+        "type": "cold_poison"
       },
       "special_move_name": "寒冰封天",
       "special_move_desc": "寒冰真气如冰封天地，寒气所至万物凝滞"
@@ -1118,8 +1053,7 @@
       "source": "嵩山派/左冷禅",
       "brief_desc": "嵩山派的掌法 是左冷禅结合大嵩阳掌及寒冰真气施展的掌法。",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 5
+        "type": "cold_poison"
       },
       "special_move_name": "寒冰神掌",
       "special_move_desc": "寒冰神掌真气如冰，一掌拍出寒气封天"
@@ -1131,8 +1065,7 @@
       "source": "明教/韦一笑",
       "brief_desc": "韦一笑独门掌法 掌力阴寒之极",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 5
+        "type": "cold_poison"
       },
       "special_move_name": "寒冰绵掌",
       "special_move_desc": "寒冰绵掌真气如绵，寒中带柔透骨而入"
@@ -1144,8 +1077,7 @@
       "source": "少林寺/觉远",
       "brief_desc": "在觉远大师死前口述九阳真经全文时所传给少林寺",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "special_move_name": "少林九阳",
       "special_move_desc": "少林九阳真气如烈日当空，至刚至阳"
@@ -1157,8 +1089,7 @@
       "source": "峨嵋派/郭襄",
       "brief_desc": "在觉远大师死前口述九阳真经全文时所传给郭襄",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "special_move_name": "峨嵋九阳",
       "special_move_desc": "峨嵋九阳真气如朝霞满天，柔中带刚"
@@ -1176,8 +1107,7 @@
       "category": "finger",
       "source": "少林寺/成昆",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 8
+        "type": "cold_poison"
       },
       "brief_desc": "成昆阴毒点穴指力 偷袭杨逍韦一笑等人",
       "special_move_name": "幻阴寒指",
@@ -1198,8 +1128,7 @@
       "category": "fist",
       "source": "少林寺/方证",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "brief_desc": "少林寺武学 寺僧练成金刚神掌后 方可修练的擒拿手法。",
       "special_move_name": "拈花擒拿",
@@ -1228,8 +1157,7 @@
       "source": "青城派/余沧海",
       "brief_desc": "青城派掌门余沧海成名绝技，掌力可摧人心脏",
       "effect": {
-        "type": "internal_injury",
-        "base_rate": 10
+        "type": "internal_injury"
       },
       "special_move_name": "摧心断魂",
       "special_move_desc": "掌力直透胸腹，摧心断魂一击致命"
@@ -1256,8 +1184,7 @@
       "category": "fist",
       "source": "荆州/丁典",
       "effect": {
-        "type": "shock",
-        "base_rate": 6
+        "type": "shock"
       },
       "brief_desc": "丁典练成神照经后用来打死偷袭者的拳功。",
       "special_move_name": "气吞山河",
@@ -1270,8 +1197,7 @@
       "source": "少林寺/方证",
       "brief_desc": "少林七十二绝技之一 是萧远山入藏经阁偷学的第一门武功",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "special_move_name": "无相劫指",
       "special_move_desc": "无相劫指无形无迹，指力破空而至"
@@ -1289,8 +1215,7 @@
       "category": "internal",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "张三丰获觉远大师传授的部分九阳神功心法",
       "special_move_name": "武当少阳",
@@ -1303,8 +1228,7 @@
       "source": "大理段氏/段正淳",
       "brief_desc": "大理段氏的家传剑法 起手招式为「其得断金」 出招时脚步沉着",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "锐不可当",
       "special_move_desc": "锐气如虹，锋刃难挡"
@@ -1323,8 +1247,7 @@
       "source": "少林寺/成昆、谢逊",
       "brief_desc": "成昆谢逊师徒所修独门内功 阴寒毒辣",
       "effect": {
-        "type": "shield",
-        "base_rate": 8
+        "type": "shield"
       },
       "special_move_name": "气墙横亘",
       "special_move_desc": "真气凝成气墙，横亘身前"
@@ -1336,8 +1259,7 @@
       "source": "华山派/岳不群",
       "brief_desc": "华山派混元掌内功 袁承志所修内外合一",
       "effect": {
-        "type": "shield",
-        "base_rate": 8
+        "type": "shield"
       },
       "special_move_name": "混元罡气",
       "special_move_desc": "混元内力凝成护体罡气，坚不可摧"
@@ -1348,8 +1270,7 @@
       "category": "fist",
       "source": "白驼山庄/欧阳锋",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "第一次华山论剑后 欧阳锋为在下回论剑时出奇制胜",
       "special_move_name": "毒雾弥漫",
@@ -1361,8 +1282,7 @@
       "category": "blade",
       "source": "少林寺/方证",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "少林七十二绝技之一 刀法练成需在乾木旁快劈八十一刀",
       "special_move_name": "燃木焚天",
@@ -1375,8 +1295,7 @@
       "source": "少林寺/谢逊",
       "brief_desc": "为人体丹田内气外发 发声吐气的一门内功绝技",
       "effect": {
-        "type": "sound_attack",
-        "base_rate": 10
+        "type": "sound_attack"
       },
       "special_move_name": "魔音贯耳",
       "special_move_desc": "魔音贯耳，扰敌心神"
@@ -1387,8 +1306,7 @@
       "category": "blade",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "张三丰所创的武当绝技 俞岱岩用这门刀法斩杀过一名大盗。",
       "special_move_name": "玄虚一刀",
@@ -1400,8 +1318,7 @@
       "category": "sword",
       "source": "古墓派/小龙女",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 6
+        "type": "external_wound"
       },
       "brief_desc": "古墓派剑法 由林朝英所创 招招克制全真剑法",
       "special_move_name": "锐不可当",
@@ -1413,8 +1330,7 @@
       "category": "sword",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "sound_attack",
-        "base_rate": 5
+        "type": "sound_attack"
       },
       "brief_desc": "黄药师剑法 剑如玉箫飘逸",
       "special_move_name": "龙吟虎啸",
@@ -1426,8 +1342,7 @@
       "category": "internal",
       "source": "西藏密宗/金轮法王",
       "effect": {
-        "type": "shield",
-        "base_rate": 10
+        "type": "shield"
       },
       "brief_desc": "在第三版中金轮法王传授给郭襄的上乘密宗内功心法",
       "special_move_name": "瑜伽密乘",
@@ -1446,8 +1361,7 @@
       "category": "lightfoot",
       "source": "白驼山庄/欧阳锋",
       "effect": {
-        "type": "pursuit",
-        "base_rate": 10
+        "type": "pursuit"
       },
       "brief_desc": "白驼山庄家传轻功 欧阳克曾在与梅超风交手时使出。",
       "special_move_name": "追风逐电",
@@ -1466,8 +1380,7 @@
       "category": "palm",
       "source": "玄碧山庄/谢烟客",
       "effect": {
-        "type": "shock",
-        "base_rate": 6
+        "type": "shock"
       },
       "brief_desc": "谢烟客的掌法 威力惊人 曾震慑长乐帮多名高手。",
       "special_move_name": "碧针清掌",
@@ -1487,8 +1400,7 @@
       "source": "少林寺/玄慈",
       "brief_desc": "七十二绝技第一，可以卸掉降龙十八掌掌力，刚柔随心、后发制人，玄慈靠此硬接萧峰。",
       "effect": {
-        "type": "reverse",
-        "base_rate": 12
+        "type": "reverse"
       },
       "special_move_name": "般若金刚",
       "special_move_desc": "般若掌力如金刚怒目，降妖伏魔"
@@ -1520,8 +1432,7 @@
       "category": "special",
       "source": "少林寺/方证",
       "effect": {
-        "type": "reverse",
-        "base_rate": 11
+        "type": "reverse"
       },
       "brief_desc": "少林七十二绝技之一 拳劲隐藏在衣袖底发出",
       "special_move_name": "袖里乾坤",
@@ -1534,8 +1445,7 @@
       "source": "古墓派/李莫愁",
       "brief_desc": "赤练神掌 又名五毒神掌。",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "special_move_name": "赤练毒掌",
       "special_move_desc": "赤练毒掌真气如蛇，毒素如赤练缠绕"
@@ -1546,8 +1456,7 @@
       "category": "sword",
       "source": "少林寺/达摩祖师",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 6
+        "type": "external_wound"
       },
       "brief_desc": "少林七十二绝技之一 因苦慧大师创西域少林一派 遂流传至西域",
       "special_move_name": "达摩伏魔",
@@ -1566,8 +1475,7 @@
       "category": "hidden",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "poison",
-        "base_rate": 10
+        "type": "poison"
       },
       "brief_desc": "星宿派的阴毒武功 比腐尸毒更上一层楼",
       "special_move_name": "毒贯周身",
@@ -1579,8 +1487,7 @@
       "category": "finger",
       "source": "白驼山庄/欧阳锋",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "brief_desc": "欧阳锋阴毒点穴手法 仅欧阳锋黄药师可解",
       "special_move_name": "点穴截脉",
@@ -1607,8 +1514,7 @@
       "source": "少林寺/空性",
       "brief_desc": "少林七十二绝技之一 空性所擅擒拿抓手法",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "special_move_name": "龙爪擒龙",
       "special_move_desc": "龙爪手爪如龙爪，擒龙伏虎无往不利"
@@ -1635,8 +1541,7 @@
       "category": "sword",
       "source": "恒山派/定闲",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "恒山派剑法 定静师太所传百花剑式",
       "special_move_name": "万花齐放",
@@ -1649,8 +1554,7 @@
       "source": "天山派/天山派",
       "brief_desc": "天山派剑术的绝诣 所以叫做“三分”",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "三分天下",
       "special_move_desc": "三分剑术一剑三分，剑气纵横割裂四方"
@@ -1661,8 +1565,7 @@
       "category": "hidden",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "poison",
-        "base_rate": 12
+        "type": "poison"
       },
       "brief_desc": "星宿派的暗器、毒物之一。",
       "special_move_name": "三笑逍遥",
@@ -1674,8 +1577,7 @@
       "category": "finger",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "星宿老怪丁春秋所创之毒功 曾传给徒弟出尘子。",
       "special_move_name": "三阴蜈蚣",
@@ -1696,8 +1598,7 @@
       "category": "sword",
       "source": "上清观/上清观",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "上清观一派以速度见长的剑法。",
       "special_move_name": "上清快剑",
@@ -1758,8 +1659,7 @@
       "source": "秦家寨/秦家寨",
       "brief_desc": "云州秦家寨的镇寨绝学 乃是前代寨主秦公望所创 一共六十四招",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "special_move_name": "五虎断门",
       "special_move_desc": "五虎断门刀刀如五虎，一刀断门势不可挡"
@@ -1770,8 +1670,7 @@
       "category": "palm",
       "source": "长乐帮/贝海石",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "brief_desc": "长乐帮军师贝海石成名武林的绝技。",
       "special_move_name": "横扫千军",
@@ -1809,8 +1708,7 @@
       "source": "江南七怪/柯镇恶",
       "brief_desc": "江南七怪之首飞天蝙蝠柯镇恶的成名武功 杖下威力十分刚猛。",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "伏魔降妖",
       "special_move_desc": "伏魔杖法杖如金刚，降妖伏魔无往不利"
@@ -1821,8 +1719,7 @@
       "category": "lightfoot",
       "source": "万里独行/田伯光",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "田伯光施展的轻功。",
       "special_move_name": "三叠云梯",
@@ -1841,8 +1738,7 @@
       "category": "sword",
       "source": "八仙剑门/八仙剑门",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "八仙剑一门的镇派绝技。",
       "special_move_name": "八仙过海",
@@ -1869,8 +1765,7 @@
       "source": "八卦门/王维扬",
       "brief_desc": "八卦门最精深的掌法 非将外八卦练至登峰造极 决不能动",
       "effect": {
-        "type": "reverse",
-        "base_rate": 8
+        "type": "reverse"
       },
       "special_move_name": "八卦护体",
       "special_move_desc": "内劲儿流转，流转攻击"
@@ -1881,8 +1776,7 @@
       "category": "palm",
       "source": "星宿派/游坦之",
       "effect": {
-        "type": "poison",
-        "base_rate": 6
+        "type": "poison"
       },
       "brief_desc": "游坦之吸取雪山千年冰蚕的毒性后练成的神功",
       "special_move_name": "冰蚕噬心",
@@ -1894,8 +1788,7 @@
       "category": "hidden",
       "source": "古墓派/李莫愁",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 8
+        "type": "cold_poison"
       },
       "brief_desc": "古墓派的独门暗器 针上剧毒威力非常 李莫愁曾凭此威震江湖。",
       "special_move_name": "冰魄追魂",
@@ -1908,8 +1801,7 @@
       "source": "天地会/陈近南",
       "brief_desc": "天地会总舵主陈近南的成名招式 爪劲异常阴毒",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 5
+        "type": "cold_poison"
       }
     },
     "刀中夹镖": {
@@ -1932,8 +1824,7 @@
       "category": "palm",
       "source": "神龙教/洪安通",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "brief_desc": "神龙教的阴狠掌力 中掌者在一年半载后",
       "special_move_name": "化骨绵掌",
@@ -1953,8 +1844,7 @@
       "source": "明教/天鹰教/殷离",
       "brief_desc": "殷离与其母的独门武功 修练时需吸收蜘蛛剧毒",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "special_move_name": "剧毒蚀骨",
       "special_move_desc": "剧毒渗透入骨，腐蚀对手战力"
@@ -1991,8 +1881,7 @@
       "source": "全真教/王重阳",
       "brief_desc": "全真教剑法之一 剑法只攻不守 招招力求同归于尽",
       "effect": {
-        "type": "surprise",
-        "base_rate": 20
+        "type": "surprise"
       },
       "special_move_name": "同归于尽",
       "special_move_desc": "与敌人同归于尽，伤敌一千，自伤八百"
@@ -2044,8 +1933,7 @@
       "category": "sword",
       "source": "衡山派/莫大、刘正风",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "回风落雁剑为衡山派剑招之一 共有三十六路",
       "special_move_name": "削铁如泥",
@@ -2058,8 +1946,7 @@
       "source": "青城派/余沧海",
       "brief_desc": "四川青城派的镇山绝技之一 以独门兵刃雷公轰施展",
       "effect": {
-        "type": "reverse",
-        "base_rate": 8
+        "type": "reverse"
       },
       "special_move_name": "城字十八",
       "special_move_desc": "城字十八破十八破连环，如攻城略地势不可挡"
@@ -2070,8 +1957,7 @@
       "category": "lightfoot",
       "source": "襄阳/郭靖",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "乃绝顶轻功上天梯衍化出来 最早之前是以郭靖传授予杨过",
       "special_move_name": "壁虎游墙",
@@ -2105,8 +1991,7 @@
       "source": "武当派/张三丰",
       "brief_desc": "殷梨亭所创的剑招 招数只攻不守和敌人同归于尽",
       "effect": {
-        "type": "surprise",
-        "base_rate": 6
+        "type": "surprise"
       },
       "special_move_name": "天地同寿",
       "special_move_desc": "只攻不守和敌人同归于尽"
@@ -2117,8 +2002,7 @@
       "category": "hidden",
       "source": "蓬莱派/蓬莱派",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "山东蓬莱派的暗器绝技。",
       "special_move_name": "毒贯周身",
@@ -2162,8 +2046,7 @@
       "category": "blade",
       "source": "林氏/林玉龙、任飞燕、袁冠南、萧中慧",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "一位高僧传给任飞燕跟林玉龙夫妻的刀法 共七十二招",
       "special_move_name": "同生共死",
@@ -2182,8 +2065,7 @@
       "category": "blade",
       "source": "丐帮/洪七公",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "丐帮长老吴长风所擅长的刀法 曾与云中鹤交战时报出",
       "special_move_name": "奇门三才",
@@ -2223,8 +2105,7 @@
       "category": "internal",
       "source": "蒙古/潇湘子",
       "effect": {
-        "type": "heal",
-        "base_rate": 6
+        "type": "heal"
       },
       "brief_desc": "潇湘子所练的武功 乃祝由科一派旁门异术 仅出现在第一版",
       "special_move_name": "寿木长春",
@@ -2236,8 +2117,7 @@
       "category": "sword",
       "source": "泰山派/天门道人",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "泰山派剑法中最高深的绝艺 要旨在於左手的算数",
       "special_move_name": "削铁如泥",
@@ -2257,8 +2137,7 @@
       "source": "红花会/陈家洛",
       "brief_desc": "陈家洛在迷宫中藉由庄子所悟出的武学",
       "effect": {
-        "type": "surprise",
-        "base_rate": 6
+        "type": "surprise"
       },
       "special_move_name": "庖丁解牛",
       "special_move_desc": "庖丁解牛功如庖丁解牛，游刃有余直取要害"
@@ -2269,8 +2148,7 @@
       "category": "internal",
       "source": "五台山清凉寺/清凉寺",
       "effect": {
-        "type": "shield",
-        "base_rate": 4
+        "type": "shield"
       },
       "brief_desc": "五台山清凉寺的绝技之一。",
       "special_move_name": "心意混元",
@@ -2283,8 +2161,7 @@
       "source": "日月神教/任我行",
       "brief_desc": "任我行跟左冷禅交手时所使的掌法 招式狂砍狠劈",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "急风骤雨",
       "special_move_desc": "急风骤雨掌掌如急风骤雨，密不透风"
@@ -2318,8 +2195,7 @@
       "category": "palm",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 5
+        "type": "cold_poison"
       },
       "brief_desc": "星宿老怪丁春秋所创之毒功 曾传给徒弟出尘子。",
       "special_move_name": "抽髓断魂",
@@ -2347,8 +2223,7 @@
       "category": "lightfoot",
       "source": "铁剑门/木桑道人、袁承志",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       },
       "brief_desc": "木桑道人和袁承志下棋后 教给他的第一种轻身功夫",
       "special_move_name": "攀云乘龙",
@@ -2369,8 +2244,7 @@
       "category": "internal",
       "source": "雪山派/史小翠",
       "effect": {
-        "type": "shield",
-        "base_rate": 4
+        "type": "shield"
       },
       "brief_desc": "史小翠白阿绣所修内功 阴柔绵长",
       "special_move_name": "无妄归真",
@@ -2389,8 +2263,7 @@
       "category": "sword",
       "source": "昆仑派/何太冲",
       "effect": {
-        "type": "reverse",
-        "base_rate": 5
+        "type": "reverse"
       },
       "brief_desc": "昆仑派剑法 由何太冲跟班淑娴夫妇一同施展 剑法依循两仪之道",
       "special_move_name": "昆仑两仪",
@@ -2403,8 +2276,7 @@
       "source": "胡家/胡一刀、胡斐",
       "brief_desc": "胡斐家传掌法 用于遭人围攻而大处劣势之时 不求有功",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "special_move_name": "春蚕吐丝",
       "special_move_desc": "春蚕掌法掌如春蚕吐丝，绵绵不绝"
@@ -2422,8 +2294,7 @@
       "category": "lightfoot",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "dodge",
-        "base_rate": 10
+        "type": "dodge"
       },
       "brief_desc": "武当派闻名武林的轻功身法。",
       "special_move_name": "梯云直上",
@@ -2443,8 +2314,7 @@
       "source": "武当派/宋远桥、宋青书",
       "brief_desc": "武当绝技之一 宋青书对付重伤的张无忌时 获父亲宋远桥点拨",
       "effect": {
-        "type": "shield",
-        "base_rate": 8
+        "type": "shield"
       },
       "special_move_name": "绵掌太极",
       "special_move_desc": "武当绵掌真气如棉，以柔克刚借力打力"
@@ -2495,8 +2365,7 @@
       "source": "华山派/穆人清、黄真、归辛树、袁承志",
       "brief_desc": "华山派掌法 乃是自外而内修练混元功之用的掌式",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "混元掌罡",
       "special_move_desc": "混元掌力真气如罡，一掌推出排山倒海"
@@ -2507,8 +2376,7 @@
       "category": "internal",
       "source": "晋阳/萧半和",
       "effect": {
-        "type": "shield",
-        "base_rate": 8
+        "type": "shield"
       },
       "brief_desc": "萧半和绝学 可抗衡震天三十掌 修练条件严苛",
       "special_move_name": "混元归炁",
@@ -2521,8 +2389,7 @@
       "source": "丐帮/洪七公",
       "brief_desc": "洪七公随意传给黄蓉的武功之一 黄蓉曾在丐帮大会上使出。",
       "effect": {
-        "type": "heal",
-        "base_rate": 8
+        "type": "heal"
       },
       "special_move_name": "混天无极",
       "special_move_desc": "混天功真气如混沌初开，无极生太极"
@@ -2560,8 +2427,7 @@
       "category": "lightfoot",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "surprise",
-        "base_rate": 6
+        "type": "surprise"
       },
       "brief_desc": "黄药师所创的轻功身法 黄蓉曾用来躲开彭连虎的攻击",
       "special_move_name": "灵鳌探海",
@@ -2574,8 +2440,7 @@
       "source": "华山派/封不平",
       "brief_desc": "狂风快剑为华山派剑宗封不平在中条山隐居十五年所创的剑法",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "血溅五步",
       "special_move_desc": "锋芒所至，血溅五步"
@@ -2593,8 +2458,7 @@
       "category": "finger",
       "source": "梅庄/黑白子",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 4
+        "type": "cold_poison"
       },
       "brief_desc": "黑白子凝水成冰的指力。",
       "special_move_name": "玄天寒指",
@@ -2614,8 +2478,7 @@
       "source": "古墓派/小龙女",
       "brief_desc": "古墓派的独门暗器 是一种细如毛发的金针 六成黄金、四成精钢",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "special_move_name": "玉蜂针雨",
       "special_move_desc": "玉蜂针如蜂群出巢，漫天针雨无处可逃"
@@ -2634,8 +2497,7 @@
       "source": "华山派/穆人清、黄真、归辛树、袁承志",
       "brief_desc": "华山派拳法 穆人清曾传予黄真和归辛树、袁承志三名弟子。",
       "effect": {
-        "type": "disarm",
-        "base_rate": 5
+        "type": "disarm"
       },
       "special_move_name": "破玉一剑",
       "special_move_desc": "破玉一剑如破玉而出，剑气凌厉无坚不摧"
@@ -2655,8 +2517,7 @@
       "category": "palm",
       "source": "雪山派/白万剑",
       "effect": {
-        "type": "illusion",
-        "base_rate": 4
+        "type": "illusion"
       },
       "brief_desc": "白自在的得意绝技 一揪、一抓、一绊 接连三招 曾胜过许多高手",
       "special_move_name": "神倒鬼跌",
@@ -2686,8 +2547,7 @@
       "category": "palm",
       "source": "昆仑派/冯锡范",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 8
+        "type": "fire_poison"
       },
       "brief_desc": "昆仑派独门掌法 冯锡范曾用来击杀关安基",
       "special_move_name": "红砂漫天",
@@ -2749,8 +2609,7 @@
       "category": "sword",
       "source": "苗家/苗人凤",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 6
+        "type": "external_wound"
       },
       "brief_desc": "苗人凤家传剑法 剑术通神天下无敌手",
       "special_move_name": "苗家独步",
@@ -2763,8 +2622,7 @@
       "source": "丐帮/洪七公",
       "brief_desc": "洪七公随意传给黄蓉的武功之一 黄蓉曾在丐帮大会上使出。",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "莲花绽放",
       "special_move_desc": "莲花掌掌势如莲花绽放，层层推进"
@@ -2782,8 +2640,7 @@
       "category": "finger",
       "source": "武当派/俞莲舟",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "张三丰次徒俞莲舟学会虎爪手后 苦心孤诣从中自创十二路新招",
       "special_move_name": "虎爪绝户",
@@ -2841,8 +2698,7 @@
       "category": "hidden",
       "source": "天龙门/田归农",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "天龙门世代相传的暗器绝招 发出时既准又快 兼含剧毒",
       "special_move_name": "毒龙锥心",
@@ -2870,8 +2726,7 @@
       "category": "blade",
       "source": "雪山派/史小翠",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "白自在妻室史小翠针对雪山剑法所创的刀式",
       "special_move_name": "金乌坠地",
@@ -2884,8 +2739,7 @@
       "source": "金蛇秘笈/夏雪宜",
       "brief_desc": "金蛇郎君夏雪宜所创剑法 诡异狠辣",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "special_move_name": "金蛇吐信",
       "special_move_desc": "金蛇剑法如金蛇吐信，剑势诡异刁钻难防"
@@ -2910,8 +2764,7 @@
       "category": "hidden",
       "source": "金蛇秘笈/夏雪宜",
       "effect": {
-        "type": "poison",
-        "base_rate": 6
+        "type": "poison"
       },
       "brief_desc": "金蛇郎君夏雪宜暗器手法 奇准无比",
       "special_move_name": "毒贯周身",
@@ -2923,8 +2776,7 @@
       "category": "lightfoot",
       "source": "全真教/王重阳",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       },
       "brief_desc": "全真派极精深的轻功 马钰曾在蒙古让郭靖每日上崖下崖而修练到的",
       "special_move_name": "金雁横空",
@@ -2967,8 +2819,7 @@
       "source": "崆峒派/木灵子",
       "brief_desc": "崆峒派的厉害内功，双手掌力分为阴阳两种 倒转运使起来",
       "effect": {
-        "type": "surprise",
-        "base_rate": 6
+        "type": "surprise"
       },
       "special_move_name": "阴阳互转",
       "special_move_desc": "瞬间阴阳真气互换，刚柔并济，威力无穷"
@@ -3029,8 +2880,7 @@
       "category": "hidden",
       "source": "青城派/余沧海",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "四川青城派的镇山绝技之一 以独门兵刃雷公轰搭配不同暗器使出",
       "special_move_name": "青字九打",
@@ -3043,8 +2893,7 @@
       "source": "少林寺/方证",
       "brief_desc": "少林七十二绝技之一 亦流传至西域少林一派",
       "effect": {
-        "type": "disarm",
-        "base_rate": 5
+        "type": "disarm"
       },
       "special_move_name": "韦陀伏魔",
       "special_move_desc": "韦陀伏魔剑降妖伏魔，剑光如韦陀护法"
@@ -3065,8 +2914,7 @@
       "source": "峨嵋派/灭绝师太",
       "brief_desc": "峨嵋派掌法精要所在 在张无忌为保锐金旗残众时，灭绝师太使出。",
       "effect": {
-        "type": "disarm",
-        "base_rate": 5
+        "type": "disarm"
       },
       "special_move_name": "飘雪穿云",
       "special_move_desc": "飘雪穿云掌掌力如雪花穿云，轻盈而凌厉"
@@ -3078,8 +2926,7 @@
       "source": "胡家/胡斐",
       "brief_desc": "胡斐武功大成使出的轻功绝技。",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "special_move_name": "飞天遁影",
       "special_move_desc": "身形如飞，瞬息之间已至数丈之外"
@@ -3116,8 +2963,7 @@
       "source": "天明教/鹰教/殷天正",
       "brief_desc": "双手摆出鹰的钩爪之势 势成鹰爪 其爪锋锐之处可以任意撕裂骨骼",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "special_move_name": "鹰爪锁喉",
       "special_move_desc": "鹰爪擒拿功爪如鹰爪，锁喉擒拿无往不利"
@@ -3154,8 +3000,7 @@
       "source": "少林寺/黄钟公",
       "brief_desc": "黄钟公替令狐冲把脉时为防有变而暗中预备的擒拿手法。",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "龙爪锁喉",
       "special_move_desc": "龙爪功爪如龙爪，锁喉擒拿一击致命"
@@ -3211,8 +3056,7 @@
       "category": "palm",
       "source": "昆仑派/何太冲",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "brief_desc": "昆仑派拳掌招数之一 西华子曾用来攻击天鹰教的封坛主。",
       "special_move_name": "点穴截脉",
@@ -3294,8 +3138,7 @@
       "category": "blade",
       "source": "八卦门/王维扬",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "慕容复和段誉在少林寺大战时 慕容复所使出的刀法。",
       "special_move_name": "八卦游身",
@@ -3370,8 +3213,7 @@
       "category": "lightfoot",
       "source": "江湖/不平道人",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "蛟王不平道人在乌老大面前展现的轻功身法。",
       "special_move_name": "凭虚临风",
@@ -3391,8 +3233,7 @@
       "source": "江南七怪/韩宝驹",
       "brief_desc": "江南七怪中“南山樵子”南希仁的武功",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "南山一刀",
       "special_move_desc": "南山刀法一刀如南山，沉稳厚重"
@@ -3411,8 +3252,7 @@
       "source": "玉判官/贝人龙",
       "brief_desc": "玉判官贝人龙的趁手兵器 吴钩剑名虽是剑 实是双钩",
       "effect": {
-        "type": "disarm",
-        "base_rate": 5
+        "type": "disarm"
       },
       "special_move_name": "吴钩霜雪",
       "special_move_desc": "吴钩如霜雪，剑光凛冽寒气逼人"
@@ -3424,8 +3264,7 @@
       "source": "日月神教/向问天",
       "brief_desc": "向问天模仿吸星大法创出的武功 可以将敌手攻来的内力自手臂传至地下",
       "effect": {
-        "type": "reverse",
-        "base_rate": 3
+        "type": "reverse"
       },
       "special_move_name": "吸功入地",
       "special_move_desc": "吸功入地小法吸功入地，化敌内力于无形"
@@ -3550,8 +3389,7 @@
       "source": "古墓派/林朝英",
       "brief_desc": "古墓派一门的基本功法。入门第二个学习的武功。",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "special_move_name": "夭娇碧空",
       "special_move_desc": "夭娇身法如碧空游龙，灵动飘逸"
@@ -3621,8 +3459,7 @@
       "source": "青城派/余沧海",
       "brief_desc": "青城派余沧海所传腿法 腿影如幻难辨",
       "effect": {
-        "type": "pursuit",
-        "base_rate": 6
+        "type": "pursuit"
       },
       "special_move_name": "幻影迷踪",
       "special_move_desc": "幻影腿法身形如幻，残影重重难辨真假"
@@ -3667,8 +3504,7 @@
       "category": "internal",
       "source": "华山派/岳不群",
       "effect": {
-        "type": "shield",
-        "base_rate": 6
+        "type": "shield"
       },
       "brief_desc": "华山派内功之一。",
       "special_move_name": "抱元守一",
@@ -3714,8 +3550,7 @@
       "category": "finger",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "weakness",
-        "base_rate": 5
+        "type": "weakness"
       },
       "brief_desc": "黄药师腿法 扫腿如旋风刚猛",
       "special_move_name": "釜底抽薪",
@@ -3727,8 +3562,7 @@
       "category": "hidden",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "星宿派的暗器、毒物之一。",
       "special_move_name": "无形无影",
@@ -3747,8 +3581,7 @@
       "category": "palm",
       "source": "江湖/褚红柳",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "brief_desc": "沧州千柳庄主褚红柳驰名武林的绝技 施展开时双掌颜色会逐渐变红",
       "special_move_name": "朱砂血印",
@@ -3774,8 +3607,7 @@
       "category": "sword",
       "source": "青城派/余沧海",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "青城派闻名武林的一门剑法 刚劲轻灵兼而有之",
       "special_move_name": "松风剑鸣",
@@ -3810,8 +3642,7 @@
       "category": "fist",
       "source": "梅家/梅文馨",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "brief_desc": "梅文馨跟梅芳姑母女的家传武艺。",
       "special_move_name": "梅花三弄",
@@ -3823,8 +3654,7 @@
       "category": "palm",
       "source": "药王庄/程灵素",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "武林中常见的毒掌功夫 但灵智上人的修为之深却是武林少见",
       "special_move_name": "毒雾弥漫",
@@ -3901,8 +3731,7 @@
       "category": "palm",
       "source": "八卦门/王维扬",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "八卦门掌法 一施出时再不停留 脚下每一步都按着先天八卦的图式",
       "special_move_name": "八卦游身",
@@ -3928,8 +3757,7 @@
       "category": "lightfoot",
       "source": "地堂门/燕青",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       },
       "brief_desc": "地堂门身法 可以滚到敌人身前 用单刀砍他们的腿。",
       "special_move_name": "燕青十八翻",
@@ -3992,8 +3820,7 @@
       "category": "hidden",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 5
+        "type": "cold_poison"
       },
       "brief_desc": "星宿派的暗器、毒物之一。",
       "special_move_name": "碧磷鬼火",
@@ -4012,8 +3839,7 @@
       "category": "lightfoot",
       "source": "黄河帮/沙通天",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "沙通天的轻功身法 曾用来拦截黄蓉逃跑。",
       "special_move_name": "移形换位",
@@ -4133,8 +3959,7 @@
       "source": "华山派/岳不群",
       "brief_desc": "华山派的腿招。",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       }
     },
     "赤尻连拳": {
@@ -4157,8 +3982,7 @@
       "category": "finger",
       "source": "红花会/无尘道人",
       "effect": {
-        "type": "weakness",
-        "base_rate": 5
+        "type": "weakness"
       },
       "brief_desc": "无尘道人因失了一条手臂 因此腿上功夫练得出神入化",
       "special_move_name": "迷踪连环",
@@ -4177,8 +4001,7 @@
       "category": "sword",
       "source": "红花会/无尘道人",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "无尘道长绝学 红花会第一剑法",
       "special_move_name": "追魂夺命",
@@ -4239,8 +4062,7 @@
       "source": "全真教/王重阳",
       "brief_desc": "全真教武学 马钰所修练的内功。",
       "effect": {
-        "type": "shield",
-        "base_rate": 8
+        "type": "shield"
       },
       "special_move_name": "金关二十四",
       "special_move_desc": "二十四诀金关玉锁，层层递进真气如潮"
@@ -4272,8 +4094,7 @@
       "category": "palm",
       "source": "峨嵋派/灭绝师太",
       "effect": {
-        "type": "shield",
-        "base_rate": 5
+        "type": "shield"
       },
       "brief_desc": "峨嵋派掌法 和武当派的绵掌形似而神非",
       "special_move_name": "金刚不坏",
@@ -4300,8 +4121,7 @@
       "source": "江南七怪/张阿生",
       "brief_desc": "江南七怪中笑弥陀张阿生练有的横练功夫。",
       "effect": {
-        "type": "shield",
-        "base_rate": 8
+        "type": "shield"
       }
     },
     "铁帚腿法": {
@@ -4338,8 +4158,7 @@
       "category": "hidden",
       "source": "星宿派/丁春秋",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 5
+        "type": "fire_poison"
       },
       "brief_desc": "星宿派首徒摘星子用以惩戒师弟的含毒火焰弹。",
       "special_move_name": "铄心弹爆",
@@ -4379,8 +4198,7 @@
       "category": "sword",
       "source": "昆仑派/何太冲",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "昆仑派剑法之一 剑法全走斜势 但七八招斜势之中",
       "special_move_name": "雨打飞花",
@@ -4401,8 +4219,7 @@
       "category": "sword",
       "source": "石梁派/石梁派",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 6
+        "type": "fire_poison"
       },
       "brief_desc": "石梁派绝招 共有六六三十六招 竟无一招实招",
       "special_move_name": "雷震八方",
@@ -4430,8 +4247,7 @@
       "category": "sword",
       "source": "西域/陈达海",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "陈达海的成名绝技 施展时剑尖闪动 犹如蟒蛇。",
       "special_move_name": "青蟒吐信",
@@ -4520,8 +4336,7 @@
       "category": "lightfoot",
       "source": "江湖/瑞大林",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "brief_desc": "瑞大林的轻功身法。",
       "special_move_name": "七步追魂",
@@ -4554,8 +4369,7 @@
       "category": "lightfoot",
       "source": "江湖/瑞大林",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "brief_desc": "瑞大林的轻功身法。",
       "special_move_name": "八步逐月",
@@ -4582,8 +4396,7 @@
       "source": "胡家/胡一刀、胡斐",
       "brief_desc": "胡斐家传武艺之一 但仅是习练拳脚器械的入门基础。",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "special_move_name": "四象挪移",
       "special_move_desc": "四象步法挪移乾坤，踏四象方位变幻莫测"
@@ -4594,8 +4407,7 @@
       "category": "blade",
       "source": "地堂门/地堂门",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "brief_desc": "地堂刀法 地堂门武功 倘若上阵打仗 可以滚过去砍马腿",
       "special_move_name": "地堂滚刀",
@@ -4665,8 +4477,7 @@
       "category": "lightfoot",
       "source": "地堂门/地堂门",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "brief_desc": "地堂门身法 可以滚到敌人身前 用单刀砍他们的腿。",
       "special_move_name": "松鼠草飞",
@@ -4685,8 +4496,7 @@
       "category": "finger",
       "source": "武当派/陆菲青",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "brief_desc": "武当派独门点穴功夫。",
       "special_move_name": "一指定乾坤",
@@ -4760,8 +4570,7 @@
       "category": "lightfoot",
       "source": "鹰爪雁行门/鹰爪雁行门",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "brief_desc": "鹰爪雁行门绝技之一。",
       "special_move_name": "雁行排空",
@@ -4851,8 +4660,7 @@
       "category": "lightfoot",
       "source": "飞马镖局/马行空",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "brief_desc": "飞马镖局马行空所传基础步法桩功",
       "special_move_name": "行步如桩",
@@ -4864,8 +4672,7 @@
       "category": "lightfoot",
       "source": "江湖/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "brief_desc": "江湖通用轻功 燕行步法迅捷",
       "special_move_name": "燕行掠影",
@@ -4877,8 +4684,7 @@
       "category": "lightfoot",
       "source": "江湖/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 2
+        "type": "dodge"
       },
       "brief_desc": "江湖通用轻功 步法如燕行轻快",
       "special_move_name": "燕回闪",
@@ -4890,8 +4696,7 @@
       "category": "internal",
       "source": "少林寺/方证",
       "effect": {
-        "type": "heal",
-        "base_rate": 2
+        "type": "heal"
       },
       "brief_desc": "少林方证所传内功 罗汉金身基础功法",
       "special_move_name": "罗汉金身",
@@ -4920,8 +4725,7 @@
       "source": "峨嵋派/灭绝师太",
       "brief_desc": "峨嵋派灭绝师太所传掌法 四象方位，圆中有方，阴阳相成",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       }
     },
     "黑砂掌": {
@@ -4931,8 +4735,7 @@
       "source": "青城派/常赫志、常伯志",
       "brief_desc": "青城派慧侣道长传给徒弟常赫志、常伯志的武功",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "黑砂满天",
       "special_move_desc": "黑砂掌掌力如黑砂，铺天盖地席卷而来"
@@ -4943,8 +4746,7 @@
       "category": "palm",
       "source": "黑沼/瑛姑",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 8
+        "type": "cold_poison"
       },
       "brief_desc": "掌力阴寒如冰箭 中者寒毒入体经脉受损",
       "special_move_name": "寒阴箭掌",
@@ -4957,8 +4759,7 @@
       "source": "少林寺/成昆",
       "brief_desc": "成昆跟谢逊师徒所学的拳法 招式刚猛威吓 与七伤拳看来颇相似。",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 10
+        "type": "fire_poison"
       },
       "special_move_name": "霹雳裂空",
       "special_move_desc": "霹雳神拳拳如霹雳裂空，一击之下天崩地裂"
@@ -4969,8 +4770,7 @@
       "category": "fist",
       "source": "九阴真经/郭靖",
       "effect": {
-        "type": "shock",
-        "base_rate": 12
+        "type": "shock"
       },
       "brief_desc": "九阴真经刚阳拳法 正大刚猛",
       "special_move_name": "气吞山河",
@@ -4982,8 +4782,7 @@
       "category": "palm",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "黄药师掌法 招如落英缤纷掌劲凌厉",
       "special_move_name": "锐不可当",
@@ -4996,8 +4795,7 @@
       "source": "少林寺/度难",
       "brief_desc": "少林七十二绝技之一 一丈开外掌力丝毫不减，蓄力虚空，最难练成远程掌法",
       "effect": {
-        "type": "shock",
-        "base_rate": 10
+        "type": "shock"
       },
       "special_move_name": "须弥压顶",
       "special_move_desc": "须弥山神掌掌力如须弥，一掌压下如泰山压顶"
@@ -5016,8 +4814,7 @@
       "source": "丐帮/乔峰",
       "brief_desc": "丐帮早期降龙掌法 萧峰精简为十八掌",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "雷霆万钧",
       "special_move_desc": "如雷霆万钧之势，震慑四方"
@@ -5029,8 +4826,7 @@
       "source": "黄易/步惊云",
       "brief_desc": "风云雄霸天下步惊云绝学 排云掌十二式 掌势如云似浪",
       "effect": {
-        "type": "shock",
-        "base_rate": 12
+        "type": "shock"
       },
       "special_move_name": "排云万里",
       "special_move_desc": "排云掌掌力如排云，一掌推出云开雾散"
@@ -5041,8 +4837,7 @@
       "category": "palm",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "shock",
-        "base_rate": 12
+        "type": "shock"
       },
       "brief_desc": "大内皇宫传承掌法 威严皇者之掌 法度森严",
       "special_move_name": "破空一击",
@@ -5054,8 +4849,7 @@
       "category": "palm",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "shock",
-        "base_rate": 10
+        "type": "shock"
       },
       "brief_desc": "佛门至高掌法 十式全施天下无敌 震古烁今",
       "special_move_name": "破空一击",
@@ -5067,8 +4861,7 @@
       "category": "palm",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "shock",
-        "base_rate": 10
+        "type": "shock"
       },
       "brief_desc": "掌势如碧海惊涛 一浪高过一浪 层层叠加无穷无尽",
       "special_move_name": "威震八方",
@@ -5080,8 +4873,7 @@
       "category": "palm",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "shock",
-        "base_rate": 12
+        "type": "shock"
       },
       "brief_desc": "雄浑霸道之极的掌法 以力破万法 霸绝天下",
       "special_move_name": "破空一击",
@@ -5093,8 +4885,7 @@
       "category": "sword",
       "source": "沐王府/沐家人",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "brief_desc": "沐王府家传剑法 云南沐氏明室遗臣所习",
       "special_move_name": "沐家剑诀",
@@ -5106,8 +4897,7 @@
       "category": "sword",
       "source": "西域/水岱",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "brief_desc": "西域水岱所传剑法 剑招如孔雀开屏华丽",
       "special_move_name": "孔雀开屏",
@@ -5119,8 +4909,7 @@
       "category": "sword",
       "source": "无量剑派/左子穆",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "brief_desc": "无量剑派左子穆所传剑法 无量山一脉剑招",
       "special_move_name": "无量剑诀",
@@ -5132,8 +4921,7 @@
       "category": "sword",
       "source": "桃花岛/黄药师",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "黄药师由剑法悟创的掌法 招式飘逸若仙 掌劲凌厉",
       "special_move_name": "落英缤纷",
@@ -5153,8 +4941,7 @@
       "source": "姑苏慕容氏/邓百川",
       "brief_desc": "如回风拂柳 女子轻盈剑法灵动优雅",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "回风舞柳",
       "special_move_desc": "回风舞柳剑剑如风舞柳，柔中带刚"
@@ -5166,8 +4953,7 @@
       "source": "华山派/宁中则",
       "brief_desc": "岳不群夫人宁中则独创剑招 正大灵动 令狐冲幼年所习",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "锐不可当",
       "special_move_desc": "锐气如虹，锋刃难挡"
@@ -5178,8 +4964,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 8
+        "type": "cold_poison"
       },
       "brief_desc": "孤高清冷如寒梅傲雪",
       "special_move_name": "寒霜覆体",
@@ -5192,8 +4977,7 @@
       "source": "苗家/苗人凤",
       "brief_desc": "苗人凤危急时的搏命三剑 招招同归于尽 只为克敌",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "搏命三剑",
       "special_move_desc": "搏命三剑以命相搏，剑出无回不死不休"
@@ -5204,8 +4988,7 @@
       "category": "sword",
       "source": "姑苏慕容氏/慕容复",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 6
+        "type": "external_wound"
       },
       "brief_desc": "剑法按星璇轨迹运转 流转不停",
       "special_move_name": "血溅五步",
@@ -5217,8 +5000,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 6
+        "type": "external_wound"
       },
       "brief_desc": "黑白双剑合璧 玄铁+素心 威力倍增",
       "special_move_name": "锐不可当",
@@ -5231,8 +5013,7 @@
       "source": "天山派/天山派",
       "brief_desc": "天山派剑法 气势开阔高远 如天山冰峰",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "削铁如泥",
       "special_move_desc": "劲力贯注锋刃，削铁如泥"
@@ -5243,8 +5024,7 @@
       "category": "sword",
       "source": "铁剑门/木桑道人",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "弈理入剑 如弈棋布子 步步为营剑招深远",
       "special_move_name": "力劈华山",
@@ -5257,8 +5037,7 @@
       "source": "其他武侠/阿越",
       "brief_desc": "如仙猿跳涧腾跃灵动的剑法 轻灵多变",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "削铁如泥",
       "special_move_desc": "劲力贯注锋刃，削铁如泥"
@@ -5269,8 +5048,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 8
+        "type": "external_wound"
       },
       "brief_desc": "剑招如披风乱舞 看似杂乱实则暗藏章法",
       "special_move_name": "力劈华山",
@@ -5282,8 +5060,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 8
+        "type": "external_wound"
       },
       "brief_desc": "九天玄女所传女系剑法 精妙灵动适合女子",
       "special_move_name": "血溅五步",
@@ -5295,8 +5072,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 8
+        "type": "external_wound"
       },
       "brief_desc": "剑势如银河天汉泻落九天 开阔雄浑",
       "special_move_name": "力劈华山",
@@ -5308,8 +5084,7 @@
       "category": "sword",
       "source": "峨嵋派/灭绝师太",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "倚天剑所配套剑法 峨眉派灭绝师太、周芷若传承",
       "special_move_name": "锋芒毕露",
@@ -5321,8 +5096,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "剑势如风雷并发 急风迅雷威力叠加",
       "special_move_name": "锐不可当",
@@ -5334,8 +5108,7 @@
       "category": "sword",
       "source": "逍遥派/逍遥子",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "逍遥派精妙剑理 剑法飘逸如神仙 无招无形",
       "special_move_name": "锐不可当",
@@ -5347,8 +5120,7 @@
       "category": "sword",
       "source": "侠客岛/石破天",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 12
+        "type": "cold_poison"
       },
       "brief_desc": "侠客行诗首句化招 吴钩之剑寒光如霜雪 出手凌厉",
       "special_move_name": "寒冰彻骨",
@@ -5360,8 +5132,7 @@
       "category": "finger",
       "source": "全真教/王重阳",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "按北斗七星方位点出的指力 精准无比",
       "special_move_name": "削铁如泥",
@@ -5373,8 +5144,7 @@
       "category": "sword",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "武当张三丰所创剑法 剑意圆转绵绵不绝",
       "special_move_name": "太极圆转",
@@ -5386,8 +5156,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "寒冰系剑法 剑出如漫天飞雪 剑气寒彻骨髓",
       "special_move_name": "锋芒毕露",
@@ -5400,8 +5169,7 @@
       "source": "其他武侠/通用",
       "brief_desc": "以幻取胜的剑法 剑影重重真假难辨 令敌无从下手",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "special_move_name": "血溅五步",
       "special_move_desc": "锋芒所至，血溅五步"
@@ -5412,8 +5180,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "剑修直指彼岸之剑 一剑断因果 超脱生死",
       "special_move_name": "血溅五步",
@@ -5425,8 +5192,7 @@
       "category": "sword",
       "source": "黄易/大唐双龙传",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "天子之剑 以气运剑 剑势如龙 王者方得发挥全威",
       "special_move_name": "锐不可当",
@@ -5438,8 +5204,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "御剑飞仙剑诀 凌空驭剑斩敌千里 剑仙之流",
       "special_move_name": "血溅五步",
@@ -5451,8 +5216,7 @@
       "category": "sword",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "以乐御剑 九韶仙音化剑 闻者丧胆 上古剑法",
       "special_move_name": "锐不可当",
@@ -5464,8 +5228,7 @@
       "category": "sword",
       "source": "越国/阿青",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "阿青越女剑之剑境 一剑破三千甲士 古剑道巅峰",
       "special_move_name": "锋芒毕露",
@@ -5484,8 +5247,7 @@
       "category": "blade",
       "source": "江湖/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "brief_desc": "江湖通用刀法 六合门刀招 上下左右前后六合",
       "special_move_name": "六合归一",
@@ -5497,8 +5259,7 @@
       "category": "blade",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "brief_desc": "江湖通用刀法 分花拂柳招式轻柔",
       "special_move_name": "分花拂柳",
@@ -5518,8 +5279,7 @@
       "source": "鹰爪雁行门/鹰爪雁行门",
       "brief_desc": "鹰爪雁行门两大绝技之一， 刀势如雁行轻灵",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 3
+        "type": "external_wound"
       },
       "special_move_name": "雁行千里",
       "special_move_desc": "刀法刀如雁行千里，连绵不绝"
@@ -5544,8 +5304,7 @@
       "category": "blade",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "江湖通用刀法 修罗刀势狠辣诡异",
       "special_move_name": "修罗地狱",
@@ -5557,8 +5316,7 @@
       "category": "blade",
       "source": "陆家庄/陆乘风",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "陆家庄的家传功夫 陆展元、陆立鼎所习",
       "special_move_name": "陆家刀法",
@@ -5578,8 +5336,7 @@
       "source": "少林寺/陈家洛",
       "brief_desc": "陈家洛跟张召重交手时施展的刀法 刚猛伏虎",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "金刚伏虎",
       "special_move_desc": "金刚怒目，一刀降龙伏虎"
@@ -5590,8 +5347,7 @@
       "category": "blade",
       "source": "南海/云中鹤",
       "effect": {
-        "type": "poison",
-        "base_rate": 7
+        "type": "poison"
       },
       "brief_desc": "鹤形蛇势八打手法 长短结合诡异多变",
       "special_move_name": "鹤蛇八打",
@@ -5610,8 +5366,7 @@
       "category": "special",
       "source": "梅庄/秃笔翁",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 3
+        "type": "acupoint_seal"
       },
       "brief_desc": "朱子柳以笔为兵 书法入武 判官司笔法点打穴位",
       "special_move_name": "封穴截脉",
@@ -5624,8 +5379,7 @@
       "source": "其他武侠/通用",
       "brief_desc": "独臂老人传下刀法 单臂施刀刀走偏锋怪招频出",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "独臂一刀",
       "special_move_desc": "独臂刀法一刀惊人，残而不废威力无穷"
@@ -5637,8 +5391,7 @@
       "source": "姑苏慕容氏/田伯光、风波恶",
       "brief_desc": "刀出卷起飞沙走石 关外风沙刀",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "special_move_name": "飞沙走石",
       "special_move_desc": "飞沙走石刀刀如飞沙，铺天盖地势不可挡"
@@ -5649,8 +5402,7 @@
       "category": "blade",
       "source": "南海/岳老三",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "南海鳄神岳老三鳄嘴剪法 剪人脑袋如剪竹",
       "special_move_name": "鳄剪断金",
@@ -5662,8 +5414,7 @@
       "category": "special",
       "source": "五毒教/蓝凤凰",
       "effect": {
-        "type": "poison",
-        "base_rate": 7
+        "type": "poison"
       },
       "brief_desc": "鞭梢如蝎尾倒钩常带剧毒 鞭法狠辣毒辣",
       "special_move_name": "毒雾弥漫",
@@ -5690,8 +5441,7 @@
       "source": "五毒教/蓝凤凰",
       "brief_desc": "五毒教蛛丝软索 带毒柔中带刚",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "special_move_name": "五毒噬心",
       "special_move_desc": "五种毒素齐发，噬心蚀骨"
@@ -5717,8 +5467,7 @@
       "source": "林氏/袁冠南、萧中慧",
       "brief_desc": "夫妻刀法演化而来，鸳鸯双刀所配刀法 夫妻同使威力倍增 卓天雄亦会其半",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "special_move_name": "比翼双飞",
       "special_move_desc": "双刀交错如鸳鸯比翼，刀光凛冽难防"
@@ -5736,8 +5485,7 @@
       "category": "blade",
       "source": "血刀门/血刀老祖",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "血刀门综合武功 刀法+内功+毒功合璧",
       "special_move_name": "血刀饮血",
@@ -5763,8 +5511,7 @@
       "category": "blade",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 8
+        "type": "external_wound"
       },
       "brief_desc": "江湖名刀红袖刀法 刀法华丽如红袖飘扬",
       "special_move_name": "锐不可当",
@@ -5784,8 +5531,7 @@
       "source": "绝情谷/公孙止",
       "brief_desc": "公孙止家传武艺 以独特的锯齿金刀跟黑剑 两手同使刀法剑术",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "special_move_name": "血溅五步",
       "special_move_desc": "锋芒所至，血溅五步"
@@ -5796,8 +5542,7 @@
       "category": "blade",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "沙通天系刀法 久经沙场百战而来 刀势沉稳狠辣",
       "special_move_name": "百战不殆",
@@ -5810,8 +5555,7 @@
       "source": "胡家/胡斐",
       "brief_desc": "胡斐武功大成以后所用刀法 如飞狐迅疾灵动",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "special_move_name": "飞狐掠影",
       "special_move_desc": "刀势如飞狐掠影，轻灵迅捷防不胜防"
@@ -5829,8 +5573,7 @@
       "category": "blade",
       "source": "逍遥派/逍遥子",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "冥光幻化气刀 刀气无形伤敌神魂 诡奇阴狠",
       "special_move_name": "锐不可当",
@@ -5863,8 +5606,7 @@
       "category": "special",
       "source": "少林寺/方证",
       "effect": {
-        "type": "shock",
-        "base_rate": 12
+        "type": "shock"
       },
       "brief_desc": "少林三渡金刚伏魔圈黑索鞭法 三鞭合阵伏魔天下",
       "special_move_name": "横扫千军",
@@ -5876,8 +5618,7 @@
       "category": "blade",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "刀道心境井中月 心如井水观月 刀意清澈",
       "special_move_name": "血溅五步",
@@ -5896,8 +5637,7 @@
       "category": "blade",
       "source": "黄易/项羽",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "紫雷九击 刀气紫色惊雷 项家霸王刀遗风",
       "special_move_name": "力劈华山",
@@ -5916,8 +5656,7 @@
       "category": "blade",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "狠辣霸道的魔道刀法 刀出如天魔降临 刀气滔天",
       "special_move_name": "锐不可当",
@@ -5929,8 +5668,7 @@
       "category": "blade",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "传鹰《破碎虚空》系天刀九问 刀意问天 直入天人之境",
       "special_move_name": "力劈华山",
@@ -5949,8 +5687,7 @@
       "category": "finger",
       "source": "丐帮/洪七公",
       "effect": {
-        "type": "weakness",
-        "base_rate": 3
+        "type": "weakness"
       },
       "brief_desc": "洪七公传黄蓉的武功 铁帚扫腿刚猛",
       "special_move_name": "釜底抽薪",
@@ -5963,8 +5700,7 @@
       "source": "五湖门/江南七怪/韩小莹",
       "brief_desc": "五湖门武功 鞋尖包铁踢中要害立取性命 腿法层出不穷",
       "effect": {
-        "type": "weakness",
-        "base_rate": 3
+        "type": "weakness"
       },
       "special_move_name": "破绽百出",
       "special_move_desc": "一击直取破绽，乱敌阵脚"
@@ -5975,8 +5711,7 @@
       "category": "finger",
       "source": "六合丁氏/丁家",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 4
+        "type": "acupoint_seal"
       },
       "brief_desc": "六合丁氏家传擒拿手 锁关节制敌",
       "special_move_name": "一指定乾坤",
@@ -5988,8 +5723,7 @@
       "category": "finger",
       "source": "白驼山庄/欧阳锋",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 4
+        "type": "acupoint_seal"
       },
       "brief_desc": "欧阳锋点穴手法 阴毒透骨 仅欧阳锋黄药师可解",
       "special_move_name": "一指定乾坤",
@@ -6016,8 +5750,7 @@
       "source": "五虎门/凤天南",
       "brief_desc": "佛山名腿 出腿无影无形 快速刁钻",
       "effect": {
-        "type": "weakness",
-        "base_rate": 5
+        "type": "weakness"
       },
       "special_move_name": "釜底抽薪",
       "special_move_desc": "釜底抽薪，瓦解对手战力"
@@ -6036,8 +5769,7 @@
       "source": "古墓派/林朝英、小龙女",
       "brief_desc": "古墓派奇招 长袖拂穴封敌经脉 灵动飘逸",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 10
+        "type": "cold_poison"
       },
       "special_move_name": "玄冰刺骨",
       "special_move_desc": "玄冰寒气刺入骨髓，冰封经脉"
@@ -6056,8 +5788,7 @@
       "source": "少林寺/少林三渡",
       "brief_desc": "少林三渡高僧金刚伏魔圈 黑索阵法 三僧合练伏魔神通",
       "effect": {
-        "type": "shock",
-        "base_rate": 10
+        "type": "shock"
       },
       "special_move_name": "金刚伏魔",
       "special_move_desc": "金刚伏魔真气如金刚怒目，降妖伏魔"
@@ -6086,8 +5817,7 @@
       "category": "finger",
       "source": "九阴真经/梅超风、周芷若",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "brief_desc": "九阴神爪误练版 五指发劲摧坚破锐",
       "special_move_name": "封穴截脉",
@@ -6125,8 +5855,7 @@
       "source": "全真教/王重阳",
       "brief_desc": "先天气功与乾坤大挪移融合 乾坤倒转 先天为基",
       "effect": {
-        "type": "shock",
-        "base_rate": 20
+        "type": "shock"
       },
       "special_move_name": "先天乾坤",
       "special_move_desc": "先天乾坤诀真气如乾坤，包罗万象天地合一"
@@ -6146,8 +5875,7 @@
       "category": "finger",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 12
+        "type": "fire_poison"
       },
       "brief_desc": "至阳至刚的炎阳内功 真气炽烈如日 火系绝学",
       "special_move_name": "炎阳焚天",
@@ -6177,8 +5905,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "江湖通用暗器 蒺藜带毒伤人",
       "special_move_name": "毒蒺藜刺",
@@ -6199,8 +5926,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "poison",
-        "base_rate": 5
+        "type": "poison"
       },
       "brief_desc": "五毒教剧毒蛊毒 碧蚕蛊虫伤人无解",
       "special_move_name": "碧蚕蛊毒",
@@ -6219,8 +5945,7 @@
       "category": "hidden",
       "source": "红花会/骆冰",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 4
+        "type": "external_wound"
       },
       "brief_desc": "红花会骆冰所传暗器 连珠飞刀连发不绝",
       "special_move_name": "连珠飞刀",
@@ -6241,8 +5966,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "poison",
-        "base_rate": 6
+        "type": "poison"
       },
       "brief_desc": "五毒教剧毒蛊毒 金蚕蛊虫伤人极毒",
       "special_move_name": "金蚕噬心",
@@ -6290,8 +6014,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "sound_attack",
-        "base_rate": 5
+        "type": "sound_attack"
       },
       "brief_desc": "恒山派普善咒清音 音功护体清心",
       "special_move_name": "清音普善",
@@ -6303,8 +6026,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "sound_attack",
-        "base_rate": 5
+        "type": "sound_attack"
       },
       "brief_desc": "佛门梵音入武 普安咒音波伤敌",
       "special_move_name": "梵音普安",
@@ -6325,8 +6047,7 @@
       "category": "hidden",
       "source": "金蛇秘笈/夏雪宜",
       "effect": {
-        "type": "poison",
-        "base_rate": 8
+        "type": "poison"
       },
       "brief_desc": "金蛇郎君暗器手法 奇准无比",
       "special_move_name": "金蛇锥心",
@@ -6356,8 +6077,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "poison",
-        "base_rate": 12
+        "type": "poison"
       },
       "brief_desc": "以筝音驱使万蛇 音波惑敌群蛇噬人 诡异毒辣",
       "special_move_name": "剧毒蚀骨",
@@ -6369,8 +6089,7 @@
       "category": "hidden",
       "source": "铁剑门/木桑道人",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 5
+        "type": "external_wound"
       },
       "brief_desc": "轻功身法 如星丸跳掷灵动迅捷",
       "special_move_name": "锐不可当",
@@ -6396,8 +6115,7 @@
       "category": "special",
       "source": "侠客岛/石破天",
       "effect": {
-        "type": "weakness",
-        "base_rate": 5
+        "type": "weakness"
       },
       "brief_desc": "侠客行诗句化招 酒后一诺重千金 意气风发",
       "special_move_name": "釜底抽薪",
@@ -6409,8 +6127,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "sound_attack",
-        "base_rate": 10
+        "type": "sound_attack"
       },
       "brief_desc": "音波类魔功 以魔音直入神魂 搜魂夺魄 令人防不胜防",
       "special_move_name": "魔音贯耳",
@@ -6422,8 +6139,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 12
+        "type": "fire_poison"
       },
       "brief_desc": "雷火门秘制火器 暗器挟雷火之威 中者雷焚火烤",
       "special_move_name": "炎阳灼魂",
@@ -6435,8 +6151,7 @@
       "category": "hidden",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 12
+        "type": "fire_poison"
       },
       "brief_desc": "霹雳堂秘制雷火弹 掷出爆炸 雷火齐伤人马俱焚",
       "special_move_name": "烈焰焚身",
@@ -6456,8 +6171,7 @@
       "source": "日月神教/东方不败",
       "brief_desc": "葵花宝典速功结合暗器飞针 快得看不见针影",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "special_move_name": "葵花飞针",
       "special_move_desc": "劲力贯注锋万千针刺，无法抵挡"
@@ -6482,8 +6196,7 @@
       "category": "hidden",
       "source": "古龙/李寻欢",
       "effect": {
-        "type": "external_wound",
-        "base_rate": 10
+        "type": "external_wound"
       },
       "brief_desc": "小李飞刀李寻欢绝技 飞刀一出例不虚发 纵横江湖未尝一败",
       "special_move_name": "力劈华山",
@@ -6496,8 +6209,7 @@
       "source": "其他武侠/通用",
       "brief_desc": "九霄仙气所化呼吸吐纳法 功深时可辟谷不食 神清气朗",
       "effect": {
-        "type": "heal",
-        "base_rate": 12
+        "type": "heal"
       },
       "special_move_name": "九霄仙息",
       "special_move_desc": "九霄仙气贯顶而下，真气如天降甘霖"
@@ -6508,8 +6220,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "illusion",
-        "base_rate": 12
+        "type": "illusion"
       },
       "brief_desc": "以大悲入魔的奇诡功法 佛魔同体 正邪莫辨",
       "special_move_name": "大悲魔相",
@@ -6521,8 +6232,7 @@
       "category": "internal",
       "source": "黄易/广成子",
       "effect": {
-        "type": "heal",
-        "base_rate": 12
+        "type": "heal"
       },
       "brief_desc": "破碎虚空系四大奇书之一 天地奥秘化为图录 悟者可破碎虚空",
       "special_move_name": "战神临世",
@@ -6535,8 +6245,7 @@
       "source": "黄易/寇仲、徐子陵",
       "brief_desc": "修真长生之诀 吐纳天地灵气 延年益寿固本培元",
       "effect": {
-        "type": "heal",
-        "base_rate": 14
+        "type": "heal"
       },
       "special_move_name": "长生不老",
       "special_move_desc": "长生仙诀运转，真气生生不息延年益寿"
@@ -6547,8 +6256,7 @@
       "category": "internal",
       "source": "黄易/师妃暄",
       "effect": {
-        "type": "heal",
-        "base_rate": 12
+        "type": "heal"
       },
       "brief_desc": "剑心通明之境 心中无物剑随心动 剑道至极境界",
       "special_move_name": "剑心通明",
@@ -6560,8 +6268,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "illusion",
-        "base_rate": 12
+        "type": "illusion"
       },
       "brief_desc": "太玄经符箓分支 以箓引气玄奥非常",
       "special_move_name": "太玄虚箓",
@@ -6573,8 +6280,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 12
+        "type": "heal"
       },
       "brief_desc": "皇极惊世武学 推算命运而击敌之破绽 皇极臻神",
       "special_move_name": "皇极臻神",
@@ -6587,8 +6293,7 @@
       "source": "明教/张无忌",
       "brief_desc": "明帝传下的武学宝典 内含帝王气数 威力与命格挂钩",
       "effect": {
-        "type": "heal",
-        "base_rate": 12
+        "type": "heal"
       },
       "special_move_name": "明神武典",
       "special_move_desc": "明神武典真气贯体，如日月同辉万邪不侵"
@@ -6599,8 +6304,7 @@
       "category": "internal",
       "source": "日月神教/东方不败",
       "effect": {
-        "type": "illusion",
-        "base_rate": 12
+        "type": "illusion"
       },
       "brief_desc": "葵花宝典修炼产生的奇速真气 行功快捷无伦",
       "special_move_name": "葵花幻影",
@@ -6612,8 +6316,7 @@
       "category": "internal",
       "source": "黄易/阴癸派",
       "effect": {
-        "type": "illusion",
-        "base_rate": 12
+        "type": "illusion"
       },
       "brief_desc": "天魔功修炼至极境 天魔解体大法可爆数倍功力",
       "special_move_name": "天魔极道",
@@ -6625,8 +6328,7 @@
       "category": "internal",
       "source": "黄易/阴癸派",
       "effect": {
-        "type": "illusion",
-        "base_rate": 12
+        "type": "illusion"
       },
       "brief_desc": "魔门阴癸派至高大法 天魔两气 奇诡难测",
       "special_move_name": "天魔乱舞",
@@ -6638,8 +6340,7 @@
       "category": "internal",
       "source": "温瑞安/萧秋水",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "剑修忘情天书 七情尽去剑心无垢 出手更无牵挂",
       "special_move_name": "忘情天书",
@@ -6651,8 +6352,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "如逝水东流波澜起伏 绵绵不绝 水势入武学",
       "special_move_name": "逝水波澜",
@@ -6664,8 +6364,7 @@
       "category": "internal",
       "source": "古龙/邀月",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "明玉功修炼至极境 明玉无极 肌肤晶莹可刀枪不入",
       "special_move_name": "明玉无极",
@@ -6677,8 +6376,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "少林佛门禁制擒拿 锁拿敌骨 天佛降魔之势",
       "special_move_name": "锁骨天佛",
@@ -6690,8 +6388,7 @@
       "category": "internal",
       "source": "古龙/王怜花",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "王怜花毕生所学所作宝鉴 内含医卜星相武功毒术无所不包",
       "special_move_name": "怜花宝鉴",
@@ -6703,8 +6400,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "如惊涛拍岸海潮汹涌 一浪强过一浪 刚猛如海",
       "special_move_name": "惊涛海潮",
@@ -6716,8 +6412,7 @@
       "category": "internal",
       "source": "古龙/燕南天",
       "effect": {
-        "type": "heal",
-        "base_rate": 12
+        "type": "heal"
       },
       "brief_desc": "神功嫁衣需转嫁 燕南天天下第一神剑所习 气贯长虹",
       "special_move_name": "嫁衣神功",
@@ -6729,8 +6424,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "brief_desc": "天武帝所遗武经 包罗万象威力无匹",
       "special_move_name": "天武神经",
@@ -6743,8 +6437,7 @@
       "source": "九阴真经/黄裳、黄蓉、一灯大师",
       "brief_desc": "九阴真经梵文总纲别译 精微深奥",
       "effect": {
-        "type": "heal",
-        "base_rate": 10
+        "type": "heal"
       },
       "special_move_name": "九阴梵纲",
       "special_move_desc": "九阴梵纲真气如网，天罗地网无处可逃"
@@ -6755,8 +6448,7 @@
       "category": "internal",
       "source": "明教/张无忌",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 8
+        "type": "fire_poison"
       },
       "brief_desc": "波斯明教圣火令武功 诡异古怪旁门左道 圣火令为兵",
       "special_move_name": "圣火万法",
@@ -6768,8 +6460,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 8
+        "type": "heal"
       },
       "brief_desc": "少林神足经内功 足底涌泉运劲 身法奇特",
       "special_move_name": "神足摩地",
@@ -6781,8 +6472,7 @@
       "category": "internal",
       "source": "九阴真经/郭靖",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 8
+        "type": "cold_poison"
       },
       "brief_desc": "九阴真经下卷锻骨篇 锻炼筋骨皮膜抗打",
       "special_move_name": "九阴锻骨",
@@ -6794,8 +6484,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 8
+        "type": "heal"
       },
       "brief_desc": "血河派血旗招法 旗影翻飞如血河翻涌",
       "special_move_name": "血河旗扬",
@@ -6808,8 +6497,7 @@
       "source": "白驼山庄/欧阳锋",
       "brief_desc": "欧阳锋家族内功，朱蛤神功 形如蟾蜍吞月 引气入腹 常带剧毒",
       "effect": {
-        "type": "absorb",
-        "base_rate": 10
+        "type": "absorb"
       },
       "special_move_name": "朱蛤吞月",
       "special_move_desc": "朱蛤吞月真气如蟾，吞噬天地精华化己用"
@@ -6820,8 +6508,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 8
+        "type": "heal"
       },
       "brief_desc": "九玄碧落剑派武学 剑势高远清幽",
       "special_move_name": "九玄碧落",
@@ -6834,8 +6521,7 @@
       "source": "姑苏慕容氏/慕容复",
       "brief_desc": "南慕容慕容复家传内功，九转功成便能变转身体软硬",
       "effect": {
-        "type": "reverse",
-        "base_rate": 8
+        "type": "reverse"
       },
       "special_move_name": "化石九转",
       "special_move_desc": "化石九转真气如石，九转之后坚如磐石"
@@ -6847,8 +6533,7 @@
       "source": "三清道派/通用",
       "brief_desc": "三清道派玄功基础 道门清修内功",
       "effect": {
-        "type": "purify",
-        "base_rate": 8
+        "type": "purify"
       },
       "special_move_name": "三清化一",
       "special_move_desc": "三清真气化三为一，道法自然清静无为"
@@ -6859,8 +6544,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "cold_poison",
-        "base_rate": 5
+        "type": "cold_poison"
       },
       "brief_desc": "冰火两重天 既修阴寒又修阳炎 旁门奇功",
       "special_move_name": "冰火同炉",
@@ -6872,8 +6556,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 5
+        "type": "heal"
       },
       "brief_desc": "四相步走狐行 狡兔四穴 身法多变",
       "special_move_name": "狐行四相",
@@ -6886,8 +6569,7 @@
       "source": "全真教/通用",
       "brief_desc": "全真少阳经脉内功 道门基础上乘内功之一",
       "effect": {
-        "type": "fire_poison",
-        "base_rate": 5
+        "type": "fire_poison"
       },
       "special_move_name": "少阳初升",
       "special_move_desc": "少阳真气如旭日初升，生机勃勃温而不燥"
@@ -6898,8 +6580,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 5
+        "type": "heal"
       },
       "brief_desc": "混元一气功基础 真气混元如一",
       "special_move_name": "混元一气",
@@ -6911,8 +6592,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "illusion",
-        "base_rate": 5
+        "type": "illusion"
       },
       "brief_desc": "道门运气归虚之法 使真气归元不见破绽",
       "special_move_name": "导气归虚",
@@ -6924,8 +6604,7 @@
       "category": "internal",
       "source": "五毒教/蓝凤凰",
       "effect": {
-        "type": "purify",
-        "base_rate": 5
+        "type": "purify"
       },
       "brief_desc": "五毒教百毒真经 天下毒术总纲 无所不毒",
       "special_move_name": "百毒不侵",
@@ -6937,8 +6616,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 5
+        "type": "heal"
       },
       "brief_desc": "女子媚功 姹女含情无想无相 惑敌心智",
       "special_move_name": "姹女无想",
@@ -6950,8 +6628,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "shield",
-        "base_rate": 5
+        "type": "shield"
       },
       "brief_desc": "江湖通用内功 天罡气混世雄浑",
       "special_move_name": "混世天罡",
@@ -6963,8 +6640,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "shield",
-        "base_rate": 5
+        "type": "shield"
       },
       "brief_desc": "江湖通用内功 罡气如龙卷旋劲雄浑",
       "special_move_name": "龙卷罡气",
@@ -6976,8 +6652,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 3
+        "type": "heal"
       },
       "brief_desc": "江湖通用内功 龟息真定闭气藏神",
       "special_move_name": "龟息真定",
@@ -6989,8 +6664,7 @@
       "category": "internal",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 3
+        "type": "heal"
       },
       "brief_desc": "江湖奇门内功 八门金锁阵法所化内劲",
       "special_move_name": "八门金锁",
@@ -7002,8 +6676,7 @@
       "category": "internal",
       "source": "江湖/通用",
       "effect": {
-        "type": "heal",
-        "base_rate": 3
+        "type": "heal"
       },
       "brief_desc": "江湖通用拳掌 绵里藏针柔中带刚",
       "special_move_name": "绵里藏针",
@@ -7015,8 +6688,7 @@
       "category": "lightfoot",
       "source": "雪山派/白万剑",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "雪山派白万剑所传轻功 如飞鸿踏雪无痕",
       "special_move_name": "飞鸿踏雪",
@@ -7028,8 +6700,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       },
       "brief_desc": "江湖轻功身法 如拂柳回风飘逸",
       "special_move_name": "拂柳回风",
@@ -7041,8 +6712,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       },
       "brief_desc": "令狐冲曾用以嘲笑罗人杰被踢飞的姿势 剑招意境",
       "special_move_name": "平沙落雁",
@@ -7055,8 +6725,7 @@
       "source": "逍遥派/逍遥子",
       "brief_desc": "逍遥派逍遥子所传轻功 遨游天地逍遥无拘",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "special_move_name": "逍遥遨游",
       "special_move_desc": "身如逍遥游，遨游天地间进退自如"
@@ -7067,8 +6736,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       },
       "brief_desc": "江湖轻功身法 如燕子抄水贴地而飞",
       "special_move_name": "燕子抄水",
@@ -7080,8 +6748,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 4
+        "type": "dodge"
       },
       "brief_desc": "独钓寒江意境融入武学 招法孤高绵长",
       "special_move_name": "寒江独钓",
@@ -7093,8 +6760,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 5
+        "type": "dodge"
       },
       "brief_desc": "全真金雁功进阶 如金雁翱翔天际 道门轻功",
       "special_move_name": "金雁翱翔",
@@ -7107,8 +6773,7 @@
       "source": "其他武侠/通用",
       "brief_desc": "如飞燕回翔转折曼妙 犹如女子身法灵动",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "special_move_name": "飞燕回翔",
       "special_move_desc": "身如飞燕回翔，盘旋迂回避开一切攻势"
@@ -7119,8 +6784,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 5
+        "type": "dodge"
       },
       "brief_desc": "如仙鹤飞舞云光灿烂 鹤形武学至境",
       "special_move_name": "鹤舞云光",
@@ -7132,8 +6796,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 5
+        "type": "dodge"
       },
       "brief_desc": "如平步青云 稳步直上 轻功身法",
       "special_move_name": "平步青云",
@@ -7146,8 +6809,7 @@
       "source": "其他武侠/通用",
       "brief_desc": "天罡梅花步 梅花桩上练出武功 步法轻灵",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "special_move_name": "天罡梅花",
       "special_move_desc": "天罡梅花步法，踏罡步斗变幻莫测"
@@ -7159,8 +6821,7 @@
       "source": "大理段氏/段正明",
       "brief_desc": "降龙伏虎系武学身法 如龙行虎步气势非凡",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "special_move_name": "龙行虎步",
       "special_move_desc": "步如龙行虎步，气势磅礴不可阻挡"
@@ -7171,8 +6832,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 5
+        "type": "dodge"
       },
       "brief_desc": "星河浩瀚渺渺无际 意境开阔绵长",
       "special_move_name": "星河浩渺",
@@ -7184,8 +6844,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "蹑空而行如可摘星 轻功高绝之境",
       "special_move_name": "蹑空摘星",
@@ -7197,8 +6856,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "如飞鸟空中回旋转折 身法灵动",
       "special_move_name": "飞鸟回旋",
@@ -7210,8 +6868,7 @@
       "category": "lightfoot",
       "source": "武当派/张三丰",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "武当轻功梯云纵进阶版 进退腾挪纵横自在",
       "special_move_name": "梯云纵横",
@@ -7223,8 +6880,7 @@
       "category": "lightfoot",
       "source": "襄阳/郭靖",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "如登天梯直上凌云 上乘攀越轻功",
       "special_move_name": "天梯凌云",
@@ -7236,8 +6892,7 @@
       "category": "lightfoot",
       "source": "九阴真经/郭靖",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "brief_desc": "如蛇行狸翻 地堂身法翻滚腾挪",
       "special_move_name": "蛇行狸翻",
@@ -7250,8 +6905,7 @@
       "source": "姑苏慕容氏",
       "brief_desc": "按北斗七星方位的轻身步法 玄妙无方",
       "effect": {
-        "type": "dodge",
-        "base_rate": 6
+        "type": "dodge"
       },
       "special_move_name": "北斗仙踪",
       "special_move_desc": "步踏北斗七星，仙踪飘渺不可捉摸"
@@ -7262,8 +6916,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "illusion",
-        "base_rate": 8
+        "type": "illusion"
       },
       "brief_desc": "身法螺旋飘忽 如影似鬼 虚实莫测",
       "special_move_name": "鬼影迷踪",
@@ -7275,8 +6928,7 @@
       "category": "lightfoot",
       "source": "黑沼/瑛姑",
       "effect": {
-        "type": "dodge",
-        "base_rate": 8
+        "type": "dodge"
       },
       "brief_desc": "瑛姑黑沼灵狐步法 结合奇门遁甲 神出鬼没",
       "special_move_name": "黑沼灵狐",
@@ -7288,8 +6940,7 @@
       "category": "lightfoot",
       "source": "逍遥派/逍遥子",
       "effect": {
-        "type": "illusion",
-        "base_rate": 8
+        "type": "illusion"
       },
       "brief_desc": "凌虚踏步横渡虚空 道门上乘轻功代表",
       "special_move_name": "凌虚飞渡",
@@ -7301,8 +6952,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "illusion",
-        "base_rate": 8
+        "type": "illusion"
       },
       "brief_desc": "千般幻影配合毒香 令人神志恍惚中伏",
       "special_move_name": "千幻飘香",
@@ -7314,8 +6964,7 @@
       "category": "lightfoot",
       "source": "侠客岛/石破天",
       "effect": {
-        "type": "dodge",
-        "base_rate": 8
+        "type": "dodge"
       },
       "brief_desc": "银鞍照白马飒沓如流星 古风侠客招式",
       "special_move_name": "银鞍白马",
@@ -7327,8 +6976,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "pursuit",
-        "base_rate": 8
+        "type": "pursuit"
       },
       "brief_desc": "暗器手法或轻功身法 如流星奔月快绝无伦",
       "special_move_name": "流星赶月",
@@ -7340,8 +6988,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "illusion",
-        "base_rate": 8
+        "type": "illusion"
       },
       "brief_desc": "如惊鸿一瞥照影惊鸿 轻功身法飘逸绝俗",
       "special_move_name": "惊鸿照影",
@@ -7353,8 +7000,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "illusion",
-        "base_rate": 10
+        "type": "illusion"
       },
       "brief_desc": "幻魔迷踪步 身形如幻如魔 敌不可测",
       "special_move_name": "幻魔迷踪",
@@ -7366,8 +7012,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 10
+        "type": "dodge"
       },
       "brief_desc": "脚踩浮萍横渡江湖 上乘轻功之一种 水上行走如履平地",
       "special_move_name": "萍踪无迹",
@@ -7379,8 +7024,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 12
+        "type": "dodge"
       },
       "brief_desc": "踏雪无痕类轻功 踏过沙石不痕迹 绝顶轻功代表",
       "special_move_name": "踏雪无痕",
@@ -7392,8 +7036,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 10
+        "type": "dodge"
       },
       "brief_desc": "如踏月而行衣袂香华 女子刺客轻功",
       "special_move_name": "踏月香华",
@@ -7405,8 +7048,7 @@
       "category": "lightfoot",
       "source": "少林寺/达摩祖师",
       "effect": {
-        "type": "dodge",
-        "base_rate": 10
+        "type": "dodge"
       },
       "brief_desc": "少林达摩祖师一苇渡江之轻功 脚踏一苇横渡大江 佛门传奇",
       "special_move_name": "一苇凌波",
@@ -7418,8 +7060,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 10
+        "type": "dodge"
       },
       "brief_desc": "云中之羽扶摇霄汉 轻身剑法飘逸无方",
       "special_move_name": "云羽仙霄",
@@ -7431,8 +7072,7 @@
       "category": "lightfoot",
       "source": "其他武侠/通用",
       "effect": {
-        "type": "dodge",
-        "base_rate": 10
+        "type": "dodge"
       },
       "brief_desc": "如彩凤展翼 身法曼妙灵动 女子门派上乘轻功",
       "special_move_name": "凤飞彩翼",
@@ -7445,8 +7085,7 @@
       "source": "葵花宝典/东方不败",
       "brief_desc": "《葵花宝典》中轻功，身形如梦似花的轻功身法+迷魂术 令人眼花缭乱",
       "effect": {
-        "type": "illusion",
-        "base_rate": 10
+        "type": "illusion"
       },
       "special_move_name": "梦花迷影",
       "special_move_desc": "身如梦花迷影，如幻如真不可捉摸"
@@ -7458,8 +7097,7 @@
       "source": "逍遥派/灵鹫宫/天山童姥",
       "brief_desc": "逍遥派奇功 三十年一返老还童 威力无伦",
       "effect": {
-        "type": "heal",
-        "base_rate": 12
+        "type": "heal"
       },
       "special_move_name": "唯我独尊",
       "special_move_desc": "八荒六合唯我独尊，真气席卷天地万物"
@@ -7470,8 +7108,7 @@
       "category": "internal",
       "source": "少林寺/石破天",
       "effect": {
-        "type": "illusion",
-        "base_rate": 4
+        "type": "illusion"
       },
       "brief_desc": "少林罗汉伏魔神功 罗汉金身伏魔驱邪",
       "special_move_name": "伏魔幻相",
@@ -7483,8 +7120,7 @@
       "category": "special",
       "source": "古墓派/小龙女",
       "effect": {
-        "type": "acupoint_seal",
-        "base_rate": 5
+        "type": "acupoint_seal"
       },
       "brief_desc": "金铃与软索结合的兵器功夫 缠点打皆宜",
       "special_move_name": "封穴截脉",
@@ -7496,8 +7132,7 @@
       "category": "internal",
       "source": "荆州/丁典、狄云",
       "effect": {
-        "type": "heal",
-        "base_rate": 20
+        "type": "heal"
       },
       "brief_desc": "连城诀神照经别称 顶级内功 可起死回生",
       "special_move_name": "神照归元",
@@ -7517,8 +7152,7 @@
       "source": "峨嵋派/灭绝师太",
       "brief_desc": "峨嵋派灭绝师太所修内功 佛光普照刚猛正大",
       "effect": {
-        "type": "heal",
-        "base_rate": 8
+        "type": "heal"
       },
       "special_move_name": "佛光普照",
       "special_move_desc": "佛光普照真气如佛光，普度众生护体无伤"
@@ -7530,8 +7164,7 @@
       "source": "全真教/王重阳",
       "brief_desc": "全真三花聚顶五气朝元掌法 道门高深掌力",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "三花聚顶",
       "special_move_desc": "三花聚顶真气如花开，精气神三花合一"
@@ -7542,8 +7175,7 @@
       "category": "internal",
       "source": "全真教/王重阳",
       "effect": {
-        "type": "shield",
-        "base_rate": 8
+        "type": "shield"
       },
       "brief_desc": "先天功旁支 练就先天罡气护体 刀剑难伤",
       "special_move_name": "先天罡气",
@@ -7570,8 +7202,7 @@
       "source": "明教/韦一笑",
       "brief_desc": "韦一笑所擅长的轻功之一 独树一帜的轻功功夫",
       "effect": {
-        "type": "pursuit",
-        "base_rate": 6
+        "type": "pursuit"
       },
       "special_move_name": "草上飞绝",
       "special_move_desc": "真气如草上飞掠，身轻如燕踏草无痕"
@@ -7611,8 +7242,7 @@
       "source": "青城派",
       "brief_desc": "青城派内功，以松柏之韧为基，劲力绵长阴狠，",
       "effect": {
-        "type": "internal_injury",
-        "base_rate": 7
+        "type": "internal_injury"
       },
       "special_move_name": "松风含针",
       "special_move_desc": "运转青松劲时，将内力凝成细针藏攻击之中，看似轻描淡写的一拂，实则暗劲透体，直伤经脉，中者初时不觉，待察觉时已内腑受创，阴狠难防。"
@@ -7624,8 +7254,7 @@
       "source": "恒山派",
       "brief_desc": "以柔克刚，绵密内劲中暗藏针尖般的穿透力，如定静师太般外柔内刚。",
       "effect": {
-        "type": "reverse",
-        "base_rate": 8
+        "type": "reverse"
       },
       "special_move_name": "绵里藏针劲",
       "special_move_desc": "运功时内息如绵丝缠绕，看似柔和，实则暗劲如针。"
@@ -7637,8 +7266,7 @@
       "source": "昆仑派",
       "brief_desc": "昆仑派内功，以阴阳调和、刚柔并济为要义，练至大成可生生不息、攻守兼备。",
       "effect": {
-        "type": "shield",
-        "base_rate": 10
+        "type": "shield"
       },
       "special_move_name": "两仪生化",
       "special_move_desc": "阴阳二气交融，内力如潮汐般往复不息，瞬间在周身形成护体气墙，可卸去敌招三成劲力，并借势反震。"
@@ -7650,8 +7278,7 @@
       "source": "古墓派",
       "brief_desc": "古墓派顶级轻功，身法飘忽若鬼魅，进退如电，可于方寸之间闪转腾挪，令对手无从捉摸。",
       "effect": {
-        "type": "dodge",
-        "base_rate": 15
+        "type": "dodge"
       },
       "special_move_name": "飞仙幻影",
       "special_move_desc": "身形化作数道残影，如天罗地网般笼罩对手，令其眼花缭乱，难以锁定真身，同时可借势反击，攻其不备。"
@@ -7673,8 +7300,7 @@
       "source": "江南七怪/柯镇恶",
       "brief_desc": "柯镇恶以毒菱暗器闻名江南，手法狠辣，暗器淬毒，专攻敌人要害，令人防不胜防。",
       "effect": {
-        "type": "poison",
-        "base_rate": 15
+        "type": "poison"
       },
       "special_move_name": "毒菱天女散花",
       "special_move_desc": "柯镇恶以铁菱暗器施展的绝技，双手连扬，数十枚毒菱如天女散花般撒出，笼罩敌人周身大穴，中者不仅受外伤，更会身中剧毒，行动迟缓，内力运转不畅。"
@@ -7686,8 +7312,7 @@
       "source": "姑苏慕容氏/公冶干",
       "brief_desc": "掌势如大风云飞，刚柔并济，以气御掌，攻守兼备，乃慕容氏家传绝学。",
       "effect": {
-        "type": "shock",
-        "base_rate": 5
+        "type": "shock"
       },
       "special_move_name": "风卷残云",
       "special_move_desc": "双掌连环拍出，掌风如狂风卷席，裹挟漫天尘沙，令敌目眩神迷，掌力吞吐间暗藏三道后劲，中者如被风暴席卷，气血翻涌，难以自持。"
@@ -7706,8 +7331,7 @@
       "source": "鸳鸯刀/晋阳大侠萧半和",
       "brief_desc": "以浑厚内劲催动，掌势如翻天覆地，一式十三变，攻守兼备的顶级掌法。",
       "effect": {
-        "type": "shock",
-        "base_rate": 4
+        "type": "shock"
       },
       "special_move_name": "翻天覆地",
       "special_move_desc": "双掌连环拍出，劲力如浪涛叠涌，一浪高过一浪，最后一掌蕴含十三重暗劲，中者五脏俱震，气血翻涌，心神为之夺。"
@@ -7737,8 +7361,7 @@
       "source": "昆仑派/何太冲",
       "brief_desc": "昆仑派剑法的绝招 必须两人同使 两人功力相若 内劲相同",
       "effect": {
-        "type": "reverse",
-        "base_rate": 8
+        "type": "reverse"
       }
     }
   }
