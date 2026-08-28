@@ -7,6 +7,7 @@ config.py — 全局配置中心 v2
 【回滚】cp config.py.bak config.py 即可恢复
 """
 import os
+import re
 
 try:
     from dotenv import load_dotenv
@@ -117,3 +118,31 @@ def thinking_extra_body(model_name):
     if "glm-5.3" in _m:
         return {"thinking": {"type": "enabled"}, "reasoning_effort": GLM_THINKING_EFFORT}
     return {"thinking": {"type": "disabled"}}
+
+
+def is_glm53(model_name):
+    """是否GLM-5.3系列（强制思考，reasoning_content不可当正文用）"""
+    return "glm-5.3" in (model_name or "").lower()
+
+
+GLM53_MIN_MAX_TOKENS = 5000  # GLM-5.3思考token计入completion，额度不足时思考吃光导致content为空
+
+
+def adjust_max_tokens(model_name, max_tokens):
+    """GLM-5.3系列：max_tokens提到至少5000，给思考留额度；其他模型原样返回"""
+    if is_glm53(model_name):
+        return max(max_tokens or 0, GLM53_MIN_MAX_TOKENS)
+    return max_tokens
+
+
+_THINK_RE = re.compile(r"<think>.*?</think>", re.S)
+
+
+def strip_think_tags(text):
+    """剥离模型内联思考块：<think>...</think>（含未闭合前缀，即思考被max_tokens截断的情况）"""
+    if not text:
+        return text
+    text = _THINK_RE.sub("", text)
+    if "<think>" in text:
+        text = text.split("<think>", 1)[0]
+    return text.strip()

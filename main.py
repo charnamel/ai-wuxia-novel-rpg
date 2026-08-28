@@ -7,7 +7,7 @@ import textwrap
 import colorama
 import threading
 # 在 main.py 中删除原来的定义，改为导入
-from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, CLOUD_MEM_SLOT_ID, thinking_extra_body
+from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, CLOUD_MEM_SLOT_ID, thinking_extra_body, is_glm53, strip_think_tags, adjust_max_tokens
 from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node #导入作弊器代码
 from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 # ===== 骰子检定系统（最小侵入导入） =====
@@ -497,14 +497,15 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=0.65, retry_times=3,
             clean_user = textwrap.shorten(clean_user, width=1200, placeholder="...")
         try:
             # 构建请求参数
+            _model_name = model if model else DEEPSEEK_MODEL
             kwargs = {
-                "model": model if model else DEEPSEEK_MODEL,
+                "model": _model_name,
                 "messages": [
                     {"role": "system", "content": clean_sys},
                     {"role": "user", "content": clean_user}
                 ],
                 "temperature": temp,
-                "max_tokens": max_tokens, 
+                "max_tokens": adjust_max_tokens(_model_name, max_tokens),  # GLM-5.3思考吃completion额度，提到≥5000
                 "top_p": 1.0,
                 "stream": stream,
                 "timeout": actual_timeout
@@ -603,12 +604,12 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=0.65, retry_times=3,
                         full_text += delta
                 print(COLOR_END, flush=True)
                 print()
-                return {"content": full_text, "tool_calls": None}
+                return {"content": strip_think_tags(full_text), "tool_calls": None}
 
             else:
                 # 非流式：可能返回工具调用
                 choice = resp.choices[0]
-                content = choice.message.content or ""
+                content = strip_think_tags(choice.message.content or "")
                 tool_calls = choice.message.tool_calls if hasattr(choice.message, 'tool_calls') else None
                 if content and content.strip():
                     return {"content": content.strip(), "tool_calls": tool_calls}
@@ -631,13 +632,15 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=0.65, retry_times=3,
                     try:
                         resp2 = _client.chat.completions.create(**_kwargs2)
                         _ch2 = resp2.choices[0]
-                        _content2 = _ch2.message.content or ""
+                        _content2 = strip_think_tags(_ch2.message.content or "")
                         if not _content2:
                             # 第二轮content也为空，尝试reasoning_content兜底
-                            _reasoning2 = getattr(_ch2.message, 'reasoning_content', None) or ""
-                            if _reasoning2:
-                                print(f"{COLOR_WARN}[MiMo兜底] 第二轮content仍为空，提取reasoning_content({len(_reasoning2)}字符){COLOR_END}")
-                                _content2 = _reasoning2
+                            # （仅限MiMo等无法关思考的模型；GLM-5.3思考走独立字段，绝不能当正文）
+                            if not is_glm53(_model_name):
+                                _reasoning2 = getattr(_ch2.message, 'reasoning_content', None) or ""
+                                if _reasoning2:
+                                    print(f"{COLOR_WARN}[MiMo兜底] 第二轮content仍为空，提取reasoning_content({len(_reasoning2)}字符){COLOR_END}")
+                                    _content2 = _reasoning2
                         if _content2:
                             return {"content": _content2.strip(), "tool_calls": tool_calls}
                         # 第二轮也空，返回空content但保留tool_calls（至少保住游戏状态更新）
@@ -648,8 +651,9 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=0.65, retry_times=3,
                         return {"content": "", "tool_calls": tool_calls}
                 else:
                     # ★ 兜底：思考模式未关闭时，提取 reasoning_content（与 llm_call_npc_gen 一致）
+                    # 仅限MiMo等无法关思考的模型；GLM-5.3思考走独立字段，当正文会污染剧情，改为抛异常重试
                     reasoning = getattr(choice.message, 'reasoning_content', None) or ""
-                    if reasoning:
+                    if reasoning and not is_glm53(_model_name):
                         print(f"{COLOR_WARN}[主循环思考模式兜底] content为空，提取reasoning_content({len(reasoning)}字符){COLOR_END}")
                         return {"content": reasoning.strip(), "tool_calls": None}
                     raise Exception("模型返回空内容且无工具调用")
@@ -704,8 +708,9 @@ def llm_call_npc_gen(sys_prompt: str, user_prompt: str, temp=0.5, retry_times=2)
             result = content.strip()
             if not result:
                 # ★ 兜底：思考模式未关闭时，提取 reasoning_content
+                # 仅限MiMo等无法关思考的模型；GLM-5.3思考走独立字段，当正文会污染输出
                 reasoning = getattr(_msg, 'reasoning_content', None) or ""
-                if reasoning:
+                if reasoning and not is_glm53(DEEPSEEK_MODEL):
                     print(f"{COLOR_WARN}[NPC思考模式兜底] content为空，提取reasoning_content({len(reasoning)}字符){COLOR_END}")
                     return reasoning.strip()
                 raise Exception("API返回空内容")
@@ -2907,7 +2912,7 @@ def init_npc_agents(force_regen: bool = False):
                         m for m in npc["memory_list"]
                         if m and not m.strip().startswith("无") and m.strip() not in ["无", "（无）", "(无)", "无。"]
                     ]
-                if len(npc["memory_list"]) != original_len:
+                    if len(npc["memory_list"]) != original_len:
                         updated = True
         
                 # 清理 martial_skills（已有）
@@ -5598,7 +5603,7 @@ def player_edit_menu():
 def game_core_loop():
     # 新增这一行，声明使用全局变量
     global latest_plot1_text
-    print(f"{COLOR_SYSTEM}🔄 正在加载全局存档数据，启用DeepSeek-V4-Flash模型...{COLOR_END}")
+    print(f"{COLOR_SYSTEM}🔄 正在加载全局存档数据，主循环模型：{MAIN_LOOP_MODEL or DEEPSEEK_MODEL}...{COLOR_END}")
     print(f"{COLOR_SYSTEM}📌 数据源规则：本地story_source.txt优先，缺失内容AI智能补齐{COLOR_END}")
     build_novel_world()
     init_player()
