@@ -3168,6 +3168,7 @@ def set_npc_body_status(npc_name, status="normal", desc=""):
             status_hp_map = {"normal": 100, "light_injured": 80, "heavy_injured": 40, "dying": 0, "deceased": -1}
             if status in status_hp_map:
                 vit_npc["hp"] = status_hp_map[status]
+                vit_npc["poisoned"] = False
             elif status == "poisoned":
                 vit_npc["poisoned"] = True
             npc["vitality"] = vit_npc
@@ -5282,6 +5283,18 @@ __L4_MERGE_SLOT__
         npc_full_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
         related_npc_status = []
         npc_status_lines = []
+        # 当前剧情年份（novel_node正则提一次，供web端NPC显示年龄）
+        _cur_year_web = 0
+        try:
+            import re as _re_web
+            if player_obj and player_obj.novel_node:
+                for _ym in _re_web.finditer(r"(\d{1,4})年", player_obj.novel_node or ""):
+                    _yv = int(_ym.group(1))
+                    if 1500 <= _yv <= 2049:
+                        _cur_year_web = _yv
+                        break
+        except Exception:
+            _cur_year_web = 0
         for npc in npc_full_data.get("npc_list", []):
             name = npc.get("name", "")
             if not name:
@@ -5293,12 +5306,24 @@ __L4_MERGE_SLOT__
                 rel_text = f"·{relation}" if relation else ""
                 body_map = {"normal": "健康", "light_injured": "轻伤", "injured": "重伤", "heavy_injured": "重伤", "dying": "濒死", "deceased": "已故", "poisoned": "中毒", "missing": "失踪"}
                 body = body_map.get(npc.get("body_status", "normal"), "健康")
-                npc_line = f"{name} {attitude}{rel_text} 好感{favor} {body}"
+                # 年龄（档案year + 当前剧情年份推算，数据不全省略）
+                _birth = npc.get("year", 0)
+                _age_web = None
+                if _cur_year_web and _birth:
+                    try:
+                        _a = _cur_year_web - int(_birth)
+                        if 0 < _a <= 120:
+                            _age_web = _a
+                    except Exception:
+                        pass
+                _age_text = f"{_age_web}岁 " if _age_web is not None else ""
+                npc_line = f"{name} {_age_text}{attitude}{rel_text} 好感{favor} {body}"
                 npc_status_lines.append(npc_line)
                 related_npc_status.append({
                     "name": name, "identity": npc.get("identity", ""),
                     "body_status": npc.get("body_status", "normal"),
-                    "body_status_desc": npc.get("body_status_desc", ""), "favor": favor
+                    "body_status_desc": npc.get("body_status_desc", ""),
+                    "favor": favor, "age": _age_web
                 })
         npc_change_display = "\n".join(npc_status_lines) if npc_status_lines else "无活跃NPC"
         # 拼接AI原始输出（含伤势等自然语言描述）

@@ -998,13 +998,45 @@ def remove_effect(name, effect_id, player_name=None):
     return f"【状态】{name} 的「{n}」已解除"
 
 
+def _clear_legacy_poisoned_flag(name, track, player_name):
+    """effects列表中已无中毒类条目时，将旧vitality.poisoned联动置False。
+    返回True表示实际做了写入（供上层决定是否追加播报日志）。"""
+    def _do_clear(vit_getter, vit_setter, *args):
+        vit = vit_getter(*args) if args else vit_getter()
+        if not vit or not vit.get("poisoned"):
+            return False
+        new_vit = dict(vit)
+        new_vit["poisoned"] = False
+        if args:
+            ok = vit_setter(*args, new_vit)
+        else:
+            ok = vit_setter(new_vit)
+        return bool(ok) if ok is not None else True
+    if track == "player":
+        return _do_clear(get_player_vitality, set_player_vitality)
+    elif track == "npc":
+        return _do_clear(get_npc_vitality, set_npc_vitality, name)
+    elif track == "temp":
+        return _do_clear(get_temp_vitality, set_temp_vitality, name)
+    return False
+
+
 def tick_effects(name, player_name=None, scene_npc_names=None):
     """每轮结算（V5纯播报制）：到点播报状态警讯 → 剩余回合-1 → 到期移除。
     程序不再做任何数值结算——损血扣蓝的具体数值由AI经vitality_change单写者通道
-    在下一轮剧情中体现。已故角色冻结跳过。返回日志字符串（空串=无效果在身/无变化）。"""
+    在下一轮剧情中体现。已故角色冻结跳过。返回日志字符串（空串=无效果在身/无变化）。
+    兼容层：effects列表无中毒类条目时，联动清理旧vitality.poisoned僵尸标记。"""
     effects, track = _get_effects_raw(name, player_name)
-    if track is None or not effects:
+    if track is None:
         return ""
+
+    # ---- 出口1：effects本来就为空 → 直接尝试清旧poisoned残留，然后返回 ----
+    if not effects:
+        cleared = _clear_legacy_poisoned_flag(name, track, player_name)
+        if cleared:
+            return f"☠️ {name} 状态结算：余毒未清标记已清除（毒素自然代谢消散）"
+        return ""
+
     cfg_all = _load_effect_config()
     # 亡故冻结
     if track == "player":
@@ -1042,7 +1074,15 @@ def tick_effects(name, player_name=None, scene_npc_names=None):
     for e in kept:
         cfg = cfg_all.get(e.get("id"), {})
         parts.append(f"{cfg.get('name', e.get('id'))}×{e.get('stacks', 1)}·剩{e.get('remain_rounds')}轮")
-    if not parts and not expired_parts and not active_parts:
+
+    # ---- 出口2：正常结算后，若kept中已无任何中毒类id → 联动清旧poisoned残留 ----
+    has_any_poison_effect = any(str(e.get("id", "")).startswith("poison") for e in kept)
+    cleared_log = ""
+    if not has_any_poison_effect:
+        if _clear_legacy_poisoned_flag(name, track, player_name):
+            cleared_log = "余毒未清标记已清除"
+
+    if not parts and not expired_parts and not active_parts and not cleared_log:
         return ""
     tag = "（临时）" if track == "temp" else ""
     segments = []
@@ -1052,6 +1092,8 @@ def tick_effects(name, player_name=None, scene_npc_names=None):
         segments.append("，".join(active_parts))
     if expired_parts:
         segments.append("，".join(expired_parts))
+    if cleared_log:
+        segments.append(cleared_log)
     return f"☠️ {name}{tag} 状态结算：" + "；".join(segments)
 
 
