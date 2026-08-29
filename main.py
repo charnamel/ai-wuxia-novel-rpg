@@ -4158,12 +4158,12 @@ def process_one_round(user_input: str, is_web: bool = False):
                 break
         # 状态中文映射：补全健康状态，所有情况都明确标注
         status_label = {
-            "normal": " 健康",
-            "light_injured": " 轻伤",
-            "heavy_injured": " 重伤",
-            "dying": " 濒死",
-            "deceased": " 已故",
-            "poisoned": " 中毒"
+            "normal": "健康",
+            "light_injured": "轻伤",
+            "heavy_injured": "重伤",
+            "dying": "濒死",
+            "deceased": "已故",
+            "poisoned": "中毒"
         }
         for npc in npc_full_data.get("npc_list", []):
             name = npc.get("name", "").strip()
@@ -4189,7 +4189,8 @@ def process_one_round(user_input: str, is_web: bool = False):
                 _age_part = ""
                 if _cur_year and _birth and 0 < _cur_year - int(_birth) <= 120:
                     _age_part = f"年龄:{_cur_year - int(_birth)} "
-                npc_line = f"丨 {name}（{identity}）态度:{attitude}{relation_part} {_age_part}{status_text}"
+                _age_block = f"{_age_part.rstrip()} " if _age_part else ""
+                npc_line = f"丨 {name}（{identity}）{status_text} {_age_block}态度:{attitude}{relation_part}丨"
                 active_lines.append(npc_line)
             else:
                 passive_list.append(f"丨{name}（{identity}）")
