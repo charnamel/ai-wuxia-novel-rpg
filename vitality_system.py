@@ -151,14 +151,32 @@ def parse_vitality_tool_calls(tool_calls):
 
 
 # ---------- 正则兜底 ----------
-# 【体力结算】张三：气血-5，内力+0（兼容数值后带括号注释，如：气血-2（被掌风扫中））
+# 【体力结算】张三：气血-5，内力+0（兼容数值后带括号注释/带百分号/多种分隔符/冒号缺失用空格替代）
 _V_NUM = r"[+−-]?\d+(?:\s*%)?(?:[（(][^）)]*[）)])?"
+# 分隔符族：气血↔内力之间的常见AI漂移符（8种标点）；也允许"纯空格/制表符/换行替代分隔符"
+_V_SEP = r"[,，、;；/|｜]"
+_V_SEP_OR_SPACE = r"(?:" + _V_SEP + r"|\s+)"
+# 名字字符（原子级）：普通合法字，且禁止"气"后跟"血"、禁止"内"后跟"力"——解决【骆冰气血+1】被名字组
+# 误吃成"骆冰气血"（后面没有冒号/空格就断不开的bug）
+_NAME_CH = r"(?:[^：:，,\s（(气内]|[气内](?!血|力))"
+# 人名↔气血之间：冒号(全/半角)/空格/或两者都有，**也允许直接贴着**（0个分隔字符）
+#   这样【骆冰气血+1】就能正确切成 名字="骆冰" + 直接到"气血"
+_NAME_SEP = r"[：:\s]*"
 VITALITY_REGEX = re.compile(
-    r"【体力结算】\s*([^：:，,\s（(]+)\s*[：:]\s*气血\s*(" + _V_NUM + r")\s*[,，]\s*内力\s*(" + _V_NUM + r")"
+    r"【体力结算】\s*(" + _NAME_CH + r"+)\s*" + _NAME_SEP + r"\s*气血\s*("
+    + _V_NUM
+    + r")\s*" + _V_SEP_OR_SPACE + r"\s*内力\s*("
+    + _V_NUM
+    + r")"
 )
 # 续行：前缀行后紧跟的不带前缀行（AI常把第二个人的结算直接换行写在后面）
+#   行首行尾锁定 + 与主正则保持相同的人名分隔/气血内力分隔规则
 VITALITY_LINE_REGEX = re.compile(
-    r"^\s*([^：:，,\s（(]+)\s*[：:]\s*气血\s*(" + _V_NUM + r")\s*[,，]\s*内力\s*(" + _V_NUM + r")\s*$"
+    r"^\s*(" + _NAME_CH + r"+)\s*" + _NAME_SEP + r"\s*气血\s*("
+    + _V_NUM
+    + r")\s*" + _V_SEP_OR_SPACE + r"\s*内力\s*("
+    + _V_NUM
+    + r")\s*$"
 )
 
 
@@ -175,13 +193,27 @@ def parse_vitality_regex(reply_text):
     支持两种形态：
     1. 带【体力结算】前缀的行
     2. 紧跟在前缀行之后的续行（如 AI 常见的多人结算连写）
+    3. AI拆行：同一条结算被拆成两行（如"【体力结算】骆冰：气血+1\n内力+2"）
+       处理：逐行扫描，若上一行含"气血XX"但缺内力段，当前行含纯"内力XX"则合并回上一行
     """
     results = []
     if not reply_text:
         return results
     lines = reply_text.splitlines()
-    prev_was_settle = False
+    # 预处理：合并 AI 拆行的气血/内力分离
+    merged = []
     for line in lines:
+        # 合并条件：上一行含"气血"+数字（无分隔符+内力段），当前行以"内力"+数字开头
+        if (merged
+                and re.search(r"气血\s*[+−-]?\d+", merged[-1])
+                and not re.search(_V_SEP + r"\s*内力", merged[-1])
+                and re.match(r"^\s*内力\s*[+−-]?\d+", line)):
+            merged[-1] = f"{merged[-1]}，{line.strip()}"   # 拼接逗号，与主正则兼容
+        else:
+            merged.append(line)
+
+    prev_was_settle = False
+    for line in merged:
         m = VITALITY_REGEX.search(line)
         if m:
             prev_was_settle = True

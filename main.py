@@ -160,7 +160,7 @@ MAX_CONTEXT_LOG = 2000
 # ===== 云记忆全局槽位ID（从 config.py → .env 读取）======
 # CLOUD_MEM_SLOT_ID 已从 config 导入，无需在此硬编码
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
-# ---- 【新增】事件触发与进度配置 ----4. 武功经验类：skill_exp_gain（经验分级：战斗厮杀+3~15、日常勤练+1~50、月余苦练+10~100、数年苦修+50~300、顿悟突破+50~300、奇遇机缘自行给出）
+# ---- 【新增】事件触发与进度配置 ----4. 武功经验类：skill_exp_gain（经验分级：战斗厮杀+3~15、日常勤练+1~50、月余苦练+10~100、数年苦修+50~300、顿悟突破+50~300、奇遇机缘自行给出；闲聊/日常对话/社交寒暄场景一律不增）
 PROGRESS_FILE = "data/progress.json"
 RANDOM_EVENT_PROBABILITY = 0.02  # 日常行动触发随机意外事件的概率（2%）
 PLOT_PROGRESS_PER_ACTION = 0.2   # 每次日常交互推进的剧情进度值
@@ -194,7 +194,7 @@ STATIC_SYSTEM_PROMPT = """
 1. 基础规则：每轮必须主动调用 update_game_state，根据剧情输出数值，数值变化必须与剧情对应。
 2. 玩家属性类：reputation_delta（根据玩家剧情，江湖声望名气变化，单次-5~+5，重大事件-50~+50）。
 3. 世界状态类：world_trend（江湖大势30字内）、faction_balance（本轮NPC记忆，每条格式：姓名|记忆内容，30字内，可多条）、mood（情绪）、new_rumor（玩家主线剧情原子记录30字内，NPC有可能知道）。
-4. 武功经验类：skill_exp_gain（武学经验增长时填写，按以下场景对应区间给出数值：日常勤练+1~50、战斗厮杀+3~15、月余苦练+10~100、数年苦修+50~300、顿悟突破+50~300、奇遇机缘自行给出；需与剧情耗时和强度对应，严禁无理由乱给）、skill_exp_update（感悟更新）、bottleneck_progress_delta（瓶颈增量）。
+4. 武功经验类：skill_exp_gain（武学经验增长时填写，按以下场景对应区间给出数值：日常勤练+1~50、战斗厮杀+3~15、月余苦练+10~100、数年苦修+50~300、顿悟突破+50~300、奇遇机缘自行给出；需与剧情耗时和强度对应，严禁无理由乱给；闲聊、日常对话/社交寒暄场景一律不增）、skill_exp_update（感悟更新）、bottleneck_progress_delta（瓶颈增量）。
 5. 任务进度类：task（任务进展，name优先传完整任务名，单轮涨幅≤5%）。
 6. 武功学习类：new_skills（习得新武功时填写）。
 7. NPC状态类：npc_favor_update（好感实质变化时填写，单次±1~±8；施恩/契合性格则增，冒犯/违背立场则减，闲聊不触发）、npc_relationship_update（关系标签4字内）。NPC身体状态一律通过 vitality_change 的HP数值体现，禁止通过文本或其它字段直接标记NPC死亡。
@@ -3793,7 +3793,7 @@ def process_one_round(user_input: str, is_web: bool = False):
                         },
                         "skill_exp_gain": {
                             "type": "array",
-                            "description": "武功经验增益列表，仅在本轮有武功经验增长时填写，无增长填空数组。数值参考区间：日常勤练+1~50、战斗厮杀+3~15、月余苦练+10~100、数年苦修+50~300、顿悟突破+50~300、奇遇机缘自行给出",
+                            "description": "武功经验增益列表，仅在本轮有武功经验增长时填写，无增长填空数组。数值参考区间：日常勤练+1~50、战斗厮杀+3~15、月余苦练+10~100、数年苦修+50~300、顿悟突破+50~300、奇遇机缘自行给出；闲聊/日常对话/社交寒暄场景一律不填（空数组）",
                             "items": {
                                 "type": "object",
                                 "properties": {
