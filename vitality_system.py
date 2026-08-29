@@ -427,7 +427,10 @@ def migrate_all_npcs(force=False):
 
 
 def _sync_body_status(npc):
-    """HP -> body_status 单向同步（HP 是唯一真相源）"""
+    """HP -> body_status 单向同步（HP 是唯一真相源）；status 变动时顺带修复 body_status_desc 的僵尸描述。
+    三条件同时满足才覆写 desc：(1)status档位真变了 (2)旧desc含与新status矛盾的反义关键词 (3)不是相邻档默认值抖动。
+    非健康态+desc为空时，兜底填默认中文（AI后续写正则命中精细描述会自然覆盖）。
+    """
     vit = _normalize_vitality(npc.get("vitality"))
     hp = vit["hp"]
     status = hp_to_status(hp)
@@ -436,6 +439,42 @@ def _sync_body_status(npc):
         pass
     if vit["poisoned"] and status == "normal":
         status = "poisoned"
+
+    # ---------- desc 僵尸描述同步（最小侵入三条件）----------
+    _CN_MAP = {
+        "normal":"健康","light_injured":"轻伤","heavy_injured":"重伤",
+        "dying":"濒死","deceased":"已故","poisoned":"中毒","missing":"失踪",
+    }
+    _default_cn = _CN_MAP.get(status, "")
+    _old_status = str(npc.get("body_status") or status).strip() or status  # 空/None当没变，防初始化误写
+    _old_desc   = str(npc.get("body_status_desc", "") or "")
+    if _old_status != status:
+        # 新status ↔ 反义/不兼容关键词表（命中 = 旧desc是别的档位残留，必须清）
+        _INCOMPAT = {
+            "normal":       ("重伤","轻伤","濒死","呕血","奄奄一息","毙命","身亡","遍体鳞伤","性命垂危","负伤","吐血","断了","碎了","伤势不轻","倒地","重创","筋脉断裂","不治","香消玉殒","气绝","咽气"),
+            "light_injured":("重伤","濒死","奄奄一息","毙命","身亡","遍体鳞伤","性命垂危","不治","倒地不起","香消玉殒","气绝","咽气",
+                             "伤势痊愈","恢复如初","已然痊愈","健康","伤愈","完好","痊愈","完好如初","毒已清","毒已解"),
+            "heavy_injured":("轻伤","已故","毙命","身亡","伤势痊愈","恢复如初","已然痊愈","健康","伤愈","完好","毒已清"),
+            "dying":        ("伤势痊愈","恢复","健康","伤愈","完好","轻伤","重伤","已故","痊愈","完好如初"),
+            "deceased":     ("伤势痊愈","恢复","健康","伤愈","完好","轻伤","重伤","濒死","痊愈","起死回生","苏醒"),
+            "poisoned":     ("伤势痊愈","恢复","伤愈","完好","健康","毒已解","毒已清","余毒散尽"),
+        }.get(status, ())
+        _is_old_default = any(_old_desc == v for v in _CN_MAP.values())
+
+        # 相邻档抖动跳过（只有上一次是默认值时才跳；AI写的精细描述抖动时仍然按反义规则处理）
+        _NEIGHBORS = {
+            ("light_injured","normal"),("normal","light_injured"),
+            ("heavy_injured","light_injured"),("light_injured","heavy_injured"),
+            ("dying","heavy_injured"),("heavy_injured","dying"),
+        }
+        _jitter_skip = _is_old_default and (_old_status, status) in _NEIGHBORS
+
+        if not _jitter_skip and _old_desc and any(kw in _old_desc for kw in _INCOMPAT):
+            npc["body_status_desc"] = _default_cn
+    # 兜底：非健康态 + 当前desc仍为空 → 填默认中文（独立于status变化，首次同步也生效）
+    if status != "normal" and _default_cn and not str(npc.get("body_status_desc","") or "").strip():
+        npc["body_status_desc"] = _default_cn
+
     npc["body_status"] = status
     npc["vitality"] = vit
 
