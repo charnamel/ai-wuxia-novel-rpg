@@ -80,3 +80,25 @@ def advance_world_time(current_data=None):
 
     save_location_time(current_data)
     return current_data
+
+# ===== 【时间变更】间接触发天气（每3次时辰变更，25%概率换天气）=====
+_WEATHER_CHANGE_INTERVAL = 3  # 每N次时间变更累计一次抽奖机会
+_WEATHER_CHANGE_PROB = 0.25   # 到达阈值后的中奖概率（与advance_world_time保持一致）
+
+def tick_weather_on_time_change():
+    """【时间变更】正则路径专用：以计数器间接触发天气随机，避免天气长期不变。
+    计数器 _weather_tick 内嵌到 location_time.json，不新建文件。
+    """
+    data = load_location_time()
+    tick = int(data.get("_weather_tick", 0) or 0) + 1
+    if tick >= _WEATHER_CHANGE_INTERVAL:
+        tick = 0
+        if random.random() < _WEATHER_CHANGE_PROB:
+            new_weather = random.choice(WEATHER_SEQUENCE)
+            old = data.get("weather", "")
+            if new_weather != old:
+                data["weather"] = new_weather
+                print(f"[天气] 间接触发：{old} → {new_weather}")
+    data["_weather_tick"] = tick
+    save_location_time(data)
+    return data

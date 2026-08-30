@@ -25,7 +25,7 @@ from practice_system import do_practice
 from openai import OpenAI
 # 导入动态主线模块
 from mainline_dynamic import advance_mainline
-from location_time import load_location_time, update_location_time, advance_world_time, format_time_with_24h
+from location_time import load_location_time, update_location_time, advance_world_time, format_time_with_24h, tick_weather_on_time_change
 def get_llm_content(response):
     """从 llm_call_common 返回值中提取文本内容（兼容新旧格式）"""
     if isinstance(response, dict):
@@ -3916,7 +3916,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         last_context = context_cache["last_plot_summary"]
 
         # ===== 【智能】耗时动作识别 =====
-        time_consuming_keywords = ["练功", "修炼", "休息", "睡觉", "赶路", "等待", "闲逛", "练", "修", "休", "逛", "睡", "散步", "走走"]
+        time_consuming_keywords = ["练功", "修炼", "休息", "睡觉", "赶路", "等待", "闲逛", "练", "修", "休", "逛", "睡", "散步", "走走", "前往", "去往", "拜访", "寻找", "进入", "离开", "赶赴", "抵达", "游历", "出行", "入城", "出城", "上山", "下山"]
         should_advance_time = any(keyword in user_input for keyword in time_consuming_keywords)
 
         location_time = load_location_time()
@@ -5029,6 +5029,7 @@ __L4_MERGE_SLOT__
             new_time = time_match.group(1).strip()
             if new_time and new_time not in _SKIP_VALUES:
                 update_location_time(time=new_time)
+                tick_weather_on_time_change()  # 每3次时间变更间接触发一次天气抽奖
             else:
                 print(f"【时间变更】AI输出'{new_time}'（无效/无变化）→ 保持当前")
 
