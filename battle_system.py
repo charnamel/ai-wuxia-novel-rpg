@@ -630,62 +630,64 @@ def run_battle_system(
                 continue
 
             # ★ 骰子检定：正则检测武功名→AI判DC→程序掷骰（与web端正常剧情一致路径）
+            # ★ DC开关守卫：关闭时跳过整个检定（env: ENABLE_DICE_SYSTEM=false）
             _dice_constraint = ""
-            try:
-                _pobj = get_player()
-                if _pobj:
-                    _classified = dice_detect_martial_skill_classified(player_attack, _pobj.martial_skill_list, _pobj)
-                    _matched = _classified.get("all_matched", [])
-                    if _matched:
-                        _skill_name = _classified.get("primary_attack") or _matched[0]
-                        _skill_info = _pobj.get_skill_info(_skill_name)
-                        _skill_level = _skill_info["skill_level"] if _skill_info else _pobj.overall_realm
-                        _grade = _skill_info["grade"] if _skill_info else 0
-                        # AI只判DC（传入target_npc作为extra_npcs，支持临时生成的对手）
-                        _extra_npcs = [target_npc] if target_npc else []
-                        _active_npcs_brief = dice_build_active_npcs_brief(
-                            npc_data_raw, player_attack, last_round_process or "",
-                            extra_npcs=_extra_npcs,
-                            player_name=player_obj.name if player_obj else None,
-                        )
-                        # 对手锚定：防止场景残留其他NPC名导致DC判定对象跑偏
-                        _target_line = dice_build_target_npc_line(
-                            target_npc,
-                            player_name=player_obj.name if player_obj else None,
-                        ) if target_npc else ""
-                        _dc, _dc_reason = dice_ai_judge_dc_only(
-                            llm_func=llm_common_func,
-                            scene=last_round_process or "",
-                            user_action=player_attack,
-                            skill_name=_skill_name,
-                            skill_level=_skill_level,
-                            grade=_grade,
-                            skill_list_summary=_pobj.get_skill_list_summary(),
-                            overall_realm=_pobj.overall_realm,
-                            active_npcs_text=_active_npcs_brief,
-                            target_npc_text=_target_line,
-                        )
-                        # 传入preset跳过AI need_check判定，直接掷骰
-                        _check_result = dice_resolve_check_v4(
-                            player_obj=_pobj,
-                            user_action=player_attack,
-                            l1_scene=last_round_process or "",
-                            llm_func=llm_common_func,
-                            preset_skill_name=_skill_name,
-                            preset_dc=_dc,
-                            preset_dc_reason=_dc_reason,
-                            classified_skills=_classified,
-                            effect_opponent_name=target_npc.get("name") if target_npc else None,
-                            effect_opponent_data=target_npc,
-                        )
-                        if _check_result and _check_result.get("constraint_text"):
-                            _dice_constraint = "\n" + _check_result["constraint_text"]
-                            _verdict = _check_result.get("verdict", "?")
-                            _dice_natural = _check_result.get("dice_natural", 0)
-                            _dice_total = _check_result.get("dice_total", 0)
-                            print(f"{COLOR_WARN}🎲 本回合骰子检定: {_skill_name} d20={_dice_natural} → 总计={_dice_total} vs DC{_dc} → {_verdict}{COLOR_END}")
-            except Exception as _e:
-                print(f"{COLOR_WARN}[骰子] 对战检定异常: {_e}{COLOR_END}")
+            if dice_system.dice_enabled():
+                try:
+                    _pobj = get_player()
+                    if _pobj:
+                        _classified = dice_detect_martial_skill_classified(player_attack, _pobj.martial_skill_list, _pobj)
+                        _matched = _classified.get("all_matched", [])
+                        if _matched:
+                            _skill_name = _classified.get("primary_attack") or _matched[0]
+                            _skill_info = _pobj.get_skill_info(_skill_name)
+                            _skill_level = _skill_info["skill_level"] if _skill_info else _pobj.overall_realm
+                            _grade = _skill_info["grade"] if _skill_info else 0
+                            # AI只判DC（传入target_npc作为extra_npcs，支持临时生成的对手）
+                            _extra_npcs = [target_npc] if target_npc else []
+                            _active_npcs_brief = dice_build_active_npcs_brief(
+                                npc_data_raw, player_attack, last_round_process or "",
+                                extra_npcs=_extra_npcs,
+                                player_name=player_obj.name if player_obj else None,
+                            )
+                            # 对手锚定：防止场景残留其他NPC名导致DC判定对象跑偏
+                            _target_line = dice_build_target_npc_line(
+                                target_npc,
+                                player_name=player_obj.name if player_obj else None,
+                            ) if target_npc else ""
+                            _dc, _dc_reason = dice_ai_judge_dc_only(
+                                llm_func=llm_common_func,
+                                scene=last_round_process or "",
+                                user_action=player_attack,
+                                skill_name=_skill_name,
+                                skill_level=_skill_level,
+                                grade=_grade,
+                                skill_list_summary=_pobj.get_skill_list_summary(),
+                                overall_realm=_pobj.overall_realm,
+                                active_npcs_text=_active_npcs_brief,
+                                target_npc_text=_target_line,
+                            )
+                            # 传入preset跳过AI need_check判定，直接掷骰
+                            _check_result = dice_resolve_check_v4(
+                                player_obj=_pobj,
+                                user_action=player_attack,
+                                l1_scene=last_round_process or "",
+                                llm_func=llm_common_func,
+                                preset_skill_name=_skill_name,
+                                preset_dc=_dc,
+                                preset_dc_reason=_dc_reason,
+                                classified_skills=_classified,
+                                effect_opponent_name=target_npc.get("name") if target_npc else None,
+                                effect_opponent_data=target_npc,
+                            )
+                            if _check_result and _check_result.get("constraint_text"):
+                                _dice_constraint = "\n" + _check_result["constraint_text"]
+                                _verdict = _check_result.get("verdict", "?")
+                                _dice_natural = _check_result.get("dice_natural", 0)
+                                _dice_total = _check_result.get("dice_total", 0)
+                                print(f"{COLOR_WARN}🎲 本回合骰子检定: {_skill_name} d20={_dice_natural} → 总计={_dice_total} vs DC{_dc} → {_verdict}{COLOR_END}")
+                except Exception as _e:
+                    print(f"{COLOR_WARN}[骰子] 对战检定异常: {_e}{COLOR_END}")
 
             # 生成本回合打斗（返回：剧情文本 + 体力结算tool_calls）
             round_plot, _round_tool_calls = gen_single_battle_round(

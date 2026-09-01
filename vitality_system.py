@@ -479,6 +479,49 @@ def _sync_body_status(npc):
     npc["vitality"] = vit
 
 
+# ---------- desc 展示层守门（出口过滤，不改存档） ----------
+# 各状态档位 ↔ 反义/不兼容关键词（与 _sync_body_status 内 _INCOMPAT 同源，抽出共用）
+_DESC_INCOMPAT = {
+    "normal":       ("重伤","轻伤","濒死","呕血","奄奄一息","毙命","身亡","遍体鳞伤","性命垂危","负伤","吐血","断了","碎了","伤势不轻","倒地","重创","筋脉断裂","不治","香消玉殒","气绝","咽气"),
+    "light_injured":("重伤","濒死","已故","奄奄一息","毙命","身亡","遍体鳞伤","性命垂危","不治","倒地不起","香消玉殒","气绝","咽气",
+                     "伤势痊愈","恢复如初","已然痊愈","健康","伤愈","完好","痊愈","完好如初","毒已清","毒已解"),
+    "heavy_injured":("轻伤","已故","毙命","身亡","伤势痊愈","恢复如初","已然痊愈","健康","伤愈","完好","毒已清"),
+    "dying":        ("伤势痊愈","恢复","健康","伤愈","完好","轻伤","重伤","已故","痊愈","完好如初"),
+    "deceased":     ("伤势痊愈","恢复","健康","伤愈","完好","轻伤","重伤","濒死","痊愈","起死回生","苏醒"),
+    "poisoned":     ("伤势痊愈","恢复","伤愈","完好","健康","毒已解","毒已清","余毒散尽"),
+}
+_DESC_CN = {
+    "normal":"健康","light_injured":"轻伤","heavy_injured":"重伤",
+    "dying":"濒死","deceased":"已故","poisoned":"中毒","missing":"失踪",
+}
+
+def sanitize_desc(npc):
+    """展示层守门：desc 给前端显示前做一致性过滤（只改返回值，不改存档）。
+    - desc 与当前 HP 档位矛盾（含反义关键词）→ 降级返回档位默认词
+    - desc 为空且非健康态 → 返回档位默认词
+    - 其余（含合法的AI精细描述如"左臂被砍伤"）→ 原样返回
+    """
+    try:
+        vit = _normalize_vitality(npc.get("vitality"))
+        status = hp_to_status(vit["hp"])
+        if vit["poisoned"] and status == "normal":
+            status = "poisoned"
+        desc = str(npc.get("body_status_desc", "") or "").strip()
+        default_cn = _DESC_CN.get(status, "")
+        if not desc:
+            # 空 desc：非健康态补默认词；健康态返回空串（状态词前端已有，不重复）
+            return default_cn if status != "normal" else ""
+        if status in _DESC_INCOMPAT and any(kw in desc for kw in _DESC_INCOMPAT[status]):
+            return default_cn  # 矛盾 → 降级默认词
+        return desc
+    except Exception:
+        # 任何异常都兜底返回原 desc，绝不影响主流程
+        try:
+            return str(npc.get("body_status_desc", "") or "")
+        except Exception:
+            return ""
+
+
 # ---------- 姓名匹配 ----------
 def find_npc_name(raw_name, npc_names):
     """模糊匹配NPC名：精确 > 去后缀 > 包含"""

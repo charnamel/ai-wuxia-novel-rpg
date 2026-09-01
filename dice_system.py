@@ -13,11 +13,17 @@
 from __future__ import annotations
 
 import json
+import os
 import random
 import re
 import logging
 
 logger = logging.getLogger("dice_system")
+
+
+def dice_enabled():
+    """DC检定总开关（读env，实时生效，默认开启）"""
+    return os.getenv("ENABLE_DICE_SYSTEM", "true").strip().lower() not in ("false", "0", "off")
 
 # 最近一次DC判定的行动类型（"battle"/"daily"），ai_judge_dc_only 副作用写入，供对战回气等逻辑读取
 _LAST_DC_ACTION_TYPE = "daily"

@@ -456,55 +456,59 @@ def handle_battle_action(web_input: str, dice_confirm=None):
     if _dice_pending and dice_confirm is True:
         # 步骤B: 玩家确认掷骰 → 执行检定
         WEB_BATTLE_STATE["dice_pending"] = None
-        try:
-            _pobj = get_player()
-            _check_result = dice_resolve_check_v4(
-                player_obj=_pobj,
-                user_action=_dice_pending["original_action"],
-                l1_scene=WEB_BATTLE_STATE["last_round"] or "",
-                llm_func=llm_call_common,
-                preset_skill_name=_dice_pending.get("skill_name"),
-                preset_dc=_dice_pending.get("dc"),
-                preset_dc_reason=_dice_pending.get("dc_reason"),
-                classified_skills=_dice_pending.get("classified_skills"),
-                effect_opponent_name=WEB_BATTLE_STATE.get("target_name"),
-            )
-            if _check_result and _check_result.get("constraint_text"):
-                _dice_constraint = "\n" + _check_result["constraint_text"]
-                _mount_log = _check_result.get("effect_mount_log") or ""
-                # ★ DC续传锚定：记录本轮DC判定+掷骰战果，供下一轮DC判定参考
-                try:
-                    _vn = _check_result.get("verdict_narr") or _check_result.get("verdict") or ""
-                    WEB_BATTLE_STATE["last_dc_summary"] = (
-                        f"DC{_check_result.get('dc', '?')}({_check_result.get('dc_reason', '')})，"
-                        f"掷骰结果：{_check_result.get('verdict', '?')}，{_vn[:60]}"
-                    )
-                    print(f"[BattleDC] 战果已记录: {WEB_BATTLE_STATE['last_dc_summary']}")
-                except Exception:
-                    pass
-                _dice_result = {
-                    "skill_name": _check_result["skill_name"],
-                    "skill_level": _check_result["skill_level"],
-                    "grade": _check_result["grade"],
-                    "base_bonus": _check_result["base_bonus"],
-                    "skill_bonus": _check_result["skill_bonus"],
-                    "realm_bonus": _check_result["realm_bonus"],
-                    "total_modifier": _check_result["total_modifier"],
-                    "dc": _check_result["dc"],
-                    "dc_reason": _check_result.get("dc_reason", ""),
-                    "dice_natural": _check_result["dice_natural"],
-                    "dice_total": _check_result["dice_total"],
-                    "dice_rolls": _check_result["dice_rolls"],
-                    "delta": _check_result["delta"],
-                    "verdict_grade": _check_result["verdict_grade"],
-                    "verdict": _check_result["verdict"],
-                    "verdict_narr": _check_result["verdict_narr"],
-                    "effect_result": _check_result.get("effect_result"),
-                    "effect_results": _check_result.get("effect_results"),
-                }
-                print(f"[BattleDC] 确认掷骰: {_check_result['verdict']}（第{_check_result['verdict_grade']}档）")
-        except Exception as _e:
-            print(f"[WARN] 对战骰子检定异常: {_e}")
+        # ★ DC开关守卫：关闭状态下残留面板确认不触发检定
+        if not dice_system.dice_enabled():
+            print("[骰子开关] DC检定已关闭，忽略战斗残留掷骰确认")
+        else:
+            try:
+                _pobj = get_player()
+                _check_result = dice_resolve_check_v4(
+                    player_obj=_pobj,
+                    user_action=_dice_pending["original_action"],
+                    l1_scene=WEB_BATTLE_STATE["last_round"] or "",
+                    llm_func=llm_call_common,
+                    preset_skill_name=_dice_pending.get("skill_name"),
+                    preset_dc=_dice_pending.get("dc"),
+                    preset_dc_reason=_dice_pending.get("dc_reason"),
+                    classified_skills=_dice_pending.get("classified_skills"),
+                    effect_opponent_name=WEB_BATTLE_STATE.get("target_name"),
+                )
+                if _check_result and _check_result.get("constraint_text"):
+                    _dice_constraint = "\n" + _check_result["constraint_text"]
+                    _mount_log = _check_result.get("effect_mount_log") or ""
+                    # ★ DC续传锚定：记录本轮DC判定+掷骰战果，供下一轮DC判定参考
+                    try:
+                        _vn = _check_result.get("verdict_narr") or _check_result.get("verdict") or ""
+                        WEB_BATTLE_STATE["last_dc_summary"] = (
+                            f"DC{_check_result.get('dc', '?')}({_check_result.get('dc_reason', '')})，"
+                            f"掷骰结果：{_check_result.get('verdict', '?')}，{_vn[:60]}"
+                        )
+                        print(f"[BattleDC] 战果已记录: {WEB_BATTLE_STATE['last_dc_summary']}")
+                    except Exception:
+                        pass
+                    _dice_result = {
+                        "skill_name": _check_result["skill_name"],
+                        "skill_level": _check_result["skill_level"],
+                        "grade": _check_result["grade"],
+                        "base_bonus": _check_result["base_bonus"],
+                        "skill_bonus": _check_result["skill_bonus"],
+                        "realm_bonus": _check_result["realm_bonus"],
+                        "total_modifier": _check_result["total_modifier"],
+                        "dc": _check_result["dc"],
+                        "dc_reason": _check_result.get("dc_reason", ""),
+                        "dice_natural": _check_result["dice_natural"],
+                        "dice_total": _check_result["dice_total"],
+                        "dice_rolls": _check_result["dice_rolls"],
+                        "delta": _check_result["delta"],
+                        "verdict_grade": _check_result["verdict_grade"],
+                        "verdict": _check_result["verdict"],
+                        "verdict_narr": _check_result["verdict_narr"],
+                        "effect_result": _check_result.get("effect_result"),
+                        "effect_results": _check_result.get("effect_results"),
+                    }
+                    print(f"[BattleDC] 确认掷骰: {_check_result['verdict']}（第{_check_result['verdict_grade']}档）")
+            except Exception as _e:
+                print(f"[WARN] 对战骰子检定异常: {_e}")
 
     elif _dice_pending and dice_confirm is False:
         # 步骤C: 玩家跳过检定
@@ -513,107 +517,111 @@ def handle_battle_action(web_input: str, dice_confirm=None):
 
     elif not _dice_pending and dice_confirm is None:
         # 步骤A: 新出招 → 正则检测武功名
-        try:
-            _pobj = get_player()
-            if _pobj:
-                _classified = dice_detect_martial_skill_classified(player_attack, _pobj.martial_skill_list, _pobj)
-                _matched = _classified.get("all_matched", [])
-                if _matched:
-                    _skill_name = _classified.get("primary_attack") or _matched[0]
-                    _skill_info = _pobj.get_skill_info(_skill_name)
-                    _skill_level = _skill_info["skill_level"] if _skill_info else _pobj.overall_realm
-                    _grade = _skill_info["grade"] if _skill_info else 0
-                    _skill_bonus = _skill_info["bonus"] if _skill_info else 0
-                    _realm_bonus = _skill_info["realm_bonus"] if _skill_info else 0
-                    _base_bonus = _pobj.base_bonus
-                    _total_mod = _base_bonus + _skill_bonus + _realm_bonus
+        # ★ DC开关守卫：关闭时不检测武功、不弹掷骰面板
+        if not dice_system.dice_enabled():
+            pass
+        else:
+            try:
+                _pobj = get_player()
+                if _pobj:
+                    _classified = dice_detect_martial_skill_classified(player_attack, _pobj.martial_skill_list, _pobj)
+                    _matched = _classified.get("all_matched", [])
+                    if _matched:
+                        _skill_name = _classified.get("primary_attack") or _matched[0]
+                        _skill_info = _pobj.get_skill_info(_skill_name)
+                        _skill_level = _skill_info["skill_level"] if _skill_info else _pobj.overall_realm
+                        _grade = _skill_info["grade"] if _skill_info else 0
+                        _skill_bonus = _skill_info["bonus"] if _skill_info else 0
+                        _realm_bonus = _skill_info["realm_bonus"] if _skill_info else 0
+                        _base_bonus = _pobj.base_bonus
+                        _total_mod = _base_bonus + _skill_bonus + _realm_bonus
 
-                    # 增幅检定预览（用于面板显示）
-                    _inner_name = _classified.get("primary_inner", "")
-                    _light_name = _classified.get("primary_light", "")
-                    _inner_info = _pobj.get_skill_info(_inner_name) if _inner_name else None
-                    _light_info = _pobj.get_skill_info(_light_name) if _light_name else None
-                    _amp_total, _amp_detail = dice_system.compute_amplify_bonus(
-                        attack_total=_total_mod,
-                        inner_info=_inner_info,
-                        light_info=_light_info,
-                    )
-                    if _amp_total:
-                        _total_mod = _total_mod + _amp_total
-                        print(f"[BattleDC] 增幅检定: 内功={_inner_name or '无'}, 轻功={_light_name or '无'}, 增幅=+{_amp_total}")
+                        # 增幅检定预览（用于面板显示）
+                        _inner_name = _classified.get("primary_inner", "")
+                        _light_name = _classified.get("primary_light", "")
+                        _inner_info = _pobj.get_skill_info(_inner_name) if _inner_name else None
+                        _light_info = _pobj.get_skill_info(_light_name) if _light_name else None
+                        _amp_total, _amp_detail = dice_system.compute_amplify_bonus(
+                            attack_total=_total_mod,
+                            inner_info=_inner_info,
+                            light_info=_light_info,
+                        )
+                        if _amp_total:
+                            _total_mod = _total_mod + _amp_total
+                            print(f"[BattleDC] 增幅检定: 内功={_inner_name or '无'}, 轻功={_light_name or '无'}, 增幅=+{_amp_total}")
 
-                    # ★ 构建DC判定场景上下文：首轮用战前剧情，后续轮用上轮输出，均追加场景信息
-                    _dc_scene = WEB_BATTLE_STATE.get("last_round") or ""
-                    if not _dc_scene:
-                        # 首轮：last_round为空，使用战前最新剧情
-                        _dc_scene = WEB_BATTLE_STATE.get("pre_battle_plot", "")
-                    _scene_info = WEB_BATTLE_STATE.get("scene_info", "")
-                    if _scene_info:
-                        _dc_scene = f"{_dc_scene}\n【场景信息】\n{_scene_info}" if _dc_scene else f"【场景信息】\n{_scene_info}"
-                    # ★ DC续传锚定：第2轮起拼入上轮DC判定+掷骰战果（放末尾，确保300字窗口优先保留）
-                    _last_dc = WEB_BATTLE_STATE.get("last_dc_summary", "")
-                    if _last_dc and WEB_BATTLE_STATE.get("round_num", 0) >= 1:
-                        _dc_scene = f"{_dc_scene}\n【上一轮检定事实】\n{_last_dc}"
+                        # ★ 构建DC判定场景上下文：首轮用战前剧情，后续轮用上轮输出，均追加场景信息
+                        _dc_scene = WEB_BATTLE_STATE.get("last_round") or ""
+                        if not _dc_scene:
+                            # 首轮：last_round为空，使用战前最新剧情
+                            _dc_scene = WEB_BATTLE_STATE.get("pre_battle_plot", "")
+                        _scene_info = WEB_BATTLE_STATE.get("scene_info", "")
+                        if _scene_info:
+                            _dc_scene = f"{_dc_scene}\n【场景信息】\n{_scene_info}" if _dc_scene else f"【场景信息】\n{_scene_info}"
+                        # ★ DC续传锚定：第2轮起拼入上轮DC判定+掷骰战果（放末尾，确保300字窗口优先保留）
+                        _last_dc = WEB_BATTLE_STATE.get("last_dc_summary", "")
+                        if _last_dc and WEB_BATTLE_STATE.get("round_num", 0) >= 1:
+                            _dc_scene = f"{_dc_scene}\n【上一轮检定事实】\n{_last_dc}"
 
-                    _battle_npcs_brief = dice_system.build_active_npcs_brief(
-                        load_json(NPC_AGENT_FILE), player_attack,
-                        _dc_scene,
-                        extra_npcs=[WEB_BATTLE_STATE["target_npc"]] if WEB_BATTLE_STATE.get("target_npc") else []
-                    )
-                    # 对手锚定：防止场景残留其他NPC名导致DC判定对象跑偏
-                    _target_line = dice_system.build_target_npc_line(
-                        WEB_BATTLE_STATE["target_npc"]) if WEB_BATTLE_STATE.get("target_npc") else ""
-                    _dc, _dc_reason = dice_ai_judge_dc_only(
-                        llm_func=_llm_dc_low_temp,
-                        scene=_dc_scene,
-                        user_action=player_attack,
-                        skill_name=_skill_name,
-                        skill_level=_skill_level,
-                        grade=_grade,
-                        skill_list_summary=_pobj.get_skill_list_summary(),
-                        overall_realm=_pobj.overall_realm,
-                        active_npcs_text=_battle_npcs_brief,
-                        target_npc_text=_target_line,
-                    )
-                    print(f"[BattleDC] 命中「{_skill_name}」, DC={_dc}({_dc_reason})")
+                        _battle_npcs_brief = dice_system.build_active_npcs_brief(
+                            load_json(NPC_AGENT_FILE), player_attack,
+                            _dc_scene,
+                            extra_npcs=[WEB_BATTLE_STATE["target_npc"]] if WEB_BATTLE_STATE.get("target_npc") else []
+                        )
+                        # 对手锚定：防止场景残留其他NPC名导致DC判定对象跑偏
+                        _target_line = dice_system.build_target_npc_line(
+                            WEB_BATTLE_STATE["target_npc"]) if WEB_BATTLE_STATE.get("target_npc") else ""
+                        _dc, _dc_reason = dice_ai_judge_dc_only(
+                            llm_func=_llm_dc_low_temp,
+                            scene=_dc_scene,
+                            user_action=player_attack,
+                            skill_name=_skill_name,
+                            skill_level=_skill_level,
+                            grade=_grade,
+                            skill_list_summary=_pobj.get_skill_list_summary(),
+                            overall_realm=_pobj.overall_realm,
+                            active_npcs_text=_battle_npcs_brief,
+                            target_npc_text=_target_line,
+                        )
+                        print(f"[BattleDC] 命中「{_skill_name}」, DC={_dc}({_dc_reason})")
 
-                    WEB_BATTLE_STATE["dice_pending"] = {
-                        "original_action": player_attack,
-                        "skill_name": _skill_name,
-                        "dc": _dc,
-                        "dc_reason": _dc_reason,
-                        "classified_skills": _classified,
-                    }
-                    # 构建增幅显示文本
-                    _amp_display_battle = ""
-                    if _amp_total:
-                        _amp_parts = []
-                        if _inner_name:
-                            _amp_parts.append(f"内功{_inner_name}")
-                        if _light_name:
-                            _amp_parts.append(f"轻功{_light_name}")
-                        _amp_display_battle = f"\n增幅检定: {'+'.join(_amp_parts)} → +{_amp_total}"
-
-                    return {
-                        "type": "dice_pending",
-                        "dice_check": {
+                        WEB_BATTLE_STATE["dice_pending"] = {
+                            "original_action": player_attack,
                             "skill_name": _skill_name,
-                            "skill_level": _skill_level,
-                            "grade": _grade,
-                            "base_bonus": _base_bonus,
-                            "skill_bonus": _skill_bonus,
-                            "realm_bonus": _realm_bonus,
-                            "total_modifier": _total_mod,
-                            "amplify_total": _amp_total,
-                            "inner_name": _inner_name,
-                            "light_name": _light_name,
                             "dc": _dc,
                             "dc_reason": _dc_reason,
-                        },
-                        "msg": f"🎲 武功检定触发\n武功: {_skill_name}（{_skill_level}·品阶{_grade}级）\n基础修正: +{_base_bonus} | 武功加成: +{_skill_bonus + _realm_bonus}{_amp_display_battle}\n总修正: +{_total_mod} vs DC{_dc}\n({_dc_reason})\n请确认是否掷骰？",
-                    }
-        except Exception as _e:
-            print(f"[WARN] 对战骰子检测异常: {_e}")
+                            "classified_skills": _classified,
+                        }
+                        # 构建增幅显示文本
+                        _amp_display_battle = ""
+                        if _amp_total:
+                            _amp_parts = []
+                            if _inner_name:
+                                _amp_parts.append(f"内功{_inner_name}")
+                            if _light_name:
+                                _amp_parts.append(f"轻功{_light_name}")
+                            _amp_display_battle = f"\n增幅检定: {'+'.join(_amp_parts)} → +{_amp_total}"
+
+                        return {
+                            "type": "dice_pending",
+                            "dice_check": {
+                                "skill_name": _skill_name,
+                                "skill_level": _skill_level,
+                                "grade": _grade,
+                                "base_bonus": _base_bonus,
+                                "skill_bonus": _skill_bonus,
+                                "realm_bonus": _realm_bonus,
+                                "total_modifier": _total_mod,
+                                "amplify_total": _amp_total,
+                                "inner_name": _inner_name,
+                                "light_name": _light_name,
+                                "dc": _dc,
+                                "dc_reason": _dc_reason,
+                            },
+                            "msg": f"🎲 武功检定触发\n武功: {_skill_name}（{_skill_level}·品阶{_grade}级）\n基础修正: +{_base_bonus} | 武功加成: +{_skill_bonus + _realm_bonus}{_amp_display_battle}\n总修正: +{_total_mod} vs DC{_dc}\n({_dc_reason})\n请确认是否掷骰？",
+                        }
+            except Exception as _e:
+                print(f"[WARN] 对战骰子检测异常: {_e}")
 
     # 超过20轮自动强制结束，防止战斗日志无限膨胀塞爆LLM上下文
     WEB_BATTLE_STATE["round_num"] += 1
@@ -1832,7 +1840,7 @@ def chat():
             global WEB_DICE_PENDING
 
             # P1: 有骰子待确认 + 用户确认掷骰
-            if WEB_DICE_PENDING and dice_confirm is True:
+            if WEB_DICE_PENDING and dice_confirm is True and dice_system.dice_enabled():
                 pending = WEB_DICE_PENDING
                 WEB_DICE_PENDING = None
                 # 执行 V4 检定（传入预设武功名和DC，跳过重复AI判定）
@@ -1917,7 +1925,8 @@ def chat():
                 dice_clear_web_state_v4()
 
                 # V4: 正则检测武功名（不用AI），命中后再让AI给DC
-                if not dice_should_skip(user_action):
+                # ★ DC开关守卫：关闭时不检测武功，直接进入剧情生成
+                if not dice_should_skip(user_action) and dice_system.dice_enabled():
                     _pobj = get_player()
                     _classified_skills = dice_detect_martial_skill_classified(
                         user_action, _pobj.martial_skill_list if _pobj else [], _pobj
@@ -2561,6 +2570,8 @@ def api_npc_get():
             if npc.get("name") == name:
                 # V5：统一读取vitality（含迁移+亡故哨兵刷新），保证前端拿到百分比
                 npc["vitality"] = vitality_system.read_npc_vitality(npc)
+                # 展示层守门：desc 与HP档位矛盾时降级显示（只改返回值，不改存档）
+                npc["body_status_desc"] = vitality_system.sanitize_desc(npc)
                 return jsonify({"status": "success", "npc": npc})
         return jsonify({"status": "error", "message": f"NPC「{name}」不存在"})
     except Exception as e:
@@ -2966,6 +2977,63 @@ def api_switch_preset():
         print(f"[API预设] {group} 切换到 {option}，需重启服务生效")
         return jsonify({"status": "success",
                          "message": f"已切换到选项{option}，需重启服务生效"})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)})
+
+
+# ======= DC检定开关接口 ======
+
+@app.route('/api/dice/toggle', methods=['GET'])
+def api_get_dice_toggle():
+    """返回DC检定开关当前状态"""
+    return jsonify({"status": "success", "enabled": dice_system.dice_enabled()})
+
+
+@app.route('/api/dice/toggle', methods=['POST'])
+def api_post_dice_toggle():
+    """切换DC检定开关（原子写入.env，无该行则追加；立即生效，无需重启）"""
+    import os as _os
+    import tempfile as _tempfile
+
+    try:
+        new_val = "true" if not dice_system.dice_enabled() else "false"
+        env_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), ".env")
+
+        if _os.path.exists(env_path):
+            with open(env_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            found = False
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped.startswith("ENABLE_DICE_SYSTEM=") and not stripped.startswith("#"):
+                    lines[i] = f"ENABLE_DICE_SYSTEM={new_val}\n"
+                    found = True
+                    break
+            if not found:
+                lines.append(f"\n# ====== DC骰子检定开关 ======\nENABLE_DICE_SYSTEM={new_val}\n")
+            # 原子写入：先写临时文件，再 rename
+            fd, tmp_path = _tempfile.mkstemp(dir=_os.path.dirname(env_path), suffix=".tmp")
+            with _os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.writelines(lines)
+            _os.replace(tmp_path, env_path)
+        else:
+            return jsonify({"status": "error", "message": ".env 文件不存在"})
+
+        # 同步内存环境变量 → 立即生效
+        _os.environ["ENABLE_DICE_SYSTEM"] = new_val
+
+        # 切换开关时清空残留的掷骰待确认状态（防中途关闭后旧面板确认触发检定）
+        global WEB_DICE_PENDING
+        WEB_DICE_PENDING = None
+        try:
+            WEB_BATTLE_STATE["dice_pending"] = None
+        except Exception:
+            pass
+        dice_clear_web_state_v4()
+
+        print(f"[骰子开关] DC检定已{'开启' if new_val == 'true' else '关闭'}，立即生效")
+        return jsonify({"status": "success", "enabled": new_val == "true"})
     except Exception as e:
         traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)})

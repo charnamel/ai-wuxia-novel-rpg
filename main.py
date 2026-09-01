@@ -25,7 +25,7 @@ from practice_system import do_practice
 from openai import OpenAI
 # 导入动态主线模块
 from mainline_dynamic import advance_mainline
-from location_time import load_location_time, update_location_time, advance_world_time, format_time_with_24h, tick_weather_on_time_change
+from location_time import load_location_time, update_location_time, advance_world_time, format_time_with_24h, roll_weather_if_needed, normalize_shichen
 def get_llm_content(response):
     """从 llm_call_common 返回值中提取文本内容（兼容新旧格式）"""
     if isinstance(response, dict):
@@ -183,7 +183,7 @@ STATIC_SYSTEM_PROMPT = """
 【本轮剧情内容】（250字以内）
 【NPC状态变动】格式：角色名：好感±X / 无变化
 【道具/自身健康状态】综合修为：武功名 等级 / ... / 新增武功：XX / 新增道具：XX 消耗道具：XX
-【时间变更】时辰名（仅耗时动作标注）
+【时间变更】时辰名（仅耗时动作标注，必须是十二时辰标准值之一：子时/丑时/寅时/卯时/辰时/巳时/午时/未时/申时/酉时/戌时/亥时；不得附加"三刻""略耗""次日""数日后"等任何文字）
 【地点变更】新地点（仅移动时标注）
 【行动选项】格式：选项1 / 选项2 / 选项3（每个10字以内）
 可选：【近期剧情记录】一句话本轮关键事件
@@ -2567,11 +2567,11 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
         ("normal", ["伤势痊愈", "恢复如初", "已然痊愈", "毒已解", "伤势大好", "身体恢复", "伤愈"]),
         ("deceased", ["身亡", "毙命", "当场死去", "气绝身亡", "不治身亡", "已死", "死去", "丧命", "亡故", "咽气", "断了气", "没了气息", "气绝", "力竭而亡", "战死", "香消玉殒", "当场毙命", "再无声息"]),
         ("dying", ["性命垂危", "奄奄一息", "濒死", "只剩一口气", "危在旦夕"]),
-        ("heavy_injured", ["身受重伤", "重伤", "伤势不轻", "遍体鳞伤", "断了", "碎了","呕血", "口吐鲜血"]),
+        ("heavy_injured", ["身受重伤", "重伤", "伤势不轻", "遍体鳞伤"]),
         ("light_injured", ["受了轻伤", "轻伤", "擦破", "划伤", "皮肉伤"]),
         ("poisoned", ["身中剧毒", "中毒", "毒发", "中了毒"])
     ]
-    deny_words = ["听说", "传言", "据说", "仿佛", "好似", "以为", "传闻", "回忆", "梦中", "如果", "倘若"]
+    deny_words = ["听说", "听闻", "传言", "据说", "仿佛", "好似", "以为", "传闻", "回忆", "梦中", "如果", "倘若"]
 
     # 先收集每个NPC匹配到的最严重状态
     npc_final_status = {}  # {npc_name: (status, keyword)}
@@ -2590,6 +2590,11 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
                     continue
                 sentence = match.group(0)
                 if any(w in sentence for w in deny_words):
+                    continue
+                # ===== 方向过滤：中间段含其他NPC名字 → 伤者可能是别人，放弃本次匹配 =====
+                # 例："骆冰望着重伤的铁鹞堂帮众冷笑" → 骆冰与"重伤"之间夹了第三者，骆冰不应被标重伤
+                gap_text = sentence[len(name):sentence.find(kw, len(name))] if kw in sentence[len(name):] else ""
+                if any(other["name"] in gap_text for other in npc_data["npc_list"] if other["name"] != name):
                     continue
                 current_sev = severity.get(status, 0)
                 # 只保留最严重的状态
@@ -2629,6 +2634,16 @@ def parse_and_update_npc_state(reply_text: str, tool_calls=None, user_action="")
                     vit_npc["hp"] = 0
                 elif status == "poisoned":
                     vit_npc["poisoned"] = True
+                # ===== V6：重伤/轻伤 单向钳制HP（只往下压，不往上抬） =====
+                # 防止"显示重伤但面板满血"的脱钩窗口；痊愈不送血（HP只能靠工具/自然恢复回涨）
+                elif status == "heavy_injured" and vit_npc.get("hp", 100) > 30:
+                    hp_old = vit_npc.get("hp", 100)
+                    vit_npc["hp"] = 30
+                    print(f"{COLOR_GREEN}ℹ️ NPC「{name}」HP单向钳制：{int(hp_old)}→30（重伤）{COLOR_END}")
+                elif status == "light_injured" and vit_npc.get("hp", 100) > 70:
+                    hp_old = vit_npc.get("hp", 100)
+                    vit_npc["hp"] = 70
+                    print(f"{COLOR_GREEN}ℹ️ NPC「{name}」HP单向钳制：{int(hp_old)}→70（轻伤）{COLOR_END}")
                 npc["vitality"] = vit_npc
                 print(f"{COLOR_GREEN}✅ NPC「{name}」状态已设为：{status_cn[status]}（{kw}）{COLOR_END}")
                 break
@@ -4685,83 +4700,88 @@ __L4_MERGE_SLOT__
             dice_result_for_frontend = None
         else:
             # CLI 模式或 Web 未处理时，自动执行 V4 检定
-            try:
-                # 获取 L1 场景锚点（最近一轮剧情）
-                l1_scene = ""
-                _interact_logs = context_cache.get("interact_log", [])
-                if _interact_logs:
-                    _last_log = str(_interact_logs[-1])
-                    _plot_match = re.search(r'【本轮剧情(?:内容)?】(.*?)(?:【NPC|$)', _last_log, re.DOTALL)
-                    if _plot_match:
-                        l1_scene = _plot_match.group(1).strip()[-300:] or ""
-                    else:
-                        l1_scene = _last_log[-300:] or ""
-
-                # AI 判定（始终启用，场景为空时AI仍能根据行动判断）
-                _active_npcs_brief = dice_system.build_active_npcs_brief(
-                    npc_full_data, pure_user_action, l1_scene,
-                    player_name=player_obj.name if player_obj else None,
-                )
-                # 分类检测武功（支持内功轻功增幅检定）
-                _classified_skills = dice_system.detect_martial_skill_classified(
-                    pure_user_action, player_obj.martial_skill_list, player_obj
-                )
-                # 特效挂状态的对手：从玩家输入中匹配活跃NPC名（首个命中者）
-                _effect_opponent = None
-                _effect_opponent_full = None
-                try:
-                    for _an in (active_names or []):
-                        if _an and _an != (player_obj.name if player_obj else None) \
-                                and _an in pure_user_action:
-                            _effect_opponent = _an
-                            break
-                    if _effect_opponent:
-                        for _n in npc_full_data.get("npc_list", []):
-                            if _n.get("name") == _effect_opponent:
-                                _effect_opponent_full = _n
-                                break
-                except Exception:
-                    _effect_opponent = None
-                    _effect_opponent_full = None
-                _check_result = dice_resolve_check_v4(
-                    player_obj=player_obj,
-                    user_action=pure_user_action,
-                    l1_scene=l1_scene,
-                    llm_func=llm_call_common,
-                    active_npcs_text=_active_npcs_brief,
-                    classified_skills=_classified_skills,
-                    effect_opponent_name=_effect_opponent,
-                    effect_opponent_data=_effect_opponent_full,
-                )
-                _dc_check_result = _check_result
-
-                if _check_result:
-                    dice_constraint = f"\n{_check_result['constraint_text']}\n"
-                    dice_result_for_frontend = {
-                        "skill_name": _check_result["skill_name"],
-                        "skill_level": _check_result["skill_level"],
-                        "grade": _check_result["grade"],
-                        "base_bonus": _check_result["base_bonus"],
-                        "skill_bonus": _check_result["skill_bonus"],
-                        "realm_bonus": _check_result["realm_bonus"],
-                        "total_modifier": _check_result["total_modifier"],
-                        "dc": _check_result["dc"],
-                        "dc_reason": _check_result.get("dc_reason", ""),
-                        "dice_natural": _check_result["dice_natural"],
-                        "dice_total": _check_result["dice_total"],
-                        "dice_rolls": _check_result["dice_rolls"],
-                        "delta": _check_result["delta"],
-                        "verdict_grade": _check_result["verdict_grade"],
-                        "verdict": _check_result["verdict"],
-                        "verdict_narr": _check_result["verdict_narr"],
-                        "effect_result": _check_result.get("effect_result"),
-                        "effect_results": _check_result.get("effect_results"),
-                    }
-            except Exception as _e:
-                # 骰子系统异常不应阻塞正常流程
-                print(f"[WARN] 骰子V4检定异常（已跳过）: {_e}")
+            # ★ DC开关守卫：关闭时跳过整个检定（env: ENABLE_DICE_SYSTEM=false）
+            if not dice_system.dice_enabled():
                 dice_constraint = ""
                 dice_result_for_frontend = None
+            else:
+                try:
+                    # 获取 L1 场景锚点（最近一轮剧情）
+                    l1_scene = ""
+                    _interact_logs = context_cache.get("interact_log", [])
+                    if _interact_logs:
+                        _last_log = str(_interact_logs[-1])
+                        _plot_match = re.search(r'【本轮剧情(?:内容)?】(.*?)(?:【NPC|$)', _last_log, re.DOTALL)
+                        if _plot_match:
+                            l1_scene = _plot_match.group(1).strip()[-300:] or ""
+                        else:
+                            l1_scene = _last_log[-300:] or ""
+
+                    # AI 判定（始终启用，场景为空时AI仍能根据行动判断）
+                    _active_npcs_brief = dice_system.build_active_npcs_brief(
+                        npc_full_data, pure_user_action, l1_scene,
+                        player_name=player_obj.name if player_obj else None,
+                    )
+                    # 分类检测武功（支持内功轻功增幅检定）
+                    _classified_skills = dice_system.detect_martial_skill_classified(
+                        pure_user_action, player_obj.martial_skill_list, player_obj
+                    )
+                    # 特效挂状态的对手：从玩家输入中匹配活跃NPC名（首个命中者）
+                    _effect_opponent = None
+                    _effect_opponent_full = None
+                    try:
+                        for _an in (active_names or []):
+                            if _an and _an != (player_obj.name if player_obj else None) \
+                                    and _an in pure_user_action:
+                                _effect_opponent = _an
+                                break
+                        if _effect_opponent:
+                            for _n in npc_full_data.get("npc_list", []):
+                                if _n.get("name") == _effect_opponent:
+                                    _effect_opponent_full = _n
+                                    break
+                    except Exception:
+                        _effect_opponent = None
+                        _effect_opponent_full = None
+                    _check_result = dice_resolve_check_v4(
+                        player_obj=player_obj,
+                        user_action=pure_user_action,
+                        l1_scene=l1_scene,
+                        llm_func=llm_call_common,
+                        active_npcs_text=_active_npcs_brief,
+                        classified_skills=_classified_skills,
+                        effect_opponent_name=_effect_opponent,
+                        effect_opponent_data=_effect_opponent_full,
+                    )
+                    _dc_check_result = _check_result
+
+                    if _check_result:
+                        dice_constraint = f"\n{_check_result['constraint_text']}\n"
+                        dice_result_for_frontend = {
+                            "skill_name": _check_result["skill_name"],
+                            "skill_level": _check_result["skill_level"],
+                            "grade": _check_result["grade"],
+                            "base_bonus": _check_result["base_bonus"],
+                            "skill_bonus": _check_result["skill_bonus"],
+                            "realm_bonus": _check_result["realm_bonus"],
+                            "total_modifier": _check_result["total_modifier"],
+                            "dc": _check_result["dc"],
+                            "dc_reason": _check_result.get("dc_reason", ""),
+                            "dice_natural": _check_result["dice_natural"],
+                            "dice_total": _check_result["dice_total"],
+                            "dice_rolls": _check_result["dice_rolls"],
+                            "delta": _check_result["delta"],
+                            "verdict_grade": _check_result["verdict_grade"],
+                            "verdict": _check_result["verdict"],
+                            "verdict_narr": _check_result["verdict_narr"],
+                            "effect_result": _check_result.get("effect_result"),
+                            "effect_results": _check_result.get("effect_results"),
+                        }
+                except Exception as _e:
+                    # 骰子系统异常不应阻塞正常流程
+                    print(f"[WARN] 骰子V4检定异常（已跳过）: {_e}")
+                    dice_constraint = ""
+                    dice_result_for_frontend = None
         # ===== 骰子检定结束 =====
 
         # ===== 等待主动检索完成（DC检定期间已并行执行，超时则取消） =====
@@ -5028,8 +5048,15 @@ __L4_MERGE_SLOT__
         if time_match:
             new_time = time_match.group(1).strip()
             if new_time and new_time not in _SKIP_VALUES:
-                update_location_time(time=new_time)
-                tick_weather_on_time_change()  # 每3次时间变更间接触发一次天气抽奖
+                cleaned = normalize_shichen(new_time)
+                if cleaned is None:
+                    print(f"【时间变更】AI输出非法时辰：'{new_time}' → 已拒写（请提醒AI使用十二时辰标准值）")
+                else:
+                    if cleaned != new_time:
+                        print(f"【时间变更】AI输出'{new_time}'清洗为标准值'{cleaned}'后写入")
+                    else:
+                        print(f"【时间变更】检测到标准时辰：{new_time}")
+                    update_location_time(time=cleaned)
             else:
                 print(f"【时间变更】AI输出'{new_time}'（无效/无变化）→ 保持当前")
 
@@ -5323,7 +5350,7 @@ __L4_MERGE_SLOT__
                 related_npc_status.append({
                     "name": name, "identity": npc.get("identity", ""),
                     "body_status": npc.get("body_status", "normal"),
-                    "body_status_desc": npc.get("body_status_desc", ""),
+                    "body_status_desc": vit_sys.sanitize_desc(npc),  # 展示层守门：与HP档位矛盾的desc降级显示，存档不改
                     "favor": favor, "age": _age_web
                 })
         npc_change_display = "\n".join(npc_status_lines) if npc_status_lines else "无活跃NPC"
@@ -5394,6 +5421,13 @@ __L4_MERGE_SLOT__
                 print(f"{COLOR_GREEN}[自然恢复] 第{current_round}轮：\n{regen_log}{COLOR_END}")
         except Exception as e:
             print(f"{COLOR_WARN}⚠️ 自然恢复异常：{e}{COLOR_END}")
+
+        # ===== ★ 统一天气抽奖（唯一入口：每5轮·25%概率·按novel_node季节选池）★ =====
+        try:
+            _nn_for_weather = (player_obj.novel_node or "") if player_obj is not None else ""
+            roll_weather_if_needed(current_round, _nn_for_weather)
+        except Exception as e:
+            print(f"{COLOR_WARN}⚠️ 天气抽奖异常（已吞，不中断剧情）：{e}{COLOR_END}")
 
         # ★ 最终返回前再读取一次，确保一致 ★
         final_loc_time = load_location_time()

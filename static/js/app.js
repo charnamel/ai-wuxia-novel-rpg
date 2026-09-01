@@ -110,6 +110,8 @@
             await handleMessage(`add_npc|${name}|${identity}|${fav}`);
         }
          window.onload = async function() {
+            // 后台加载DC检定开关状态（侧边栏按钮显示）
+            loadDiceToggle();
             // 后台预加载NPC列表（供头像注入使用）
             try {
                 const npcRes = await fetch('/npc/list');
@@ -3077,6 +3079,46 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
 
         // ===== API 预设管理（全量可编辑）=====
         let _envSchema = null;
+
+        // ===== DC检定开关 =====
+        function renderDiceToggleBtn(enabled) {
+            const btn = document.getElementById('dice-toggle-btn');
+            if (!btn) return;
+            btn.textContent = enabled ? '🎲 DC检定：开' : '🎲 DC检定：关';
+            btn.style.color = enabled ? '' : '#888';
+        }
+
+        async function loadDiceToggle() {
+            try {
+                const res = await fetch('/api/dice/toggle');
+                const data = await res.json();
+                if (data.status === 'success') renderDiceToggleBtn(data.enabled);
+            } catch(e) {
+                renderDiceToggleBtn(true);
+            }
+        }
+
+        async function toggleDiceSystem() {
+            const btn = document.getElementById('dice-toggle-btn');
+            if (!btn || btn.disabled) return;
+            btn.disabled = true;
+            btn.textContent = '切换中...';
+            try {
+                const res = await fetch('/api/dice/toggle', { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    renderDiceToggleBtn(data.enabled);
+                } else {
+                    alert('切换失败：' + (data.message || '未知错误'));
+                    loadDiceToggle();
+                }
+            } catch(e) {
+                alert('切换失败：网络错误');
+                loadDiceToggle();
+            } finally {
+                btn.disabled = false;
+            }
+        }
 
         function toggleApiPresets() {
             const modal = document.getElementById('api-presets-modal');
