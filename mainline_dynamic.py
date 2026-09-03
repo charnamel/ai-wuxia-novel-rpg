@@ -14,6 +14,56 @@ WORLD_STATE_FILE = "data/world_state.json"
 NPC_AGENT_FILE = "data/npc_agents.json"
 MAINLINE_CATALOG_FILE = "data/mainline_catalog.json"  # 新增：原著固定桥段目录
 
+# ========== 主线进度累计（模块化：累计阈值/公式统一收口到本模块） ==========
+# 原位于 main.py，现下沉至此，main.py 仅作转发导入，保证唯一数据源。
+# 设计说明（公式）：
+#   - 每次普通日常交互        current_progress += PLOT_PROGRESS_PER_ACTION(=1)
+#   - 每次「对战」结算        current_progress += 5
+#   - 每次「回归主线」指令     current_progress += 8
+#   - 当 current_progress >= MAJOR_PLOT_TRIGGER_POINT(=100) 时触发一次，
+#     触发后 current_progress 归零重新累计（固定阈值，不再递增）。
+#   - 触发只产生一个 "trigger_mainline" 标记，由 check_and_consume_mainline_flag()
+#     在下一轮主循环消费，消费时才注入「主线暗线牵引」提示词（指向 X+1 号桥段，不推进编号）。
+PROGRESS_FILE = "data/progress.json"
+PLOT_PROGRESS_PER_ACTION = 1.0   # 每次日常交互推进的剧情进度值
+MAJOR_PLOT_TRIGGER_POINT = 100   # 每当进度累计满 100 点，触发一次原著主线关键节点
+
+def init_progress():
+    # 读取/初始化主线程度进度文件：current_progress 当前累计量 / trigger_threshold 触发门槛 / flags 待消费标记 / trigger_count 已触发次数
+    if os.path.exists(PROGRESS_FILE):
+        prog = load_json(PROGRESS_FILE)
+        if prog and isinstance(prog, dict):
+            return prog
+    progress = {
+        "current_progress": 0.0,
+        "trigger_threshold": MAJOR_PLOT_TRIGGER_POINT,
+        "flags": [],
+        "trigger_count": 0
+    }
+    save_json(PROGRESS_FILE, progress)
+    return progress
+
+def update_progress(delta: float):
+    # 累加主线进度；累计满阈值(100)即触发一次，触发后归零重新累计
+    prog = init_progress()
+    prog["current_progress"] += delta
+    if prog["current_progress"] >= prog["trigger_threshold"]:
+        prog["trigger_count"] = prog.get("trigger_count", 0) + 1
+        prog["current_progress"] = 0.0
+        prog["trigger_threshold"] = MAJOR_PLOT_TRIGGER_POINT
+        prog["flags"].append("trigger_mainline")
+    save_json(PROGRESS_FILE, prog)
+    return prog
+
+def check_and_consume_mainline_flag():
+    # 下一轮主循环消费自动主线触发标记：存在则移除并返回 True，表示本轮应注入主线牵引
+    prog = init_progress()
+    if "trigger_mainline" in prog["flags"]:
+        prog["flags"].remove("trigger_mainline")
+        save_json(PROGRESS_FILE, prog)
+        return True
+    return False
+
 
 # ========== 基础历史读写（完全保留原有逻辑） ==========
 def init_history():
@@ -297,7 +347,7 @@ def generate_next_event(world_data, npc_data, history):
         last_main_text = "暂无前置主线，为首条主线事件"
 
     # ===== 4. 构造强约束Prompt（核心改动：强制遵循基准桥段） =====
-    prompt = f"""你是《笑傲江湖》金庸原著剧情任务生成器。
+    prompt = f"""你是一个金庸原著剧情任务生成器，严格按照给定的【基准原著桥段】与【原著世界观背景】生成剧情。
 【核心铁律】
 本次生成必须100%围绕【基准原著桥段】延续展开，核心事件、关键人物、剧情内核绝对不能修改、不能原创，仅可优化触发方式，可以是听说、传闻或者直接出发，自然衔接玩家当前场景。年代时间必须严格一致，不允许提前出现未来的人物、事件、物品。
 【基准原著桥段（必须严格遵循）】
