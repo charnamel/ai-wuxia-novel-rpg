@@ -26,6 +26,14 @@ def _load_items_catalog():
         return {"items": {}}
 
 
+# ===== 秘籍/书卷类字样：catalog 未收录时，命中以下字样的物品永不判为武器/防具（统一归随身物品） =====
+_NON_WEAPON_RE = re.compile(
+    r"(?:[剑刀枪棍鞭掌拳爪指]?(?:谱|诀|决|抄本))"
+    r"|(?:抄本|秘本|秘籍|真解|残卷|心法|要诀|要义|注疏|遗篇|孤本|密卷|典藏|武学|功法)"
+    r"|(?:经|典|录|册|卷)"
+)
+
+
 def _get_item_subcategory(item_name):
     """查物品的subcategory，先查catalog，查不到用启发式"""
     data = _load_items_catalog()
@@ -42,6 +50,9 @@ def _get_item_subcategory(item_name):
                 cat_name = item.get("name", "")
                 if cat_name == base_name:
                     return item.get("subcategory", "")
+    # 秘籍/书卷类负向判定（catalog 之后、启发式之前）
+    if _NON_WEAPON_RE.search(item_name):
+        return "秘籍"
     # 启发式判断
     for kw in ("剑", "刀", "枪", "棍", "鞭", "锏", "锤", "斧", "匕", "钩"):
         if kw in item_name:
