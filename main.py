@@ -1489,58 +1489,59 @@ def update_context_cache(new_plot, user_action=""):
     if "compressed_global_summary" not in cache:
         cache["compressed_global_summary"] = "故事初始，暂无前置剧情"
     
-    last_compress_round = cache.get("last_compress_round", 0)
-    if new_round - last_compress_round >= 20 or last_compress_round == 0:
-        # 使用旧的全局摘要 + 新发生的最近详细内容，生成新的全局摘要
-        # 为了减少API输入负载，只取最近5轮作为"新发生的剧情"
-        compress_recent = recent_records[-5:] if len(recent_records) >= 5 else recent_records
-        compress_recent_context = "\n\n".join(compress_recent)
-        new_input = f"旧摘要：{cache['compressed_global_summary']}\n\n新发生的剧情：\n{compress_recent_context}"
-        
-        # 压缩提示词，强制要求输出非空文本
-        compress_prompt = f"""请完成以下任务，输出格式严格如下（不要输出其他内容）：
-
-【远古核心剧情提要】
-（将武侠剧情历史压缩为不超过300字的精炼摘要，保留核心人物关系和重大转折，必须包含新发生的重要事件。如果内容很少，请输出“故事继续，暂无重大事件”。）
-
-输入内容：
-{new_input}"""
-        
-        try:
-            compress_resp = client.chat.completions.create(
-                model=DEEPSEEK_MODEL,
-                messages=[{"role": "user", "content": compress_prompt}],
-                temperature=0.3,
-                max_tokens=400,
-                timeout=45,
-                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
-            )
-            # 安全检查：message.content 可能为 None
-            content = getattr(compress_resp.choices[0].message, 'content', '') or ''
-            full_output = content.strip()
-            print(f"DEBUG: {full_output}") 
-            
-            # 提取【远古核心剧情提要】
-            summary_match = re.search(r"【远古核心剧情提要】\s*(.*)", full_output, re.S)
-            if summary_match:
-                cache["compressed_global_summary"] = summary_match.group(1).strip()
-            else:
-                cache["compressed_global_summary"] = "故事继续，暂无重大事件"
-            
-                        
-                
-                
-                
-            cache["last_compress_round"] = new_round
-        except Exception as e:
-            print(f"{COLOR_WARN}【压缩摘要API调用失败】{e}{COLOR_END}")
-            # 如果旧摘要为空，设置一个默认值
-            if not cache.get("compressed_global_summary"):
-                cache["compressed_global_summary"] = "故事初始，暂无前置剧情"
-            if not cache.get("key_anchors"):
-                cache["key_anchors"] = []
-            # 无论是否设置了默认值，都必须更新 last_compress_round，避免反复重试
-            cache["last_compress_round"] = new_round
+    # ===== 【已停用 2026-09】远古核心剧情提要压缩管线：产出仅写入 last_plot_summary，从不注入 AI 上下文（死管线），停用省 LLM 成本；compressed_global_summary 字段初始化保留 =====
+#     last_compress_round = cache.get("last_compress_round", 0)
+#     if new_round - last_compress_round >= 20 or last_compress_round == 0:
+#         # 使用旧的全局摘要 + 新发生的最近详细内容，生成新的全局摘要
+#         # 为了减少API输入负载，只取最近5轮作为"新发生的剧情"
+#         compress_recent = recent_records[-5:] if len(recent_records) >= 5 else recent_records
+#         compress_recent_context = "\n\n".join(compress_recent)
+#         new_input = f"旧摘要：{cache['compressed_global_summary']}\n\n新发生的剧情：\n{compress_recent_context}"
+#         
+#         # 压缩提示词，强制要求输出非空文本
+#         compress_prompt = f"""请完成以下任务，输出格式严格如下（不要输出其他内容）：
+# 
+# 【远古核心剧情提要】
+# （将武侠剧情历史压缩为不超过300字的精炼摘要，保留核心人物关系和重大转折，必须包含新发生的重要事件。如果内容很少，请输出“故事继续，暂无重大事件”。）
+# 
+# 输入内容：
+# {new_input}"""
+#         
+#         try:
+#             compress_resp = client.chat.completions.create(
+#                 model=DEEPSEEK_MODEL,
+#                 messages=[{"role": "user", "content": compress_prompt}],
+#                 temperature=0.3,
+#                 max_tokens=400,
+#                 timeout=45,
+#                 extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+#             )
+#             # 安全检查：message.content 可能为 None
+#             content = getattr(compress_resp.choices[0].message, 'content', '') or ''
+#             full_output = content.strip()
+#             print(f"DEBUG: {full_output}") 
+#             
+#             # 提取【远古核心剧情提要】
+#             summary_match = re.search(r"【远古核心剧情提要】\s*(.*)", full_output, re.S)
+#             if summary_match:
+#                 cache["compressed_global_summary"] = summary_match.group(1).strip()
+#             else:
+#                 cache["compressed_global_summary"] = "故事继续，暂无重大事件"
+#             
+#                         
+#                 
+#                 
+#                 
+#             cache["last_compress_round"] = new_round
+#         except Exception as e:
+#             print(f"{COLOR_WARN}【压缩摘要API调用失败】{e}{COLOR_END}")
+#             # 如果旧摘要为空，设置一个默认值
+#             if not cache.get("compressed_global_summary"):
+#                 cache["compressed_global_summary"] = "故事初始，暂无前置剧情"
+#             if not cache.get("key_anchors"):
+#                 cache["key_anchors"] = []
+#             # 无论是否设置了默认值，都必须更新 last_compress_round，避免反复重试
+#             cache["last_compress_round"] = new_round
                 
     # ===== 最终组合成 last_plot_summary =====
     cache["last_plot_summary"] = f"{player_anchor}\n\n【远古核心剧情提要】{cache['compressed_global_summary']}\n\n【最新详细剧情】\n{recent_context}"
@@ -5330,6 +5331,8 @@ __L4_MERGE_SLOT__
                 item_lines.append(f"武学：{' / '.join(sp)}")
         if player_disp:
             item_lines.append(f"状态：{player_disp.self_state}")
+            if player_disp.age and player_disp.age > 0:
+                item_lines.append(f"年龄：{player_disp.age}岁")
         item_status_display = "\n".join(item_lines) if item_lines else "无变化"
         # 追加本轮经验增益/感悟更新到【状态】
         if _player_update_info:
@@ -5356,7 +5359,11 @@ __L4_MERGE_SLOT__
             marker = "⭐" if t.get("type") == "main" else "○"
             task_lines.append(f"{marker}{disp} {pct}% {stage}")
         task_status_display = ""  # 任务不显示在web剧情区
-        loc_time_display = f"📍{current_location} | 🕐{time_display} | 🌤{current_weather}"
+        # 从 novel_node 正则提取年份季节（如 1755年秋），拼在状态栏最前
+        _nn_text = (player_obj.novel_node if player_obj else "") or ""
+        _nn_match = re.search(r"(\d{1,4}年(?:孟|仲|季|初|深|暮)?[春夏秋冬])", _nn_text)
+        _nn_prefix = f"📅{_nn_match.group(1)} " if _nn_match else ""
+        loc_time_display = f"{_nn_prefix}📍{current_location} | 🕐{time_display} | 🌤{current_weather}"
         # 返回结果
         result = {
             "round": current_round,
