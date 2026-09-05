@@ -3,6 +3,7 @@ import time
 import json
 import hashlib
 import threading
+import re
 from collections import OrderedDict
 from typing import Optional
 import requests
@@ -231,15 +232,41 @@ def _sync_add_memory(user_id: str, content: str, category: str = "通用", meta:
         print(f"[云记忆] 写入失败[{category}]：{str(e)[:80]}")
 
 # ========== 6. 对外写入接口（带唯一ID去重） ==========
+# ---------- novel_node 时间前缀规范化 ----------
+_SEASON_ALIAS = {
+    "春": "春", "春季": "春", "春天": "春", "早春": "春", "初春": "春",
+    "仲春": "春", "暮春": "春", "晚春": "春", "深春": "春", "孟春": "春",
+    "夏": "夏", "夏季": "夏", "夏天": "夏", "初夏": "夏", "仲夏": "夏",
+    "盛夏": "夏", "暮夏": "夏", "晚夏": "夏", "孟夏": "夏",
+    "秋": "秋", "秋季": "秋", "秋天": "秋", "早秋": "秋", "初秋": "秋",
+    "仲秋": "秋", "暮秋": "秋", "晚秋": "秋", "深秋": "秋", "孟秋": "秋",
+    "冬": "冬", "冬季": "冬", "冬天": "冬", "初冬": "冬", "仲冬": "冬",
+    "暮冬": "冬", "晚冬": "冬", "深冬": "冬", "孟冬": "冬",
+}
+
+def normalize_time_prefix(novel_node: str) -> str:
+    """从 novel_node 中仅提取 'YYYY年X'(X=春/夏/秋/冬) 时间前缀，丢弃后续剧情文字。
+
+    兼容 1755年春/春季/春天/深春/早春 等各种季节修饰写法；无法识别返回空串。
+    """
+    if not novel_node:
+        return ""
+    m = re.search(r"(\d{1,4})\s*年\s*([\u4e00-\u9fa5]{0,4}?[春夏秋冬])", novel_node)
+    if not m:
+        return ""
+    year = m.group(1)
+    season = _SEASON_ALIAS.get(m.group(2), "")
+    return f"{year}年{season}" if season else ""
+
 def upload_plot_memory(user_id: str, round_num: int, plot_content: str, user_action: str, novel_node: str = ""):
     """单轮剧情上传——纯原文，去所有标签"""
     if not _module_available:
         return
-    import re
     clean_action = re.sub(r'【[^】]+】', '', user_action).strip()
     short_plot = re.sub(r'【[^】]+】', '', plot_content[:200]).strip()
-    if novel_node:
-        content = f"{novel_node}，{clean_action}。{short_plot}"
+    time_prefix = normalize_time_prefix(novel_node)
+    if time_prefix:
+        content = f"{time_prefix}，{clean_action}。{short_plot}"
     else:
         content = f"{clean_action}。{short_plot}"
     # 生成唯一ID: {user_id}_PLOT_ROUND_{round_num}
@@ -346,8 +373,9 @@ def upload_npc_memory(user_id: str, npc_name: str, memory_text: str, novel_node:
     """上传NPC个人记忆到向量库"""
     if not _module_available:
         return
-    if novel_node:
-        content = f"【{npc_name}的记忆】{novel_node}，{memory_text[:200]}"
+    time_prefix = normalize_time_prefix(novel_node)
+    if time_prefix:
+        content = f"【{npc_name}的记忆】{time_prefix}，{memory_text[:200]}"
     else:
         content = f"【{npc_name}的记忆】{memory_text[:200]}"
     # 生成唯一ID: {user_id}_NPC_MEMORY_{npc_name}_{hash(text)}
@@ -363,8 +391,9 @@ def upload_task_memory(user_id: str, task_name: str, stage_hist: str, summary: s
     """上传任务完成总结到向量库"""
     if not _module_available:
         return
-    if novel_node:
-        content = f"【任务】{task_name}：{novel_node}，{summary[:300]}"
+    time_prefix = normalize_time_prefix(novel_node)
+    if time_prefix:
+        content = f"【任务】{task_name}：{time_prefix}，{summary[:300]}"
     else:
         content = f"【任务】{task_name}：{summary[:300]}"
     # 生成唯一ID: {user_id}_TASK_MEMORY_{hash(task_name+summary)}
@@ -384,8 +413,9 @@ def upload_rumor_item(user_id: str, rumor_text: str, novel_node: str = ""):
     if not rumor_text or rumor_text.strip() in ("无", "（无）", "(无)"):
         return
     rumor_text = rumor_text.strip()
-    if novel_node:
-        content = f"【近期剧情记录】{novel_node}，{rumor_text[:200]}"
+    time_prefix = normalize_time_prefix(novel_node)
+    if time_prefix:
+        content = f"【近期剧情记录】{time_prefix}，{rumor_text[:200]}"
     else:
         content = f"【近期剧情记录】{rumor_text[:200]}"
     hash_str = hashlib.md5(f"{novel_node}_{rumor_text}".encode('utf-8')).hexdigest()[:8]

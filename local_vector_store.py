@@ -342,11 +342,37 @@ def _bg_add(user_id, content, category, meta, unique_id):
                      args=(user_id, content, category, meta, unique_id), daemon=True).start()
 
 
+# ---------- novel_node 时间前缀规范化 ----------
+_SEASON_ALIAS = {
+    "春": "春", "春季": "春", "春天": "春", "早春": "春", "初春": "春",
+    "仲春": "春", "暮春": "春", "晚春": "春", "深春": "春", "孟春": "春",
+    "夏": "夏", "夏季": "夏", "夏天": "夏", "初夏": "夏", "仲夏": "夏",
+    "盛夏": "夏", "暮夏": "夏", "晚夏": "夏", "孟夏": "夏",
+    "秋": "秋", "秋季": "秋", "秋天": "秋", "早秋": "秋", "初秋": "秋",
+    "仲秋": "秋", "暮秋": "秋", "晚秋": "秋", "深秋": "秋", "孟秋": "秋",
+    "冬": "冬", "冬季": "冬", "冬天": "冬", "初冬": "冬", "仲冬": "冬",
+    "暮冬": "冬", "晚冬": "冬", "深冬": "冬", "孟冬": "冬",
+}
+
+def normalize_time_prefix(novel_node: str) -> str:
+    """从 novel_node 中仅提取 'YYYY年X'(X=春/夏/秋/冬) 时间前缀，丢弃后续剧情文字。
+
+    兼容 1755年春/春季/春天/深春/早春 等各种季节修饰写法；无法识别返回空串。
+    """
+    if not novel_node:
+        return ""
+    m = re.search(r"(\d{1,4})\s*年\s*([\u4e00-\u9fa5]{0,4}?[春夏秋冬])", novel_node)
+    if not m:
+        return ""
+    year = m.group(1)
+    season = _SEASON_ALIAS.get(m.group(2), "")
+    return f"{year}年{season}" if season else ""
+
 def upload_plot_memory(user_id, round_num, plot_content, user_action, novel_node=""):
-    import re
     clean_action = re.sub(r'【[^】]+】', '', user_action).strip()
     short_plot = re.sub(r'【[^】]+】', '', plot_content[:200]).strip()
-    content = f"{novel_node}，{clean_action}。{short_plot}" if novel_node else f"{clean_action}。{short_plot}"
+    time_prefix = normalize_time_prefix(novel_node)
+    content = f"{time_prefix}，{clean_action}。{short_plot}" if time_prefix else f"{clean_action}。{short_plot}"
     _bg_add(user_id, content, MemoryCategory.PLOT_ROUND, {"round": round_num},
             f"{user_id}_PLOT_ROUND_{round_num}")
 
@@ -395,20 +421,16 @@ def upload_important_memory(user_id, round_num, content, score):
 
 
 def upload_npc_memory(user_id, npc_name, memory_text, novel_node=""):
-    if novel_node:
-        content = f"【{npc_name}的记忆】{novel_node}，{memory_text[:200]}"
-    else:
-        content = f"【{npc_name}的记忆】{memory_text[:200]}"
+    time_prefix = normalize_time_prefix(novel_node)
+    content = f"【{npc_name}的记忆】{time_prefix}，{memory_text[:200]}" if time_prefix else f"【{npc_name}的记忆】{memory_text[:200]}"
     hash_str = hashlib.md5(memory_text.encode('utf-8')).hexdigest()[:8]
     _bg_add(user_id, content, MemoryCategory.NPC_MEMORY, None,
             f"{user_id}_NPC_MEMORY_{npc_name}_{hash_str}")
 
 
 def upload_task_memory(user_id, task_name, stage_hist, summary, novel_node=""):
-    if novel_node:
-        content = f"【任务】{task_name}：{novel_node}，{summary[:300]}"
-    else:
-        content = f"【任务】{task_name}：{summary[:300]}"
+    time_prefix = normalize_time_prefix(novel_node)
+    content = f"【任务】{task_name}：{time_prefix}，{summary[:300]}" if time_prefix else f"【任务】{task_name}：{summary[:300]}"
     hash_input = f"{task_name}_{summary[:100]}"
     hash_str = hashlib.md5(hash_input.encode('utf-8')).hexdigest()[:8]
     _bg_add(user_id, content, MemoryCategory.TASK, None,
@@ -419,10 +441,8 @@ def upload_rumor_item(user_id, rumor_text, novel_node=""):
     if not rumor_text or rumor_text.strip() in ("无", "（无）", "(无)"):
         return
     rumor_text = rumor_text.strip()
-    if novel_node:
-        content = f"【近期剧情记录】{novel_node}，{rumor_text[:200]}"
-    else:
-        content = f"【近期剧情记录】{rumor_text[:200]}"
+    time_prefix = normalize_time_prefix(novel_node)
+    content = f"【近期剧情记录】{time_prefix}，{rumor_text[:200]}" if time_prefix else f"【近期剧情记录】{rumor_text[:200]}"
     hash_str = hashlib.md5(f"{novel_node}_{rumor_text}".encode('utf-8')).hexdigest()[:8]
     _bg_add(user_id, content, MemoryCategory.RUMOR, None,
             f"{user_id}_RUMOR_ITEM_{hash_str}")
