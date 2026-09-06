@@ -8,6 +8,7 @@ Thumbs.db
 # Secrets & env
 .env
 .env.bak
+server_config.json
 API.txt
 
 # Temp / diff scripts

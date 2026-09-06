@@ -39,6 +39,15 @@ MAIN_LOOP_API_KEY = _env(f"MAIN_LOOP_{_ml_active}_API_KEY")
 MAIN_LOOP_BASE_URL = _env(f"MAIN_LOOP_{_ml_active}_BASE_URL")
 MAIN_LOOP_MODEL = _env(f"MAIN_LOOP_{_ml_active}_MODEL")
 MAIN_LOOP_TIMEOUT = _env_int(f"MAIN_LOOP_{_ml_active}_TIMEOUT", 120)
+
+# ====== OpenCode Go 会话头（09/06 起缺 x-opencode-session 头可能被拒）======
+# 三个主循环各自独立的会话 ID；留空则该槽不发送该头。可经 web 端「系统/API预设」编辑。
+MAIN_LOOP_A_SESSION_ID = _env("MAIN_LOOP_A_SESSION_ID", "")
+MAIN_LOOP_B_SESSION_ID = _env("MAIN_LOOP_B_SESSION_ID", "")
+MAIN_LOOP_C_SESSION_ID = _env("MAIN_LOOP_C_SESSION_ID", "")
+# 按当前激活槽选择（main.py 继续使用 MAIN_LOOP_SESSION_ID，无需改动）
+MAIN_LOOP_SESSION_ID = {"A": MAIN_LOOP_A_SESSION_ID, "B": MAIN_LOOP_B_SESSION_ID, "C": MAIN_LOOP_C_SESSION_ID}.get(_ml_active, "")
+
 if not MAIN_LOOP_API_KEY:
     print(f"[config] 警告: MAIN_LOOP_{_ml_active}_API_KEY 未设置，请检查 .env")
 

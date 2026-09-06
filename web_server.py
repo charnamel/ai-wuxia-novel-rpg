@@ -3062,14 +3062,18 @@ def _build_editable_schema():
         ("img_gen", "🖼️ 配图LLM（2选1）", "IMG_GEN", ["A", "B"]),
     ]:
         fields = [{"key": f"{prefix}_ACTIVE", "label": "当前选项", "type": "select", "options": options}]
+        # 仅主循环需要 OpenCode 会话 ID（辅助/配图不走该头逻辑）
+        suffixes = [
+            ("LABEL", "标签", "text"),
+            ("API_KEY", "API Key", "password"),
+            ("BASE_URL", "Base URL", "text"),
+            ("MODEL", "模型名", "text"),
+            ("TIMEOUT", "超时(秒)", "text"),
+        ]
+        if gkey == "main_loop":
+            suffixes.append(("SESSION_ID", "OpenCode会话ID(留空不发头)", "text"))
         for opt in options:
-            for suffix, slabel, stype in [
-                ("LABEL", "标签", "text"),
-                ("API_KEY", "API Key", "password"),
-                ("BASE_URL", "Base URL", "text"),
-                ("MODEL", "模型名", "text"),
-                ("TIMEOUT", "超时(秒)", "text"),
-            ]:
+            for suffix, slabel, stype in suffixes:
                 fields.append({"key": f"{prefix}_{opt}_{suffix}", "label": f"{opt} · {slabel}", "type": stype})
         schema.append({"group": gkey, "label": glabel, "fields": fields})
 
