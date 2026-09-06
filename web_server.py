@@ -170,6 +170,7 @@ from task_manager import (
     get_task_brief_for_ai, get_active_tasks,_load_tasks,get_task_info
 )
 from llm_utils import get_llm_content
+from option_gen import clean_action_options, generate_options
 # 将当前目录加入系统路径
 sys.path.append(os.getcwd())
 
@@ -2068,6 +2069,34 @@ def chat():
         
     except Exception as e:
         return jsonify({"status": "error", "message": f"操作异常：{str(e)}"})
+
+# ======= 行动选项兜底生成（主循环未输出选项时调用）=======
+@app.route('/chat/generate_options', methods=['POST'])
+def api_generate_options():
+    """当本轮 AI 未输出【行动选项】时，用辅助模型补 3 个候选行动。
+    入参: {l1_anchor, player_action, current_goal?}
+    出参: {status: 'success', options: [...]} 或 {status: 'error'}
+    任何异常静默返回 error，不影响主流程。
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        l1 = data.get("l1_anchor", "") or ""
+        player_action = data.get("player_action", "") or ""
+        # current_goal 优先前端传，否则从缓存取
+        current_goal = data.get("current_goal", "")
+        if not current_goal:
+            try:
+                current_goal = load_context_cache().get("current_goal", "")
+            except Exception:
+                current_goal = ""
+        # L1 锚点优先前端传（末轮剧情），否则用内存里的最新剧情
+        if not l1:
+            l1 = latest_plot1_text or ""
+        opts = generate_options(l1, player_action, current_goal)
+        return jsonify({"status": "success", "options": opts})
+    except Exception as e:
+        print(f"[option_gen] 兜底接口异常: {e}")
+        return jsonify({"status": "error"})
 
 # ======= 地图系统 API 路由 =======
 @app.route('/map/get', methods=['GET'])

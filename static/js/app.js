@@ -1,5 +1,7 @@
         const output = document.getElementById('output');
         const input = document.getElementById('user_input');
+        // 行动选项状态：用于记录上一轮选项（保持与后续渲染一致）
+        let _lastOptions = [];
 
         const append = (text, cls="") => {
             const div = document.createElement('div');
@@ -501,14 +503,37 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                         taskDiv.textContent = "【任务】\n" + data.task_status;
                         output.appendChild(taskDiv);
                     }
-                    if(data.action_options) {
-                        const optDiv = document.createElement('div');
-                        optDiv.className = "change";
-                        optDiv.style.whiteSpace = "pre-wrap";
-                        optDiv.textContent = "【行动选项】\n" + data.action_options;
-                        output.appendChild(optDiv);
+                    // ===== 行动选项按钮化 =====
+                    const opts = Array.isArray(data.action_options) ? data.action_options : [];
+                    const optContainer = document.createElement('div');
+                    optContainer.className = "action-options";
+                    optContainer.style.cssText = "display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;";
+                    output.appendChild(optContainer);
+
+                    const fillInput = (text) => {
+                        input.value = '（' + text + '）';
+                        input.focus();
+                        input.scrollIntoView({block:'nearest'});
+                    };
+                    const renderBtns = (list) => {
+                        optContainer.innerHTML = '';
+                        list.forEach(opt => {
+                            const b = document.createElement('button');
+                            b.className = 'cmd-btn';
+                            b.style.cssText = 'background:#3a3a2a; border-color:#8a7a3a; color:#e8d9a0; padding:4px 10px; font-size:12px;';
+                            b.textContent = opt;
+                            b.onclick = () => fillInput(opt);
+                            optContainer.appendChild(b);
+                        });
+                    };
+
+                    if (opts.length > 0) {
+                        renderBtns(opts);
+                        _lastOptions = opts.slice();
                     }
-                    
+                    // 空选项时不再调用辅助API兜底生成，保持空白（选项仅来自主循环 AI 输出的【行动选项】）
+                    // 如需恢复辅助兜底：接口 /chat/generate_options 仍保留于 web_server.py
+
                     if(data.battle_action === "require_input") {
                         append("【系统】回合继续！请在下方的输入框中输入本回合的出招/打斗动作。", "system");
                         input.placeholder = "⚔️ 战斗中，输入招式...";

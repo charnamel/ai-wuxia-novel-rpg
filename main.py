@@ -10,6 +10,7 @@ import threading
 from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, MAIN_LOOP_SESSION_ID, CLOUD_MEM_SLOT_ID, thinking_extra_body, is_glm53, strip_think_tags, adjust_max_tokens
 from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node #导入作弊器代码
 from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
+from option_gen import clean_action_options  # 行动选项清洗（主循环解析与兜底共用）
 # ===== 骰子检定系统（最小侵入导入） =====
 import dice_system
 from dice_system import should_skip as dice_should_skip
@@ -196,7 +197,7 @@ STATIC_SYSTEM_PROMPT = """
 【道具/自身健康状态】修为/武功/新增道具/消耗道具
 【时间变更】时辰名（仅耗时动作标注；必须是十二时辰标准值之一，不得附加任何文字）
 【地点变更】新地点（仅移动时）
-【行动选项】选项1 / 选项2 / 选项3（各10字内）
+【行动选项】选项1 / 选项2 / 选项3（须贴合当前剧情、方向各异、可直接执行，避免空泛重复）
 可选【近期剧情记录】一句话本轮关键事件
 可选【任务进度】任务编号/任务名 → 进度XX%，当前阶段
 
@@ -4834,7 +4835,7 @@ __L4_MERGE_SLOT__
         - 上述【★强制剧情干预★】为本轮最高优先级，必须严格按照其内容演绎250字以内剧情，禁止替换为其它内容
         - 仍须遵守世界观、NPC人设等设定，禁止NPC做出OOC行为
         - 相关剧情人物详细参考L2、L3-1、L3-2等上述已给的所有信息
-        - 给出2-3个10字以内精简的玩家行动选项
+        - 给出2-3个贴合当前剧情、方向各异、可直接执行的玩家行动选项
         - NPC仅根据自身身份、立场与处境自然响应，禁止OOC、禁止代替玩家做决定
 {"        - 必须严格遵循上方【!系统检定·必须遵循!】中的检定结论，剧情走向必须与检定结果完全一致，禁止违背检定结论自行编造成败。" if dice_constraint else ""}
 
@@ -4857,7 +4858,7 @@ __L4_MERGE_SLOT__
         【再次强调】
         - 必须以【玩家本轮行动】为主要驱动推进250字以内的主要剧情；【L1 即时场景锚点】仅作为承接背景，禁止复制或重复L1中已描述过的剧情文字，必须根据玩家本轮行动展开新内容
         - 相关剧情人物详细参考L2、L3-1、L3-2等上述已给的所有信息
-        - 给出2-3个10字以内精简的玩家行动选项
+        - 给出2-3个贴合当前剧情、方向各异、可直接执行的玩家行动选项
         - NPC仅根据自身身份、立场与处境自然响应，禁止OOC；绝对禁止代替玩家做出任何决定、强制推进剧情、替玩家选择行动方向。
 {"        - 必须严格遵循上方【!系统检定·必须遵循!】中的检定结论，剧情走向必须与检定结果完全一致，禁止违背检定结论自行编造成败。" if dice_constraint else ""}
 
@@ -4950,19 +4951,22 @@ __L4_MERGE_SLOT__
         plot_content = ""
         npc_change_content = ""
         item_state_content = ""
-        action_options = ""  # 新增
+        action_options = []  # 清洗后的选项数组
         for idx, seg in enumerate(part_split):
             seg = seg.strip()
             if not seg:
                 continue
             if seg in ("本轮剧情", "本轮剧情内容") and idx + 1 < len(part_split):
-                plot_content = part_split[idx + 1].strip()
+                # 只取第一次匹配，防止 AI 重复输出【本轮剧情内容】标签覆盖完整正文（如"...内容完"）
+                if not plot_content:
+                    plot_content = part_split[idx + 1].strip()
             elif seg == "NPC状态变动" and idx + 1 < len(part_split):
                 npc_change_content = part_split[idx + 1].strip()
             elif seg == "道具/自身健康状态" and idx + 1 < len(part_split):
                 item_state_content = part_split[idx + 1].strip()
             elif seg == "行动选项" and idx + 1 < len(part_split):
-                action_options = part_split[idx + 1].strip()
+                action_options_raw = part_split[idx + 1].strip()
+                action_options = clean_action_options(action_options_raw)
         if not plot_content:
             print("\n⚠️ 【DEBUG 告警】触发本地剧情兜底！")
             print("⚠️ 【DEBUG 原因】正则未匹配到【本轮剧情内容】标签，或标签后无有效内容")
