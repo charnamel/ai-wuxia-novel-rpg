@@ -220,6 +220,7 @@ STATIC_SYSTEM_PROMPT = """
 14. **NPC身体状态**：一律通过 vitality_change 的HP数值体现，禁止通过文本或其它字段直接标记NPC死亡。
 15. **self_state**：主角身体/精神状态变化时填写，30字内。
 16. **novel_node**：必须以"YYYY年M季，"开头（如"1751年春，萧半和寿宴在即"）；无变化时填空字符串。
+17. **money_delta**：银两变化时填写（正数获得/收入，负数花费/失去，单位：两）。仅本轮剧情实际发生钱财收支时填写（小额打赏/食宿±1~50，酬金/赏银±50~500，大额交易/赃银±500~5000）；闲聊、赶路、练功等无交易场景一律不填。
 
 ## 禁止
 - 替玩家发言、做决定、说出玩家内心想法
@@ -863,6 +864,24 @@ BACKGROUND_STARTS = [
     "原著中", "你算了算日子", "你回忆起", "你你",
     "你心中暗", "你暗自", "你默念", "你心想",
 ]
+# ===== 银两结算（工具优先+正则兜底，对齐HP/MP双管线）=====
+MONEY_MAX_DELTA = 5000        # 单轮银两变化量上限（防AI乱写）
+_MONEY_NUM = r"[+−-]?\d+"
+_MONEY_REGEX = re.compile(r"【金钱结算】\s*(" + _MONEY_NUM + r")\s*两?\s*(?:[（(][^）)]*[）)])?")
+
+
+def parse_money_regex(reply_text):
+    """解析正文【金钱结算】兜底行（仅工具未上报 money_delta 时调用）。
+    兼容全角减号、'两'可省略、数字后括号注释，如【金钱结算】-50两（付了酒钱）"""
+    if not reply_text:
+        return None
+    m = _MONEY_REGEX.search(str(reply_text))
+    if not m:
+        return None
+    try:
+        return int(m.group(1).replace("−", "-"))
+    except ValueError:
+        return None
 # ===== add_milestone 先定义 =====
 def add_milestone(cache, text):
     if "milestones" not in cache:
@@ -3290,6 +3309,8 @@ def init_player():
             player.overall_martial_level = "初窥门径"
         if "age" not in player._data:
             player._data["age"] = 0
+        if "money" not in player._data:
+            player._data["money"] = 20
         player.save()
         set_player(player)
         return player
@@ -3587,6 +3608,23 @@ world_data = load_json(WORLD_FILE) or {}
 npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
 
 # ===================== 核心交互函数（Web & 命令行共用） =====================
+def _build_passive_recall_context(player_text, interact_logs, max_char=None):
+    """方案B：被动检索统一参照 = 玩家消息 + 最近3轮GM【本轮剧情内容】（纯规则、0成本）。
+    供被动①NPC记忆与被动②L4召回共用，保证两池的检索 query 参照完全一致。
+    仅剥离【本轮剧情内容】正文，去掉标签噪声；默认完整保留（不截断三轮剧情），
+    仅在显式传入 max_char 时才截尾。"""
+    parts = [(player_text or "").strip()]
+    recent = (interact_logs or [])[-3:]
+    for log in recent:
+        m = re.search(r"【本轮剧情(?:内容)?】\s*(.*?)(?=\n【|$)", log, re.S)
+        if m and m.group(1).strip():
+            parts.append(m.group(1).strip())
+    ctx = " ".join(parts).strip()
+    if max_char and len(ctx) > max_char:
+        ctx = ctx[:max_char]
+    return ctx
+
+
 def process_one_round(user_input: str, is_web: bool = False):
       
      # Web端入口加锁，超时30秒防死锁
@@ -3897,6 +3935,11 @@ def process_one_round(user_input: str, is_web: bool = False):
                         "location": {
                             "type": "string",
                             "description": "地点变更，仅移动时填写新地点全称，未移动时填空字符串"
+                        },
+                        # ========== 新增：银两字段 ==========
+                        "money_delta": {
+                            "type": "integer",
+                            "description": "银两变化量（正数获得/收入，负数花费/失去，单位：两）。仅本轮剧情实际涉及银两收支时填写；闲聊、赶路、练功等无交易场景一律省略。数值须与剧情对应：小额打赏/食宿±1~50，酬金/赏银±50~500，大额交易/赃银±500~5000"
                         }
                     },
                     "required": ["skill_exp_gain"]   # 至少需要提供这个空数组
@@ -4114,11 +4157,13 @@ def process_one_round(user_input: str, is_web: bool = False):
         for name in active_names:
             if name not in mentioned_npcs:
                 mentioned_npcs.append(name)
-        # 提取输入中的关键词用于NPC检索
-        _stop = {"说道","谁能","咱们","其实","只是","哈哈","然后","现在","这里","那里","什么","怎么","大家","各位","那个","这个","于是","忽然","便道","笑道","问道","又道","一声","一眼","一时","一阵","一下","之类","似的"}
-        _words = re.split(r'[，。！？、；：""''（）()\s]+', stripped_input)
-        _kw = [w for w in _words if len(w) >= 3 and w not in _stop]
-        _kw_text = " ".join(_kw[:6]) if _kw else stripped_input[:30]
+        # 方案B①：被动检索统一参照 = 玩家消息 + 近3轮GM【本轮剧情内容】（纯规则）
+        _recent_ctx = _build_passive_recall_context(force_plot if force_plot_active else stripped_input, interact_logs)
+        _kw_text = _recent_ctx  # NPC记忆检索的 query 参照
+        # 扩候选：近3轮剧情中已出现但玩家未点名的NPC也纳入回忆（白名单、去重、纯substring判定）
+        for _n in all_npc_names:
+            if _n and len(_n) >= 2 and _n not in mentioned_npcs and _n in _recent_ctx:
+                mentioned_npcs.append(_n)
         for npc_name in mentioned_npcs[:5]:
             mem_result = get_relevant_history(
                 user_id=CLOUD_MEM_SLOT_ID,
@@ -4367,6 +4412,7 @@ def process_one_round(user_input: str, is_web: bool = False):
 ・武学：{skills_compact} ← 仅玩家当面施展时NPC才能提及
 ・随身装备：{equipped_str} ← 随身佩戴的武器/防具/物品，比行李内物品更显眼，但未主动展示时NPC仍可能不知
 ・物品（行李）：{item_str} ← 正常藏在行李中，除非特殊剧情需要取出展示，否则NPC不可知
+・银两：{player_obj.money}两 ← 随身钱财，NPC不可全知（当面露财/被搜刮除外）
 ・名气：{rep_title}（{rep_value}） ← 可被江湖见闻提及
 ──以下信息NPC可能知道──
 ・年龄：{_age_display} ← 江湖可打听的公开信息
@@ -4439,7 +4485,8 @@ def process_one_round(user_input: str, is_web: bool = False):
 
 # ===== 向量检索 L4 相关历史线索 =====
         # 检索用文本：强制剧情模式下去掉!!前缀，避免污染向量检索
-        query_text = force_plot if force_plot_active else stripped_input
+        # 方案B②：L4 检索参照与被动①统一 = 玩家消息 + 近3轮GM【本轮剧情内容】
+        query_text = _build_passive_recall_context(force_plot if force_plot_active else stripped_input, interact_logs)
         # L4 双通道：CHAPTER取最高1条 + PLOT_ROUND取最高1条（云端召回2条，按score降序取前1）
         relevant_l4_nodes = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
@@ -4653,23 +4700,21 @@ def process_one_round(user_input: str, is_web: bool = False):
 ・地点：{current_location}
 ・天气：{current_weather}
 ・日期：{novel_node_info}
-
+・当前活跃NPC状态（好感/态度/状态，静态档案见下方世界书检索）
+{npc_info}
 
 {_task_display}
 {character_panel}
 {_vitality_section}
 
-【*L4-1 NPC个人记忆*】
+【*L4-1 相关历史记忆*】
 {_npc_mem_display}
 __NPC_MEM_MERGE_SLOT__
-【*当前活跃NPC状态*】（好感/态度/状态，静态档案见下方世界书检索）
-{npc_info}
-
+__L4_MERGE_SLOT__
 
 {_SEP}
 
-【*L4-2 历史剧情线索*】
-__L4_MERGE_SLOT__
+【*L4-2 世界书背景知识*】
 {_wb_display}{_special_block}{_SEP}"""
 
         # 如果有战斗接续，附加到动态信息
@@ -5130,6 +5175,37 @@ __L4_MERGE_SLOT__
                 }
                 player_obj.save()
 
+        # ===== 银两结算（工具优先 + 正则兜底，对齐HP/MP双管线）=====
+        _money_delta = None
+        if tool_calls:
+            for tc in tool_calls:
+                if tc.function.name == "update_game_state":
+                    try:
+                        _mtargs = json.loads(tc.function.arguments)
+                        if "money_delta" in _mtargs:
+                            _money_delta = _mtargs.get("money_delta")
+                            break
+                    except Exception:
+                        pass
+        if _money_delta is None:
+            _money_delta = parse_money_regex(reply)
+        if _money_delta is not None:
+            try:
+                _md = int(_money_delta)
+            except (TypeError, ValueError):
+                _md = None
+            if _md is not None and _md != 0:
+                _md = max(-MONEY_MAX_DELTA, min(MONEY_MAX_DELTA, _md))
+                if player_obj:
+                    player_obj.money = player_obj.money + _md  # setter 已钳下限0
+                    player_obj.save()
+                    _sign = "+" if _md > 0 else ""
+                    _money_log = f"💰银两结算：{_sign}{_md}两"
+                    print(f"{COLOR_GREEN}{_money_log}{COLOR_END}")
+                    # ★ 先剥离AI正文里自带的兜底行（防重复），再追加正式结算 ★
+                    plot_content = re.sub(r'【金钱结算】[^\n]*\n?', '', plot_content).rstrip()
+                    plot_content = f"{plot_content}\n{_money_log}"
+
         # ===== 特效挂载日志拼入剧情（网页可见，含1轮特效的当轮挂载提示） =====
         try:
             _mount_log_txt = (_dc_check_result or {}).get("effect_mount_log")
@@ -5390,6 +5466,7 @@ __L4_MERGE_SLOT__
             item_lines.append(f"状态：{player_disp.self_state}")
             if player_disp.age and player_disp.age > 0:
                 item_lines.append(f"年龄：{player_disp.age}岁")
+            item_lines.append(f"银两：{player_disp.money}两")
         item_status_display = "\n".join(item_lines) if item_lines else "无变化"
         # 追加本轮经验增益/感悟更新到【状态】
         if _player_update_info:

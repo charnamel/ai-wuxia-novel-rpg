@@ -163,7 +163,8 @@ class Player:
                 "bottleneck_level": 0,
                 "bottleneck_progress": 0,
                 "bottleneck_ready": False,
-                "reputation": 0
+                "reputation": 0,
+                "money": 20
             }
             if self._data.get("core_ability"):
                 self._data["martial_skill_list"] = [{
@@ -294,6 +295,21 @@ class Player:
             self._data["reputation"] = int(value)
         except (ValueError, TypeError):
             self._data["reputation"] = 0
+
+    @property
+    def money(self):
+        # 银两（整数，单位：两，下限0；旧档无字段按初始20两）
+        try:
+            return int(self._data.get("money", 20))
+        except (TypeError, ValueError):
+            return 20
+
+    @money.setter
+    def money(self, value):
+        try:
+            self._data["money"] = max(0, int(value))
+        except (TypeError, ValueError):
+            self._data["money"] = 0
 
     @property
     def rumor_list(self):
