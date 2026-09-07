@@ -182,7 +182,7 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
             query=query[:100],
             top_k=_L4_TOP_K,
             min_score=_MIN_SCORE,
-            category_filter=[MemoryCategory.CHAPTER, MemoryCategory.RUMOR],
+            category_filter=[MemoryCategory.CHAPTER, MemoryCategory.RUMOR, MemoryCategory.PLOT_ROUND],
         )
         results["l4"] = l4_result or ""
         results["l4_count"] = len([l for l in (l4_result or "").split("\n") if re.match(r'^\d+\.', l.strip())])

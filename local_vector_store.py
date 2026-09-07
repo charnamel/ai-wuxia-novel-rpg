@@ -49,6 +49,7 @@ _META_FILE = os.path.join(_DATA_DIR, "local_memory_meta.json")
 _MODEL_NAME = (os.getenv("LOCAL_MEMORY_MODEL", "") or "").strip() or "BAAI/bge-small-zh-v1.5"
 _ENCODE_BATCH = 64          # 批量重建向量时的批大小（避免内存尖峰）
 _SAVE_EVERY = 8             # 攒N条落盘一次（迁移提速；进程退出前强制落盘）
+_MODEL_ERROR_TTL = 60       # 模型加载失败冻结期(秒)：超时自动解冻重试，防一过性失败永久固化
 
 # ========== L4 业务分类常量（值与 cloud_memory_v2.MemoryCategory 完全一致） ==========
 class MemoryCategory:
@@ -63,6 +64,52 @@ class MemoryCategory:
     NPC_MEMORY = "npc_memory"
 
 
+# ========== 写入侧字段提取 + 检索评分奖励（行业级记忆生命周期：情景/语义二分） ==========
+_NPC_ACTIVE_CAP = 100   # 同NPC保留最新N条 active，超出标 archived（磁盘不删、检索降位）
+_DEFAULT_YEAR = 1750    # 无日期老数据统一回填 1750 年（时间戳设计变更前的最早时期）
+_SEASON_ORDER = {"春": 0, "夏": 1, "秋": 2, "冬": 3}
+_NPC_ENTITY_RE = re.compile(r"^【(.+?)的记忆】")
+_TASK_ENTITY_RE = re.compile(r"^【任务】([^：:]{2,30})[：:]")
+_DATE_RE = re.compile(r"(\d{1,4})\s*年\s*[\u4e00-\u9fa5]{0,4}?([春夏秋冬])")
+
+
+def _extract_entry_fields(content, category):
+    """从 content 提取 (entity, year, season)。解析不出返回 (None, None, None)。"""
+    text = str(content or "")
+    entity = None
+    if category == MemoryCategory.NPC_MEMORY:
+        m = _NPC_ENTITY_RE.match(text)
+        entity = m.group(1).strip() if m else None
+    elif category == MemoryCategory.TASK:
+        m = _TASK_ENTITY_RE.match(text)
+        entity = m.group(1).strip() if m else None
+    year = season = None
+    m = _DATE_RE.search(text)
+    if m:
+        try:
+            y = int(m.group(1))
+            if 1000 <= y <= 2200:
+                year, season = y, _SEASON_ORDER[m.group(2)]
+        except ValueError:
+            pass
+    return entity, year, season
+
+
+def _rank_bonus(entry, latest):
+    """检索加法奖励（不改门槛，只改排序）：active +0.05；非章节且有日期者按与
+    库内最新日期的季节距离线性衰减，封顶 +0.10（5年衰减到0）。
+    新旧总差距封顶 0.15：相似度差距 >0.15 时语义相关性永远赢——刻骨铭心的旧事忘不掉。"""
+    bonus = 0.05 if entry.get("status", "active") == "active" else 0.0
+    y = entry.get("year")
+    if latest and y and entry.get("category") != MemoryCategory.CHAPTER:
+        dist = (latest[0] - y) * 4 + (latest[1] - (entry.get("season") or 0))
+        if dist <= 0:
+            bonus += 0.10
+        elif dist < 20:  # 20个季节 = 5年
+            bonus += 0.10 * (20 - dist) / 20
+    return bonus
+
+
 # ========== 存储核心 ==========
 class _LocalStore:
     def __init__(self):
@@ -73,7 +120,11 @@ class _LocalStore:
         self._vectors = None       # np.ndarray (N, D) float32 已归一化
         self._model = None
         self._model_error = None
-        self._dirty_count = 0      # 未落盘条数计数
+        self._model_error_at = 0.0      # 模型加载失败时间戳（TTL 解冻重试用）
+        self._last_write_fail_log = 0.0  # 写入失败限频告警时间戳（60秒最多1条防刷屏）
+        self._dirty_count = 0      # 未落盘条目计数
+        self._entries_dirty = False   # 条目状态变更（archived）待重写标记
+        self._latest_date_by_user = {}  # {user_id: (year, season)} 库内最新游戏日期（新近奖励基准/无日期继承源）
         self._load()
 
     # ---------- 持久化 ----------
@@ -103,6 +154,8 @@ class _LocalStore:
             self._vectors = self._vectors[:n]
             self._entries = self._entries[:n]
             self._ids = {e["unique_id"] for e in self._entries}
+        # 扫描库内最新游戏日期（新近奖励基准；无日期新条目的继承源）
+        self._scan_latest_dates_locked()
         # 模型哈希校验（防换模型后旧向量静默不兼容）
         meta = {}
         if os.path.exists(_META_FILE):
@@ -115,14 +168,32 @@ class _LocalStore:
                   f"建议运行迁移脚本重建，否则检索质量会劣化")
         print(f"[本地记忆] 已加载 {len(self._entries)} 条记忆，模型={_MODEL_NAME}")
 
+    def _scan_latest_dates_locked(self):
+        """全量扫描各用户最新游戏日期（调用方须持有锁/初始化期）"""
+        for e in self._entries:
+            y = e.get("year")
+            if y:
+                key = (y, e.get("season") or 0)
+                cur = self._latest_date_by_user.get(e["user_id"])
+                if cur is None or key > cur:
+                    self._latest_date_by_user[e["user_id"]] = key
+
     def _save_meta(self):
         with open(_META_FILE, "w", encoding="utf-8") as f:
             json.dump({"model": _MODEL_NAME, "count": len(self._entries), "updated": time.time()}, f)
 
     def _flush_locked(self):
-        """落盘（调用方须持有锁）"""
-        with open(_VECTORS_FILE, "wb") as f:
-            np.save(f, self._vectors)
+        """落盘（调用方须持有锁）。条目状态有变更时原子重写 JSONL（archived 持久化）"""
+        if self._entries_dirty:
+            tmp = _ENTRIES_FILE + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                for e in self._entries:
+                    f.write(json.dumps(e, ensure_ascii=False) + "\n")
+            os.replace(tmp, _ENTRIES_FILE)
+            self._entries_dirty = False
+        if self._vectors is not None:
+            with open(_VECTORS_FILE, "wb") as f:
+                np.save(f, self._vectors)
         self._save_meta()
         self._dirty_count = 0
 
@@ -130,11 +201,14 @@ class _LocalStore:
     def _load_model(self):
         """加载模型（阻塞，服务器上约30-60秒）。只持有模型锁——加载期间检索/写入完全不受影响。
         调用方：后台预热线程 / 写入线程 / 重建接口。检索路径绝不调用本方法（防请求超时拖死worker）。
-        失败缓存于 _model_error：由预热线程清除后自动重试（一过性故障自愈）。"""
-        if self._model is not None or self._model_error:
+        失败缓存于 _model_error 并冻结 _MODEL_ERROR_TTL 秒（防重试风暴）；超时自动解冻重试，
+        预热线程清除错误标记后亦立即重试——一过性故障无需人工干预。"""
+        if self._model is not None:
+            return self._model
+        if self._model_error and (time.time() - self._model_error_at) < _MODEL_ERROR_TTL:
             return self._model
         with self._model_lock:
-            if self._model is not None or self._model_error:
+            if self._model is not None:
                 return self._model
             try:
                 t0 = time.time()
@@ -149,11 +223,20 @@ class _LocalStore:
                 from sentence_transformers import SentenceTransformer
                 self._model = SentenceTransformer(_MODEL_NAME, device="cpu")
                 self._model_error = None
+                self._model_error_at = 0.0
                 print(f"[本地记忆] 模型加载完成: {_MODEL_NAME} ({time.time()-t0:.1f}s)")
             except Exception as e:
                 self._model_error = str(e)
+                self._model_error_at = time.time()
                 print(f"[本地记忆] 模型加载失败: {str(e)[:120]}")
             return self._model
+
+    def _log_write_fail(self):
+        """写入丢弃限频告警（60秒最多1条；模型预热期不刷屏，但不再静默丢数据）"""
+        now = time.time()
+        if now - self._last_write_fail_log > 60:
+            self._last_write_fail_log = now
+            print(f"[本地记忆] 警告：记忆写入被丢弃（模型未就绪），60秒内自动重试恢复")
 
     def _encode(self, texts):
         """单条或批量编码，返回归一化向量 (N, D)。不触发模型加载——未就绪直接返回 None"""
@@ -185,19 +268,33 @@ class _LocalStore:
         self._load_model()
         vec = self._encode(content)  # 锁外编码（数十毫秒）
         if vec is None:
+            self._log_write_fail()
             return False
+        entity, year, season = _extract_entry_fields(content, category)
         with self._lock:
             if unique_id in self._ids:  # 锁内二次查重（等待期间可能被并发写入抢先）
                 return False
             entry = {"unique_id": unique_id, "user_id": user_id,
                      "content": str(content).strip(), "category": category,
-                     "meta": meta or {}}
+                     "meta": meta or {},
+                     "entity": entity, "status": "active", "year": year, "season": season}
+            # 无日期条目继承库内最新游戏日期（防新条目被误判为远古而遭新近惩罚）
+            if year is None:
+                inherited = self._latest_date_by_user.get(user_id)
+                if inherited:
+                    entry["year"], entry["season"] = inherited
+            else:
+                key = (year, season if season is not None else 0)
+                cur = self._latest_date_by_user.get(user_id)
+                if cur is None or key > cur:
+                    self._latest_date_by_user[user_id] = key
             self._entries.append(entry)
             self._ids.add(unique_id)
             if self._vectors is None:
                 self._vectors = vec
             else:
                 self._vectors = np.vstack([self._vectors, vec])
+            self._apply_lifecycle_locked(entry)
             # jsonl 追加
             with open(_ENTRIES_FILE, "a", encoding="utf-8") as f:
                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -205,6 +302,34 @@ class _LocalStore:
             if self._dirty_count >= _SAVE_EVERY:
                 self._flush_locked()
             return True
+
+    def _apply_lifecycle_locked(self, entry):
+        """写入后生命周期（调用方须持有锁）：
+        NPC记忆——同实体保留最新 _NPC_ACTIVE_CAP 条 active，超出标 archived；
+        任务记录——同实体新条目入库时旧条目标 archived（状态演进，旧状态仍可检索）。"""
+        entity = entry.get("entity")
+        if not entity:
+            return
+        cat, uid = entry["category"], entry["user_id"]
+        changed = False
+        if cat == MemoryCategory.NPC_MEMORY:
+            pairs = [(i, e) for i, e in enumerate(self._entries)
+                     if e["user_id"] == uid and e["category"] == cat
+                     and e.get("entity") == entity and e.get("status", "active") == "active"]
+            if len(pairs) > _NPC_ACTIVE_CAP:
+                pairs.sort(key=lambda p: (p[1].get("year") or _DEFAULT_YEAR,
+                                          p[1].get("season") or 0, p[0]))
+                for _, e in pairs[:len(pairs) - _NPC_ACTIVE_CAP]:
+                    e["status"] = "archived"
+                    changed = True
+        elif cat == MemoryCategory.TASK:
+            for e in self._entries:
+                if (e is not entry and e["user_id"] == uid and e["category"] == cat
+                        and e.get("entity") == entity and e.get("status", "active") == "active"):
+                    e["status"] = "archived"
+                    changed = True
+        if changed:
+            self._entries_dirty = True
 
     def add_many(self, items):
         """批量写入（迁移用）：[{user_id, content, category, meta, unique_id}]，分批encode，返回新增数"""
@@ -219,6 +344,7 @@ class _LocalStore:
         texts = [str(it["content"]).strip() for it in new_items]
         vecs = self._encode(texts)
         if vecs is None:
+            self._log_write_fail()
             return 0
         with self._lock:
             # 锁内二次去重（可能被并发写入抢先）
@@ -228,12 +354,25 @@ class _LocalStore:
                 return 0
             with open(_ENTRIES_FILE, "a", encoding="utf-8") as f:
                 for it, v in pending:
+                    entity, year, season = _extract_entry_fields(it["content"], it["category"])
                     entry = {"unique_id": it["unique_id"], "user_id": it["user_id"],
                              "content": str(it["content"]).strip(), "category": it["category"],
-                             "meta": it.get("meta") or {}}
+                             "meta": it.get("meta") or {},
+                             "entity": entity, "status": "active", "year": year, "season": season}
+                    if year is None:
+                        inherited = self._latest_date_by_user.get(it["user_id"])
+                        if inherited:
+                            entry["year"], entry["season"] = inherited
+                    else:
+                        key = (year, season if season is not None else 0)
+                        cur = self._latest_date_by_user.get(it["user_id"])
+                        if cur is None or key > cur:
+                            self._latest_date_by_user[it["user_id"]] = key
                     self._entries.append(entry)
                     self._ids.add(it["unique_id"])
                     f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            for entry in self._entries[-len(pending):]:
+                self._apply_lifecycle_locked(entry)
             mat = np.vstack([v.reshape(1, -1) for _, v in pending])
             self._vectors = mat if self._vectors is None else np.vstack([self._vectors, mat])
             self._flush_locked()
@@ -241,7 +380,7 @@ class _LocalStore:
 
     def flush(self):
         with self._lock:
-            if self._dirty_count > 0:
+            if self._dirty_count > 0 or self._entries_dirty:
                 self._flush_locked()
 
     # ---------- 检索 ----------
@@ -267,17 +406,22 @@ class _LocalStore:
             return "", []
         sims = sub_matrix @ qv.T  # (n, 1)
         sims = sims[:, 0]
-        order = np.argsort(-sims)
+        # ---- 门槛：按原始相似度先过滤（与排名解耦，防高分加成条目误杀后续达标候选）----
+        mask = sims >= min_score
+        if not mask.any():
+            return "", []
+        # ---- 加法评分：排名 = 原始相似度 + 新近奖励(≤+0.10) + 状态奖励(active+0.05) ----
+        latest = self._latest_date_by_user.get(user_id)
+        final = sims + np.array([_rank_bonus(e, latest) for e in entries_snapshot], dtype=sims.dtype)
+        order = np.where(mask)[0]
+        order = order[np.argsort(-final[order])][:top_k]
 
         nodes = []
-        for idx in order[:top_k]:
-            score = float(sims[idx])
-            if score < min_score:
-                break
+        for idx in order:
             e = entries_snapshot[idx]
             nodes.append({"content": e["content"], "category": e["category"],
                           "meta_data": {"category": e["category"], **(e.get("meta") or {})},
-                          "score": score})
+                          "score": float(final[idx])})
         if not nodes:
             return "", []
 
@@ -293,16 +437,21 @@ class _LocalStore:
 
     def status(self):
         cats = {}
+        archived = 0
         for e in self._entries:
             cats[e["category"]] = cats.get(e["category"], 0) + 1
+            if e.get("status") == "archived":
+                archived += 1
         return {
-            "available": self._model is not None or self._model_error is None,
+            "available": self._model is not None,  # 可用=模型就绪（加载中为False，防误用）
             "model_ready": self._model is not None,
             "model_loading": self._model is None and self._model_error is None,
             "model": _MODEL_NAME,
             "model_error": self._model_error,
             "count": len(self._entries),
             "categories": cats,
+            "archived": archived,
+            "active": len(self._entries) - archived,
         }
 
 
@@ -502,18 +651,32 @@ def rebuild_vectors():
     vecs = _store._encode([e["content"] for e in entries])
     if vecs is None:
         raise RuntimeError("模型不可用，无法重编码")
-    # 3. 锁内合并：编码期间新增的条目（在内存但不在磁盘快照）追加编码后原子替换
+    # 3. 锁内快照 extra → 锁外编码（不持数据锁，数十秒不阻塞读写）→ 锁内原子合并
     with _store._lock:
         extra = [e for e in _store._entries if e["unique_id"] not in disk_ids]
-        if extra:
-            extra_vecs = _store._encode([e["content"] for e in extra])
-            if extra_vecs is not None:
-                vecs = np.vstack([vecs, extra_vecs])
-                entries = entries + extra
+    if extra:
+        extra_vecs = _store._encode([e["content"] for e in extra])  # 锁外
+        if extra_vecs is None:
+            # 模型中途失效：放弃本次重建（内存/磁盘数据均未动），带出真实原因
+            raise RuntimeError("模型中途不可用，已放弃本次重建（数据未动）")
+        vecs = np.vstack([vecs, extra_vecs])
+        entries = entries + extra
+    with _store._lock:
+        # 编码期间又有新写入（不在磁盘快照也不在extra快照）：量小，锁内补编码（毫秒级）
+        extra_ids = {e["unique_id"] for e in extra}
+        newer = [e for e in _store._entries
+                 if e["unique_id"] not in disk_ids and e["unique_id"] not in extra_ids]
+        if newer:
+            nv = _store._encode([e["content"] for e in newer])
+            if nv is not None:
+                vecs = np.vstack([vecs, nv])
+                entries = entries + newer
         _store._entries = entries
         _store._ids = {e["unique_id"] for e in entries}
         _store._vectors = vecs
         _store._dirty_count = 0
+        _store._entries_dirty = False
+        _store._scan_latest_dates_locked()
         # 重写条目文件（清掉历史重复行/孤儿行，保证磁盘条目数=向量数，重启不再告警）
         with open(_ENTRIES_FILE, "w", encoding="utf-8") as f:
             for e in entries:
