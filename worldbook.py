@@ -242,6 +242,11 @@ def _build_npc_entries(npc_data):
         if year:
             content_bits.append(f"生于：{year}年")
 
+        # v5: 追加原著隐秘（【!…!】暗线标记：隐藏信息 + 游戏可按剧情改编，非铁律）
+        _secret = str(npc.get("secret") or "").strip()
+        if _secret:
+            content_bits.append(f"【!原著隐秘!】{_secret[:80]}")
+
         # v2: 追加武功简要（最多4门主要武功）
         if isinstance(martial_skills, list) and martial_skills:
             skill_briefs = []

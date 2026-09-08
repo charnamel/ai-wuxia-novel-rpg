@@ -101,11 +101,11 @@ def check_d20(modifier: int = 0, dc: int = 10,
         rolls = [random.randint(1, 20), random.randint(1, 20)]
         natural = max(rolls) if advantage else min(rolls)
         mode = "kh1" if advantage else "kl1"
-        formula = f"2d20{mode}{modifier:+d}" if modifier else f"2d20{mode}"
+        formula = f"2d20{mode}{modifier:+g}" if modifier else f"2d20{mode}"
     else:
         rolls = [random.randint(1, 20)]
         natural = rolls[0]
-        formula = f"d20{modifier:+d}" if modifier else "d20"
+        formula = f"d20{modifier:+g}" if modifier else "d20"
 
     total = natural + modifier
 
@@ -310,12 +310,13 @@ def clear_web_state_v4():
 
 # ---- V4 8档分级判定表 ----
 # (min_delta, grade, name, narrative_template)
-# V4: 正态形区间——4/5档最宽(中心),3/6档次之,2/7档收窄,1/8档±18帽
-# 中间档位在典型对局(s=-4~-9)中高频出现,极端档位留给nat特判与境界差直通
+# V4: 正态形区间——4/5档最宽(中心),3/6档次之,2/7档收窄,1/8档帽
+# V5.1: DC表重标(斜率3/上限40)后同级delta中心下移~6点,1/2/3档阈值联动下移6(18→12/14→8/8→2)
+# 4档保持delta≥0不动(成败线:delta≥0=骰子成功,档位口吻与面板成败严格一致);5~8档原封不动
 _DELTA_GRADE_TABLE = [
-    (18,    1, "完美碾压", "超凡入化,如有神助——招式威力远超平常,对手门户大开毫无还手之力,正是施展压箱底绝学的时机(程序将直挂武学特效)"),
-    (14,    2, "超常发挥", "行云流水,一气呵成,远超平时水准,目标顺利达成且占尽先手——正是趁势施展绝学的良机(程序将随机挂载武学特效)"),
-    (8,     3, "正常发挥", "得心应手,招式熟练,符合自身预期水准,一切按部就班"),
+    (12,    1, "完美碾压", "超凡入化,如有神助——招式威力远超平常,对手门户大开毫无还手之力,正是施展压箱底绝学的时机(程序将直挂武学特效)"),
+    (8,     2, "超常发挥", "行云流水,一气呵成,远超平时水准,目标顺利达成且占尽先手——正是趁势施展绝学的良机(程序将随机挂载武学特效)"),
+    (2,     3, "正常发挥", "得心应手,招式熟练,符合自身预期水准,一切按部就班"),
     (0,     4, "差强人意", "成败只在毫厘之间,勉强撑住场面未落下风,但过程波折频频,有可能无功而返"),
     (-7,    5, "功亏一篑", "差距显现,功力稍欠火候,主要目标未能达成,但尚有余力自保,全身而退"),
     (-13,   6, "拙于应对", "应对失当,招式生涩,破绽频出,目标落空,且自身挂彩受伤"),
@@ -335,6 +336,8 @@ ATTACK_CATEGORIES = {"sword", "blade", "palm", "staff", "finger", "hidden", "fis
 # 增幅率分母（控制增幅范围：内功总值-1~+12 → 增幅率-4%~52%）
 # V3: 从20调到25,降低增幅约20%
 _AMPLIFY_DIVISOR = 25
+# V5.1 增幅总值封顶：末段境界增幅滚雪球会顶穿DC上限,超出部分不计入总修正
+_AMPLIFY_CAP = 10
 
 
 def _fair_round(x):
@@ -358,8 +361,8 @@ def _compute_amplify_rate(support_skill_info: dict) -> float:
     """
     if not support_skill_info:
         return 0.0
-    bonus = int(support_skill_info.get("bonus", 0))
-    realm_bonus = int(support_skill_info.get("realm_bonus", 0))
+    bonus = float(support_skill_info.get("bonus", 0))
+    realm_bonus = float(support_skill_info.get("realm_bonus", 0))
     rate = (bonus + realm_bonus) / _AMPLIFY_DIVISOR
     print(f"  [增幅DEBUG] {support_skill_info.get('skill_name','')}: bonus={bonus} + realm_bonus={realm_bonus} → 增幅率={rate:.1%}")
     return rate
@@ -418,6 +421,8 @@ def compute_amplify_bonus(attack_total: int,
         detail["light_name"] = light_info.get("skill_name", "")
         print(f"  [增幅DEBUG] 轻功·{detail['light_name']}: {attack_total} × {rate:.1%}(减半) = {attack_total*rate:.2f} → 增幅值={amp}")
 
+    # V5.1 增幅封顶：+10（末段境界防滚雪球，超出部分不计入总修正）
+    total_amplify = min(total_amplify, _AMPLIFY_CAP)
     print(f"  [增幅DEBUG] 增幅总计: +{total_amplify}")
 
     return total_amplify, detail
@@ -1185,12 +1190,12 @@ def _fallback_dc(user_action: str) -> int:
 
 
 def _clamp_dc(dc: int) -> int:
-    """DC范围校验，限制到[5, 30]"""
+    """DC范围校验，限制到[5, 40]"""
     try:
         dc = int(dc)
     except (ValueError, TypeError):
         return 12
-    return max(5, min(30, dc))
+    return max(5, min(40, dc))
 
 
 def _vit_text_for_npc(npc: dict, player_name: str = None) -> str:
@@ -1330,11 +1335,12 @@ def build_target_npc_line(npc: dict, player_name: str = None) -> str:
 
 # ========== V5 分量制 DC：AI 分项给值，程序加总 ==========
 # 境界 → 基础DC 对照表（与提示词中的参考一致，用于交叉校验 AI 是否自洽）
+# V5.1 C方案：斜率3/境、上限40——同级对决胜率压至60-70%
 REALM_DC_TABLE = {
-    "无武功": 5, "初学入门": 7, "初窥门径": 9, "略有小成": 11, "略有所成": 13,
-    "渐入佳境": 15, "融会贯通": 17, "登堂入室": 19, "炉火纯青": 21,
-    "出神入化": 23, "登峰造极": 25, "超凡入圣": 27, "返璞归真": 28,
-    "天人合一": 29, "破碎虚空": 30,
+    "无武功": 5, "初学入门": 8, "初窥门径": 11, "略有小成": 14, "略有所成": 17,
+    "渐入佳境": 20, "融会贯通": 23, "登堂入室": 26, "炉火纯青": 29,
+    "出神入化": 32, "登峰造极": 35, "超凡入圣": 38, "返璞归真": 40,
+    "天人合一": 40, "破碎虚空": 40,
 }
 
 _REALM_ENUM = list(REALM_DC_TABLE.keys())
@@ -1365,8 +1371,8 @@ DC_COMPONENT_TOOL = {
                     "description": "对手当前实际境界（档案是巅峰数据，须按场景上下文修正：受伤/年迈/初学→降档，奇遇/发威→升档）。日常行动填'无武功'",
                 },
                 "base_dc": {
-                    "type": "integer", "minimum": 5, "maximum": 30,
-                    "description": "基础难度DC。对战=对手当前实际境界对应值(无武功5/初学入门7/初窥门径9/略有小成11/略有所成13/渐入佳境15/融会贯通17/登堂入室19/炉火纯青21/出神入化23/登峰造极25/超凡入圣27/返璞归真28/天人合一29/破碎虚空30)。日常=行动固有难度(喝水吃饭5/普通施展10/演练熟练12/演练生疏14/突破瓶颈16/疗重伤20)",
+                    "type": "integer", "minimum": 5, "maximum": 40,
+                    "description": "基础难度DC。对战=对手当前实际境界对应值(无武功5/初学入门8/初窥门径11/略有小成14/略有所成17/渐入佳境20/融会贯通23/登堂入室26/炉火纯青29/出神入化32/登峰造极35/超凡入圣38/返璞归真40/天人合一40/破碎虚空40)。日常=行动固有难度(喝水吃饭5/普通施展10/演练熟练12/演练生疏14/突破瓶颈16/疗重伤20)",
                 },
                 "base_reason": {
                     "type": "string",
@@ -1482,9 +1488,9 @@ def build_v4_dc_judge_prompt(scene: str, user_action: str,
 {mode_line}
 
 【分量标准】
-■ base_dc(5~30)基础难度：
+■ base_dc(5~40)基础难度：
   对战=对手【当前实际境界】对应DC。对手档案是完全体数据，须按场景上下文修正（受伤/年迈/初学→降，奇遇/发威→升）：
-  无武功5·初学入门7·初窥门径9·略有小成11·略有所成13·渐入佳境15·融会贯通17·登堂入室19·炉火纯青21·出神入化23·登峰造极25·超凡入圣27·返璞归真28·天人合一29·破碎虚空30
+  无武功5·初学入门8·初窥门径11·略有小成14·略有所成17·渐入佳境20·融会贯通23·登堂入室26·炉火纯青29·出神入化32·登峰造极35·超凡入圣38·返璞归真40·天人合一40·破碎虚空40
   日常=行动固有难度：喝水吃饭5·日常行走8·普通施展10·演练熟练12·演练生疏14·突破瓶颈16·强行运功18·疗重伤20
 ■ environment_mod(-4~+4)天时地利与战术态势（对玩家有利为负，对玩家不利为正）：天时不利+1·开阔有利-1·偷袭得手-1~-2·玩家群战围杀NPC-1~-3·玩家以一敌多NPC+1~+3
 ■ situation_mod(-3~+3)人和战况（对玩家有利为负）：对手负伤-1~-3·对手受制-1~-3·玩家受制+1~+3·心神不宁+1~+2。双方当前HP/MP见档案行：对手HP≤70%按负伤降档·对手MP=0（内力枯竭）按受制降档·玩家HP≤70%或MP=0按带伤加档
@@ -1498,7 +1504,7 @@ def build_v4_dc_judge_prompt(scene: str, user_action: str,
 4. 若给了【★本次对战对手】，base_dc 与 opponent_realm 只能针对该对手
 
 只返回严格JSON，不要任何解释文字：
-{{"action_type":"battle","opponent_realm":"登堂入室","base_dc":19,"base_reason":"对手武功境界登堂入室，所以是19","environment_mod":0,"environment_reason":"月色清朗，无碍","situation_mod":-2,"situation_reason":"他中我一掌正在踉跄，所以-2","equipment_mod":-1,"equipment_reason":"我持韩王青刀削铁如泥，所以-1","mod_factors":["对手负伤"]}}"""
+{{"action_type":"battle","opponent_realm":"登堂入室","base_dc":26,"base_reason":"对手武功境界登堂入室，所以是26","environment_mod":0,"environment_reason":"月色清朗，无碍","situation_mod":-2,"situation_reason":"他中我一掌正在踉跄，所以-2","equipment_mod":-1,"equipment_reason":"我持韩王青刀削铁如泥，所以-1","mod_factors":["对手负伤"]}}"""
 
     # 玩家当前HP/MP（带伤/内力枯竭可见，供situation_mod判断）
     player_vit_text = ""
@@ -1645,7 +1651,7 @@ def _sanitize_components(comp: dict, user_action: str = "") -> dict:
     return {
         "action_type": action_type,
         "opponent_realm": realm,
-        "base_dc": _int(comp.get("base_dc"), 5, 30, _fallback_dc(user_action)),
+        "base_dc": _int(comp.get("base_dc"), 5, 40, _fallback_dc(user_action)),
         "base_reason": _reason("base_reason"),
         "environment_mod": _int(comp.get("environment_mod"), -4, 4, 0),
         "environment_reason": _reason("environment_reason", 24),
@@ -1665,7 +1671,7 @@ def compute_final_dc(comp: dict, user_action: str = "") -> dict:
     """
     c = _sanitize_components(comp, user_action)
     # ★ 公式：总DC = 基础 + 环境 + 战况 + 装备（各分量已独立夹紧，总分再夹紧）
-    total = max(5, min(30, c["base_dc"] + c["environment_mod"] + c["situation_mod"] + c["equipment_mod"]))
+    total = max(5, min(40, c["base_dc"] + c["environment_mod"] + c["situation_mod"] + c["equipment_mod"]))
     # realm 交叉校验：报"初学入门"却给 base=25 之类的分项不自洽预警
     if c["opponent_realm"] and c["action_type"] == "battle":
         expect = REALM_DC_TABLE[c["opponent_realm"]]
@@ -1802,21 +1808,21 @@ def build_v4_judge_prompt(scene: str, user_action: str,
 
 【对战DC参考】(有对手时使用,基础DC+环境修正。按金庸十四部小说整体标准,"掌门"是门内地位非江湖地位)
 对手无武功→DC5(普通百姓、不会武功的NPC)
-对手初学入门→DC7(刚入门弟子、江湖新丁,修炼0-1年)
-对手初窥门径→DC9(外门弟子、庄客,修炼1-3年)
-对手略有小成→DC11(内门弟子、杂役,修炼3-5年)
-对手略有所成→DC13(镖师、小头目、权臣非武人,修炼5-8年)
-对手渐入佳境→DC15(地方小派掌门/镖局香主/精英弟子/一方好手,修炼8-15年)
-对手融会贯通→DC17(中等门派掌门/总镖头/帮派香主/一方之雄,修炼15-20年)
-对手登堂入室→DC19(名门长老/邪派堂主/小派宗师,修炼20-30年)
-对手炉火纯青→DC21(名门掌门/武林宿望/一方霸主,修炼30-40年,中低武世界天花板)
-对手出神入化→DC23(神功大成/天赋异禀,修炼40-50年或得奇遇)
-对手登峰造极→DC25(邪教教主/大内供奉/绝顶高手,修炼50-70年或天赋+奇遇)
-对手超凡入圣→DC27(武林绝顶/隐世高人,百年难遇,需天赋+奇遇+机缘)
-对手返璞归真→DC28(隐世宗师/武林神话,超凡脱俗)
-对手天人合一→DC29(传说级,与天地共鸣,非凡人可敌)
-对手破碎虚空→DC30(神话级,千古难遇)
-※ 中低武世界天花板为8档(DC21),神功大成者可破例达9档。高武世界(射雕/神雕/倚天/笑傲)天花板为10-11档。超高武世界(天龙/侠客行)天花板为12-13档。
+对手初学入门→DC8(刚入门弟子、江湖新丁,修炼0-1年)
+对手初窥门径→DC11(外门弟子、庄客,修炼1-3年)
+对手略有小成→DC14(内门弟子、杂役,修炼3-5年)
+对手略有所成→DC17(镖师、小头目、权臣非武人,修炼5-8年)
+对手渐入佳境→DC20(地方小派掌门/镖局香主/精英弟子/一方好手,修炼8-15年)
+对手融会贯通→DC23(中等门派掌门/总镖头/帮派香主/一方之雄,修炼15-20年)
+对手登堂入室→DC26(名门长老/邪派堂主/小派宗师,修炼20-30年)
+对手炉火纯青→DC29(名门掌门/武林宿望/一方霸主,修炼30-40年,中低武世界天花板)
+对手出神入化→DC32(神功大成/天赋异禀,修炼40-50年或得奇遇)
+对手登峰造极→DC35(邪教教主/大内供奉/绝顶高手,修炼50-70年或天赋+奇遇)
+对手超凡入圣→DC38(武林绝顶/隐世高人,百年难遇,需天赋+奇遇+机缘)
+对手返璞归真→DC40(隐世宗师/武林神话,超凡脱俗)
+对手天人合一→DC40(传说级,与天地共鸣,非凡人可敌)
+对手破碎虚空→DC40(神话级,千古难遇)
+※ 中低武世界天花板为8档炉火纯青(DC29),神功大成者可破例达9档出神入化(DC32)。高武世界(射雕/神雕/倚天/笑傲)天花板为10-11档。超高武世界(天龙/侠客行)天花板为12-13档。
 
 【DC判定的环境修正·分三类独立封顶】
 基础DC只看对手当前境界；若属日常行动看行动固有难度。环境修正分三类，各类独立封顶，异类修正可叠加：
@@ -1985,8 +1991,8 @@ def build_constraint_text_v4(skill_name: str, skill_level: str, grade: int,
 武功加成: +{skill_bonus}（玩家武功品阶）+ {realm_bonus}（玩家武功境界）= +{skill_bonus + realm_bonus}
 {amplify_block}玩家总修正: +{total_modifier}
 DC难度: {dc}（{dc_reason}）
-掷骰过程: d20自然值={natural} → {natural}{total_modifier:+d} = {total}
-判定差值: {total} - {dc} = {delta:+d}
+掷骰过程: d20自然值={natural} → {natural}{total_modifier:+g} = {total}
+判定差值: {total} - {dc} = {delta:+g}
 最终档位: 第{verdict_grade}档·{verdict_name}{natural_note}
 
 【叙事要求】
