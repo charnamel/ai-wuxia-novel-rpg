@@ -537,6 +537,13 @@ class Player:
                 target_sk = sk
                 break
         if not target_sk:
+            # V5.2: 剧情给经验但武功不存在 → 视为初学，走新增武功流程（自动查武功书填品阶）
+            if self.add_skill(skill_name, exp_gain):
+                self.sync_overall_level()
+                self.save()
+                self.update_bottleneck_status()
+                print(f"【经验新增武功】{skill_name}（初得{exp_gain}点经验）")
+                return True
             return False
 
         old_exp = target_sk.get("exp", 0)
