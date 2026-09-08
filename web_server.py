@@ -1062,9 +1062,24 @@ def create_player():
     if not name or not origin or not ability:
         return jsonify({"status": "error", "message": "所有字段都不能为空"})
     
+    age = 0
+    money = 20
+    try:
+        _a = int(data.get('age') or 0)
+        if 0 <= _a <= 120:
+            age = _a
+    except (TypeError, ValueError):
+        pass
+    try:
+        _m = int(data.get('money') or 20)
+        if 0 <= _m <= 999999:
+            money = _m
+    except (TypeError, ValueError):
+        pass
+    
     try:
         from main import create_player_profile
-        create_player_profile(name=name, origin=origin, ability=ability)
+        create_player_profile(name=name, origin=origin, ability=ability, age=age, money=money)
         return jsonify({"status": "success", "message": "角色创建成功！"})
     except Exception as e:
         return jsonify({"status": "error", "message": f"角色创建失败：{str(e)}"})

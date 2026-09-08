@@ -3270,8 +3270,8 @@ def handle_admin_commands(user_input: str):
 latest_plot1_text = ""
 _plot_text_lock = threading.Lock()  # latest_plot1_text 的线程安全锁
 
-def create_player_profile(name: str, origin: str, ability: str):
-    player = Player.create_new(name, origin, ability)
+def create_player_profile(name: str, origin: str, ability: str, age: int = 0, money: int = 20):
+    player = Player.create_new(name, origin, ability, age=age, money=money)
     set_player(player)
     # 初始感悟（AI生成）
     prompt = f"玩家本命功法为「{ability}」，请为这门功法生成一段初始感悟文字（20~30字），描述初学时的体会。只输出文字，不要其他。"

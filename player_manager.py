@@ -814,18 +814,20 @@ class Player:
         return None
 
     @classmethod
-    def create_new(cls, name, origin, ability, age=0, year=0):
+    def create_new(cls, name, origin, ability, age=0, year=0, money=20):
         # 创建新玩家
         # name: 玩家姓名
         # origin: 出身背景
         # ability: 核心功法
         # age: 玩家年龄（0=未知，AI从origin推断）
         # year: 出生年份（0=未知，AI从origin推断）
+        # money: 初始银两（默认20两）
         # 返回: 新的Player对象
         player = cls()
         player.name = name
         player.age = age
         player.year = year
+        player.money = money
         player.origin = origin
         player.core_ability = ability
         player.self_state = "状态平稳"
@@ -906,6 +908,10 @@ def edit_player_raw():
     player = Player.load()
     if not player:
         return False, {}, "未找到玩家存档，请先创建角色。"
+    # 兼容旧档：补全新增字段（银两等），让编辑面板可见可改
+    if "money" not in player._data:
+        player._data["money"] = player.money
+        player.save()
     set_player(player)
     return True, player.to_dict(), "读取成功"
 

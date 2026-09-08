@@ -115,6 +115,14 @@
                 <label for="init_ability">本命功法</label>
                 <input type="text" id="init_ability" value="北冥神功">
             </div>
+            <div class="field">
+                <label for="init_age">初始年龄（可留空，AI 从身世推断）</label>
+                <input type="number" id="init_age" min="0" max="120" placeholder="留空由AI推断">
+            </div>
+            <div class="field">
+                <label for="init_money">初始银两（两）</label>
+                <input type="number" id="init_money" min="0" max="99999" value="20">
+            </div>
             <button onclick="submitCreatePlayer()" class="btn btn-primary btn-block">创建角色，踏入江湖</button>
         </div>
     </div>

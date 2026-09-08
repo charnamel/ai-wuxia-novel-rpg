@@ -570,10 +570,21 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
             
             append("正在创建角色「" + name + "」...", "system");
             try {
+                const body = {name: name, origin: origin, ability: ability};
+                const ageRaw = ((document.getElementById('init_age') || {}).value || '').trim();
+                if (ageRaw !== '') {
+                    const age = parseInt(ageRaw, 10);
+                    if (!isNaN(age) && age >= 0 && age <= 120) body.age = age;
+                }
+                const moneyRaw = ((document.getElementById('init_money') || {}).value || '').trim();
+                if (moneyRaw !== '') {
+                    const money = parseInt(moneyRaw, 10);
+                    if (!isNaN(money) && money >= 0) body.money = money;
+                }
                 const res = await fetch('/create_player', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({name: name, origin: origin, ability: ability})
+                    body: JSON.stringify(body)
                 });
                 const data = await res.json();
                 if(data.status === 'success') {
