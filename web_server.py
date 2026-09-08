@@ -6,6 +6,8 @@ import sys
 import json
 import threading
 import socket
+import re
+import random
 import traceback  # <--- 加这一行
 import time
 from flask import Flask, request, jsonify
