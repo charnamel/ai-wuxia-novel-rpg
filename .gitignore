@@ -1,4 +1,4 @@
-.venv/
+﻿.venv/
 __pycache__/
 *.pyc
 .vscode/
@@ -20,7 +20,7 @@ main1.py
 
 # Build artifacts
 *.zip
-打包/
+鎵撳寘/
 test_video.mp4
 
 # IDE / editor
@@ -45,8 +45,8 @@ data/local_memory_*
 data/semantic_vectors.npy
 data/semantic_ids.json
 data/history_archive/
-data/启动原始/
-data/备份/
+data/鍚姩鍘熷/
+data/澶囦唤/
 data/test_scenarios.json
 saves/
 
@@ -62,19 +62,19 @@ static/js/*.bak*
 extract_inputs.py
 extract_scenarios.py
 tmux*.txt
-服务器指令集.txt
-部署.txt
-时间轴.md
-武功大全.txt
-项目说明文档.md
-AI互动游戏小说系统分析.md
-女主角攻略评估_*.md
-武功品阶评判标准.md
-L3全量脉络预览.md
+鏈嶅姟鍣ㄦ寚浠ら泦.txt
+閮ㄧ讲.txt
+鏃堕棿杞?md
+姝﹀姛澶у叏.txt
+椤圭洰璇存槑鏂囨。.md
+AI浜掑姩娓告垙灏忚绯荤粺鍒嗘瀽.md
+濂充富瑙掓敾鐣ヨ瘎浼癬*.md
+姝﹀姛鍝侀樁璇勫垽鏍囧噯.md
+L3鍏ㄩ噺鑴夌粶棰勮.md
 BACKGROUND_SWITCH_GUIDE.md
 
 # Local test scripts & internal test reports
 /test_*.py
 docs/README.md
-docs/检索质量对比测试报告*.md
-docs/local_vs_cloud_report.jsondocs/08-����ϵͳ-������˵����.md
+docs/妫€绱㈣川閲忓姣旀祴璇曟姤鍛?.md
+docs/local_vs_cloud_report.jsondocs/08-经济系统-需求规格说明书.md

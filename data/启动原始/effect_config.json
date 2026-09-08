@@ -1,0 +1,249 @@
+{
+  "_version": "3.0",
+  "_description": "状态库+武功特效元数据（V5锚点制：零概率）。带category的条目=可配到武功书上的特效（1档程序直挂/2-7档AI剧情裁量/8档NPC反手招）；不带category的条目=纯内部状态。dot已废弃：所有损血扣蓝数值由AI经vitality_change单写者通道体现，程序只管记账/回合递减/到期播报。",
+
+  "poison": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "剧毒",
+    "desc": "毒气入体，持续损血，急需解药救治",
+    "default_rounds": 5,
+    "max_stacks": 1,
+    "dc_hint": "目标中毒受制",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "cold_poison": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "寒毒",
+    "desc": "阴寒之气侵体，经脉凝滞，行动迟缓",
+    "default_rounds": 3,
+    "max_stacks": 1,
+    "dc_hint": "目标受寒毒侵体，经脉凝滞",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "fire_poison": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "火毒",
+    "desc": "烈焰灼烧经脉，持续灼痛，内力躁动",
+    "default_rounds": 3,
+    "max_stacks": 1,
+    "dc_hint": "目标经脉灼烧，内力躁动难凝",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "internal_injury": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "内伤",
+    "desc": "内力反噬，经脉受损，持续损耗内力",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标内息紊乱，催功乏力",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "external_wound": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "外伤",
+    "desc": "筋骨皮肉受创，流血不止，行动受阻",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标流血不止，动作受阻",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+
+  "acupoint_seal": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "点穴",
+    "desc": "穴位被封，肢体麻痹，动作僵滞",
+    "default_rounds": 3,
+    "max_stacks": 1,
+    "dc_hint": "目标出招迟滞，situation_mod -1~-2",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "weakness": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "虚弱",
+    "desc": "真气涣散，四肢酸软，战力下降",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标战力骤降，situation_mod -1~-2",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "shock": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "震慑",
+    "desc": "威压惊人，心神震荡，短暂失神",
+    "default_rounds": 1,
+    "max_stacks": 1,
+    "dc_hint": "目标短暂失神，门户大开",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "sound_attack": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "音攻",
+    "desc": "音波侵耳，神识受扰，眩晕混乱",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标眩晕，判断失误",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "illusion": {
+    "category": "special",
+    "type": "debuff",
+    "name": "幻象",
+    "desc": "眼前虚影重重，判断屡屡失误",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标为幻象所惑，攻击易落空",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "control": {
+    "category": "special",
+    "type": "debuff",
+    "name": "摄心",
+    "desc": "心神被制，短暂听凭摆布",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标心神受制，行动不由自主",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "pursuit": {
+    "category": "lightfoot",
+    "type": "debuff",
+    "name": "追击",
+    "desc": "被缠住无法脱离，欲走不能",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标被缠住，无法脱离战斗",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "disarm": {
+    "category": "attack",
+    "type": "debuff",
+    "name": "缴械",
+    "desc": "兵器脱手飞出，攻势受挫",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "目标兵刃脱手，攻势大受影响",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+
+  "shield": {
+    "category": "internal",
+    "type": "buff",
+    "name": "护体",
+    "desc": "真气护体，周身气罩流转，减免伤害",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "自身真气护体，防御检定占优",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "self"}
+  },
+  "reverse": {
+    "category": "internal",
+    "type": "buff",
+    "name": "反弹",
+    "desc": "借力打力，将攻击尽数反弹",
+    "default_rounds": 2,
+    "max_stacks": 1,
+    "dc_hint": "自身借力打力，攻击者提防反噬",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "self"}
+  },
+
+  "heal": {
+    "category": "internal",
+    "type": "buff",
+    "name": "治疗",
+    "desc": "真气温养，伤势渐愈",
+    "default_rounds": 1,
+    "max_stacks": 1,
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "self"}
+  },
+  "absorb": {
+    "category": "internal",
+    "type": "buff",
+    "name": "吸纳",
+    "desc": "吸取对方内力为己用（对方面临化功状态，自己内力渐复）",
+    "default_rounds": 1,
+    "max_stacks": 1,
+    "visible_to_ai": true,
+    "martial_trigger": {
+      "op": "add", "target": "self",
+      "also": {"target": "opponent", "effect_id": "dissolve"}
+    }
+  },
+  "dissolve": {
+    "category": "internal",
+    "type": "debuff",
+    "name": "化功",
+    "desc": "辛苦修为之内力被化去",
+    "default_rounds": 1,
+    "max_stacks": 1,
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "dodge": {
+    "category": "lightfoot",
+    "type": "buff",
+    "name": "闪避",
+    "desc": "身法灵动如鬼魅，完全规避一击",
+    "default_rounds": 1,
+    "max_stacks": 1,
+    "dc_hint": "自身身法灵动，可完全规避对手攻击",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "self"}
+  },
+  "surprise": {
+    "category": "lightfoot",
+    "type": "debuff",
+    "name": "奇袭",
+    "desc": "遭死角突袭，措手不及，门户大开",
+    "default_rounds": 1,
+    "max_stacks": 1,
+    "dc_hint": "目标措手不及，防御检定吃亏",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "opponent"}
+  },
+  "counter": {
+    "category": "special",
+    "type": "buff",
+    "name": "反击",
+    "desc": "预判对手招式，借势反击",
+    "default_rounds": 1,
+    "max_stacks": 1,
+    "dc_hint": "自身预判先机，反击检定占优",
+    "visible_to_ai": true,
+    "martial_trigger": {"op": "add", "target": "self"}
+  },
+  "purify": {
+    "category": "internal",
+    "type": "buff",
+    "name": "解毒",
+    "desc": "真气净化毒素，驱散阴寒火热之气",
+    "default_rounds": 0,
+    "max_stacks": 1,
+    "visible_to_ai": false,
+    "martial_trigger": {"op": "remove_prefix", "target": "self", "prefix": "poison"}
+  }
+}
