@@ -776,9 +776,10 @@ def init_context_cache():
 def refresh_context_cache():
     with _context_cache_lock:
         data = load_context_cache()
-        if data and isinstance(data, dict):
+        if data and isinstance(data, dict) and "last_plot_summary" in data:
             return data
-        # 初始化也在锁内执行，保证首次创建文件的原子性
+        # 全新开局（context_cache.json 缺失或字段不全）：初始化完整缓存结构，
+        # 否则 process_one_round 等处按 key 直取会 KeyError（新部署第一轮崩溃）
         return init_context_cache()
 # ===== 主角动作正则（以"你"开头的关键行为句） =====
 PROTAGONIST_PATTERNS = [
