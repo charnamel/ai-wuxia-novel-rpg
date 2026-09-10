@@ -193,7 +193,7 @@ from main import (
 )
 # 导入配图和战斗模块组件
 from image_generator import draw_ascii
-from battle_system import gen_single_battle_round, ai_judge_battle_trend, gen_battle_final_end, ai_check_battle_status, settle_battle_round_vitality, settle_battle_round_effects
+from battle_system import gen_single_battle_round, ai_judge_battle_trend, gen_battle_final_end, ai_check_battle_status, settle_battle_round_vitality, settle_battle_round_effects, set_last_battle_context
 import vitality_system
 
 CURRENT_PLOT_TEXT = ""
@@ -219,7 +219,8 @@ WEB_BATTLE_STATE = {
     "dice_pending": None,
     "scene_info": "",
     "pre_battle_plot": "",
-    "last_dc_summary": ""  # 上轮DC判定+掷骰战果摘要（DC续传锚定用）
+    "last_dc_summary": "",  # 上轮DC判定+掷骰战果摘要（DC续传锚定用）
+    "round_plots": []       # 每轮对战剧情文本（结束对战时取最后5轮）
 }
 
 def _llm_dc_low_temp(sys_p, user_p, **kwargs):
@@ -243,6 +244,7 @@ def reset_web_battle():
     WEB_BATTLE_STATE["scene_info"] = ""
     WEB_BATTLE_STATE["pre_battle_plot"] = ""
     WEB_BATTLE_STATE["last_dc_summary"] = ""
+    WEB_BATTLE_STATE["round_plots"] = []
 
 def handle_battle_action(web_input: str, dice_confirm=None):
     import re
@@ -316,7 +318,15 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                 print("[DEBUG] final_end 为空，使用默认")
 
             # Fix 4: 压缩对战日志，只写入结局摘要，避免单条记录过大撑爆L2窗口
-            compressed_battle_log = f"【对战剧情】与{WEB_BATTLE_STATE['target_name']}对战{WEB_BATTLE_STATE['round_num']}回合，对战风格：{WEB_BATTLE_STATE['battle_style']}。\n【对战结局】{final_end}"
+            # 新增：附带最后5轮对战过程（不足5轮则全取）
+            _recent_rounds = WEB_BATTLE_STATE.get("round_plots", [])[-5:]
+            _recent_process = "\n".join(_recent_rounds) if _recent_rounds else "（无回合记录）"
+            compressed_battle_log = (
+                f"【对战剧情】与{WEB_BATTLE_STATE['target_name']}对战{WEB_BATTLE_STATE['round_num']}回合，"
+                f"对战风格：{WEB_BATTLE_STATE['battle_style']}。\n"
+                f"【对战过程】\n{_recent_process}\n"
+                f"【对战结局】{final_end}"
+            )
 
             # 更新上下文、状态、进度
             update_context_cache(compressed_battle_log, user_action="结束战斗")
@@ -349,9 +359,21 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                 player_obj.save()
                 player_obj.update_bottleneck_status()  # 战斗后检测瓶颈突破
 
+            # ★ 写入对战接续缓存，供下一轮主剧情强制承接（与CLI run_battle_system 一致）
+            #   注意：这里不再调用 clear_battle_cache；由下一轮 process_one_round 消费后自行清除
+            try:
+                set_last_battle_context(
+                    battle_target=WEB_BATTLE_STATE["target_name"],
+                    battle_summary=WEB_BATTLE_STATE["total_process"],
+                    battle_result=final_end,
+                    battle_round=WEB_BATTLE_STATE["round_num"],
+                )
+                print("[DEBUG] 已写入对战接续缓存")
+            except Exception as _bce:
+                print(f"[WARN] 写入对战接续缓存失败: {_bce}")
+
             # 只有这里才会重置战斗状态
             reset_web_battle()
-            clear_battle_cache()
             print("[DEBUG] 对战结束，状态已清理")
             return {"type": "end", "msg": f"【对战结束】\n{final_end}\n\n（战斗已记入江湖轶事）"}
         except Exception as e:
@@ -681,6 +703,8 @@ def handle_battle_action(web_input: str, dice_confirm=None):
             target_npc_name=WEB_BATTLE_STATE.get("target_name"),
             target_npc_persisted=_vit_target_persisted,
         )
+        # ★ 记录纯打斗叙述（不含特效/体力/状态等机械日志），供结束对战的【对战过程】使用
+        _pure_round_plot = round_plot
         # ★ 特效挂载日志拼入回合剧情（网页可见，含1轮特效的当轮挂载提示）★
         if _mount_log:
             round_plot = f"{round_plot}\n{_mount_log}"
@@ -745,6 +769,7 @@ def handle_battle_action(web_input: str, dice_confirm=None):
         if round_plot:
             WEB_BATTLE_STATE["total_process"] += f"\n【第{WEB_BATTLE_STATE['round_num']}回合】{round_plot}"
             WEB_BATTLE_STATE["last_round"] = round_plot
+            WEB_BATTLE_STATE.setdefault("round_plots", []).append(_pure_round_plot)
             _ret = {"type": "round", "msg": f"【第{WEB_BATTLE_STATE['round_num']}回合 对战剧情】\n{round_plot}"}
             if _dice_result:
                 _ret["dice_result"] = _dice_result
@@ -1336,6 +1361,7 @@ def chat():
             WEB_BATTLE_STATE["player_data_raw"] = player_data_raw
             WEB_BATTLE_STATE["total_process"] = ""
             WEB_BATTLE_STATE["last_round"] = ""
+            WEB_BATTLE_STATE["round_plots"] = []
             WEB_BATTLE_STATE["round_num"] = 0
             WEB_BATTLE_STATE["battle_style"] = ""
             WEB_BATTLE_STATE["phase"] = "select_mode"

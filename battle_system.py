@@ -68,6 +68,16 @@ def get_last_battle_context():
         "battle_result": BATTLE_CACHE["battle_result"]
     }
 
+
+def set_last_battle_context(battle_target, battle_summary, battle_result, battle_round=1):
+    """供 web 端战斗结束后写入，供下一轮主剧情「战斗接续」强制承接
+    （与 CLI run_battle_system 结束时的行为一致）"""
+    BATTLE_CACHE["battle_target"] = battle_target or ""
+    BATTLE_CACHE["battle_summary"] = (battle_summary or "")[:600]
+    BATTLE_CACHE["battle_result"] = battle_result or ""
+    BATTLE_CACHE["battle_round"] = int(battle_round) if battle_round else 1
+    BATTLE_CACHE["in_battle"] = False
+
 # AI 智能判定双方健康/伤势状态
 def ai_check_battle_status(llm_func, player_data, npc_data, battle_process):
     # 调用AI智能判定对战双方的健康/伤势状态
