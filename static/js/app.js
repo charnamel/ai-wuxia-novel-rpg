@@ -755,6 +755,128 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
         function closeEditor() {
             document.getElementById('editor-modal').style.display = 'none';
         }
+
+        // ===== 修炼：武功经验重分配 =====
+        let _redistState = null;
+        const _RD_REALMS = ["初学入门","初窥门径","略有小成","略有所成","渐入佳境","融会贯通","登堂入室","炉火纯青","出神入化","登峰造极","超凡入圣","返璞归真","天人合一","破碎虚空"];
+        const _RD_THRESHOLDS = [0,900,1800,2700,4300,6000,9000,12000,16500,21000,29000,37000,45000,53000];
+        function _rdRealmIdx(exp) {
+            let idx = 0;
+            for (let i = 0; i < _RD_THRESHOLDS.length; i++) {
+                if (exp >= _RD_THRESHOLDS[i]) idx = i; else break;
+            }
+            return idx;
+        }
+        async function openRedistribute() {
+            const modal = document.getElementById('redistribute-modal');
+            modal.style.display = 'block';
+            const body = document.getElementById('redistribute-body');
+            body.innerHTML = '<p class="loading-hint">加载中……</p>';
+            try {
+                const res = await fetch('/player/get');
+                const data = await res.json();
+                if (data.status !== 'success' || !data.data) {
+                    body.innerHTML = '<p class="loading-hint">读取玩家数据失败。</p>';
+                    return;
+                }
+                const skills = data.data.martial_skill_list || [];
+                if (skills.length === 0) {
+                    body.innerHTML = '<p class="loading-hint">当前没有习得任何武功。</p>';
+                    return;
+                }
+                const items = [];
+                let total = 0;
+                for (const sk of skills) {
+                    const name = sk.skill_name || '';
+                    const exp = parseInt(sk.exp) || 0;
+                    const idx = _rdRealmIdx(exp);
+                    const cap = (idx >= _RD_THRESHOLDS.length - 1) ? exp : _RD_THRESHOLDS[idx + 1];
+                    items.push({name: name, exp: exp, cap: cap});
+                    total += exp;
+                }
+                _redistState = {items: items, total: total};
+                renderRedistribute();
+            } catch (e) {
+                body.innerHTML = '<p class="loading-hint">网络错误：' + e + '</p>';
+            }
+        }
+        function renderRedistribute() {
+            const st = _redistState;
+            if (!st) return;
+            const body = document.getElementById('redistribute-body');
+            let html = '';
+            for (let i = 0; i < st.items.length; i++) {
+                const it = st.items[i];
+                html += '<div style="margin:6px 0;">';
+                html += '<div style="display:flex; justify-content:space-between; font-size:12px;">';
+                html += '<span>' + it.name + '</span>';
+                html += '<span>exp <b id="rd-val-' + i + '">' + it.exp + '</b> / 上限 ' + it.cap + '</span>';
+                html += '</div>';
+                html += '<input type="range" id="rd-slider-' + i + '" min="1" max="' + it.cap + '" value="' + it.exp + '" style="width:100%;" oninput="onRedistInput(' + i + ')">';
+                html += '</div>';
+            }
+            body.innerHTML = html;
+            updatePoolDisplay();
+        }
+        function onRedistInput(i) {
+            const st = _redistState;
+            if (!st) return;
+            const slider = document.getElementById('rd-slider-' + i);
+            const it = st.items[i];
+            let val = parseInt(slider.value) || 1;
+            const others = st.items.reduce((s, x, j) => (j === i ? s : s + x.exp), 0);
+            const poolBefore = st.total - others - it.exp;
+            if (val - it.exp > poolBefore) {
+                val = it.exp + poolBefore;
+            }
+            if (val < 1) val = 1;
+            if (val > it.cap) val = it.cap;
+            it.exp = val;
+            slider.value = val;
+            document.getElementById('rd-val-' + i).textContent = val;
+            updatePoolDisplay();
+        }
+        function updatePoolDisplay() {
+            const st = _redistState;
+            if (!st) return;
+            const sum = st.items.reduce((s, x) => s + x.exp, 0);
+            const pool = st.total - sum;
+            const el = document.getElementById('redistribute-pool');
+            el.textContent = '临时池子：' + pool + ' exp';
+            el.style.color = pool === 0 ? '#4f4' : '#ff4';
+        }
+        function closeRedistribute() {
+            document.getElementById('redistribute-modal').style.display = 'none';
+            _redistState = null;
+        }
+        async function submitRedistribute() {
+            const st = _redistState;
+            if (!st) return;
+            const sum = st.items.reduce((s, x) => s + x.exp, 0);
+            const pool = st.total - sum;
+            if (pool !== 0) {
+                alert('保存失败：经验池还有 ' + pool + ' exp 未分配，请先分配完。');
+                return;
+            }
+            const skills = st.items.map(x => ({skill_name: x.name, exp: x.exp}));
+            try {
+                const res = await fetch('/practice/redistribute', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({skills: skills})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(data.msg || '修炼完成。');
+                    closeRedistribute();
+                } else {
+                    alert('保存失败：' + (data.msg || '未知错误'));
+                }
+            } catch (e) {
+                alert('网络错误：' + e);
+            }
+        }
+
         async function loadPlayerRaw() {
             try {
                 const res = await fetch('/player/get');

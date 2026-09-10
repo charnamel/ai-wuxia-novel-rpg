@@ -1053,6 +1053,31 @@ def index():
         return f.read()
 
 
+# ======= 修炼：武功经验重分配 =======
+@app.route('/practice/redistribute', methods=['POST'])
+def api_practice_redistribute():
+    """在已学武功之间重新分配经验（总量守恒，池子须清零）"""
+    from player_manager import get_player
+    data = request.get_json(force=True, silent=True) or {}
+    skills = data.get("skills", [])
+    target_map = {}
+    for item in skills:
+        if isinstance(item, dict) and item.get("skill_name"):
+            target_map[str(item["skill_name"])] = item.get("exp")
+    player = get_player()
+    if not player:
+        return jsonify({"status": "error", "msg": "未读取到玩家存档。"})
+    try:
+        ok, msg = player.redistribute_exp(target_map)
+    except Exception as e:
+        return jsonify({"status": "error", "msg": f"保存失败：{e}"})
+    return jsonify({
+        "status": "success" if ok else "error",
+        "msg": msg,
+        "skills": player.martial_skill_list,
+    })
+
+
 # ======= 创建角色接口 =======
 @app.route('/create_player', methods=['POST'])
 def create_player():

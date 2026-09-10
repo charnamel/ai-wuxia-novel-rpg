@@ -47,6 +47,7 @@
                 <button class="nav-btn" onclick="sendCommand('物品')">物品</button>
                 <button class="nav-btn" onclick="sendCommand('传闻')">传闻</button>
                 <button class="nav-btn" onclick="sendCommand('练功')">练功</button>
+                <button class="nav-btn" onclick="openRedistribute()">修炼</button>
                 <button class="nav-btn" onclick="sendCommand('配图')">配图</button>
                 <button class="nav-btn nav-btn-danger" onclick="sendCommand('对战')">对战</button>
             </div>
@@ -608,6 +609,23 @@
         </div>
         <div id="equipment-body" class="modal-body-dyn">
             <p class="loading-hint">加载中……</p>
+        </div>
+    </div>
+
+    <!-- ═══════════ 修炼：武功经验重分配 ═══════════ -->
+    <div id="redistribute-modal" style="display:none" class="modal modal-md">
+        <div class="modal-head">
+            <h3 class="modal-title">修炼 · 武功经验重分配</h3>
+            <button onclick="closeRedistribute()" class="btn btn-ghost btn-xs">关闭</button>
+        </div>
+        <div class="warn-box">拖动滑块在武功之间搬运经验。临时池子必须清零才能保存；每门最多加到「当前境界下一阈值」，最低 1。</div>
+        <div id="redistribute-pool" style="margin:8px 0; font-size:14px; color:#4af;">临时池子：0 exp</div>
+        <div id="redistribute-body" class="modal-body-dyn">
+            <p class="loading-hint">加载中……</p>
+        </div>
+        <div class="btn-row">
+            <button onclick="submitRedistribute()" class="btn btn-green">完成</button>
+            <button onclick="closeRedistribute()" class="btn btn-ghost">取消</button>
         </div>
     </div>
 
