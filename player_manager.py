@@ -419,6 +419,75 @@ class Player:
                 fallback_count += 1
         return synced_count, fallback_count, fixed_realm_count
 
+    def redistribute_exp(self, target_map):
+        """修炼：在已学武功之间重新分配经验（总量守恒，临时池子必须清零）。
+
+        target_map: {skill_name: 新exp}
+
+        规则：
+          1. 仅限已学武功，且必须与当前 martial_skill_list 一一对应
+          2. 每门 1 <= 新exp <= cap
+             cap = 该武功「当前境界」的下一阈值；
+             已达顶层境界（破碎虚空）则 cap = 当前exp（不可再升）
+          3. 总量守恒：sum(新exp) 必须等于 sum(原exp)，否则视为池子有剩余 → 保存失败
+          4. 不触碰瓶颈进度，仅改 exp 后调用同步函数（境界由同步函数重算）
+
+        返回: (ok: bool, msg: str)
+        """
+        if not self.martial_skill_list:
+            return False, "当前没有习得任何武功。"
+
+        base = {}
+        caps = {}
+        for sk in self.martial_skill_list:
+            name = sk.get("skill_name", "")
+            if not name:
+                continue
+            exp = int(sk.get("exp", 0))
+            base[name] = exp
+            realm = self.get_realm(exp)
+            try:
+                idx = self.REALM_LIST.index(realm)
+            except ValueError:
+                idx = 0
+            if idx >= len(self.EXP_THRESHOLDS) - 1:
+                caps[name] = exp  # 顶层境界：不可再升
+            else:
+                caps[name] = self.EXP_THRESHOLDS[idx + 1]
+
+        if set(target_map.keys()) != set(base.keys()):
+            return False, "武功列表与存档不一致，请刷新后重试。"
+
+        for name, newexp in target_map.items():
+            if isinstance(newexp, bool) or not isinstance(newexp, int):
+                return False, f"「{name}」经验值非法。"
+            if newexp < 1:
+                return False, f"「{name}」经验不能低于 1。"
+            if newexp > caps[name]:
+                return False, f"「{name}」超过当前境界上限（上限 {caps[name]}）。"
+
+        if sum(target_map.values()) != sum(base.values()):
+            return False, "经验池尚有剩余，保存失败（分配总量须与原有总量一致）。"
+
+        # 保存前备份 player.json
+        try:
+            import shutil
+            import time as _time
+            if os.path.exists(PLAYER_FILE):
+                shutil.copy2(PLAYER_FILE, f"{PLAYER_FILE}.bak_{_time.strftime('%Y%m%d_%H%M%S')}")
+        except Exception:
+            pass
+
+        for sk in self.martial_skill_list:
+            name = sk.get("skill_name", "")
+            if name in target_map:
+                sk["exp"] = target_map[name]
+
+        self.sync_skill_bonus_from_book()
+        self.sync_overall_level()
+        self.save()
+        return True, "修炼完成，经验已重新分配。"
+
     def get_skill_bonus(self, skill_name):
         # 获取某门武功的总加成（品阶基础+境界）
         # 玩家未学此武功时返回 0
