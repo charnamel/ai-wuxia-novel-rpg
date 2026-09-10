@@ -38,6 +38,9 @@ except ImportError:
 # 光标码崩溃的唯一触发源——加载模型前直接禁用（平台无关的根治方案）
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
+# 国内网络访问 huggingface.co 会超时，走镜像（与世界书 semantic_index.py 一致）
+os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+
 # ========== 配置 ==========
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 _DATA_DIR = os.path.join(_BASE_DIR, "data")

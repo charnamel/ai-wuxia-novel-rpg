@@ -3109,11 +3109,12 @@ def append_npc_memory(npc_name, content, reason="", npc_data=None):
     if npc_data is not None:
         for npc in npc_data.get("npc_list", []):
             if npc["name"] == npc_name:
-                if npc["memory_list"] and npc["memory_list"][-1] == full_text:
+                mem = npc.setdefault("memory_list", [])
+                if mem and mem[-1] == full_text:
                     return  # 同轮重复变动跳过
-                npc["memory_list"].append(full_text)
-                if len(npc["memory_list"]) > 25:
-                    npc["memory_list"] = npc["memory_list"][-25:]
+                mem.append(full_text)
+                if len(mem) > 25:
+                    npc["memory_list"] = mem[-25:]
                 break
         try:
             upload_npc_memory(CLOUD_MEM_SLOT_ID, npc_name, full_text, novel_node=_nn)
@@ -3126,11 +3127,12 @@ def append_npc_memory(npc_name, content, reason="", npc_data=None):
         return
     for npc in npc_all["npc_list"]:
         if npc["name"] == npc_name:
-            if npc["memory_list"] and npc["memory_list"][-1] == full_text:
+            mem = npc.setdefault("memory_list", [])
+            if mem and mem[-1] == full_text:
                 return
-            npc["memory_list"].append(full_text)
-            if len(npc["memory_list"]) > 25:
-                npc["memory_list"] = npc["memory_list"][-25:]
+            mem.append(full_text)
+            if len(mem) > 25:
+                npc["memory_list"] = mem[-25:]
             break
     save_json(NPC_AGENT_FILE, npc_all)
     try:
