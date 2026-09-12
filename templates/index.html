@@ -245,6 +245,16 @@
                             <span style="color:#666;">加载中…</span>
                         </div>
                     </div>
+                    <div id="npc-age-lock-panel" style="background:#111; border:1px solid #333; border-radius:6px; padding:8px 10px; margin-bottom:8px; font-size:12px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span style="color:#6cf;">年龄阶段锁定</span>
+                            <input type="text" id="npc-age-lock-input" placeholder="锁定文字，如：长生不老，返老还童" maxlength="12"
+                                   style="flex:1; min-width:160px; background:#111; border:1px solid #444; color:#cdf; padding:3px 6px; border-radius:3px;">
+                            <button onclick="npcAgeStageLock(true)" class="btn btn-gold" style="padding:2px 10px; font-size:11px;">锁死</button>
+                            <button onclick="npcAgeStageLock(false)" class="btn" style="padding:2px 10px; font-size:11px;">解除</button>
+                            <span id="npc-age-lock-status" style="color:#888;"></span>
+                        </div>
+                    </div>
                     <textarea id="npc-editor" class="textarea-code ta-s" placeholder="选择左侧 NPC 开始编辑，或点击「新增 NPC」创建新角色……"></textarea>
                     <div class="btn-row">
                         <button onclick="npcSave()" class="btn btn-green">保存修改</button>
@@ -618,7 +628,7 @@
             <h3 class="modal-title">修炼 · 武功经验重分配</h3>
             <button onclick="closeRedistribute()" class="btn btn-ghost btn-xs">关闭</button>
         </div>
-        <div class="warn-box">拖动滑块在武功之间搬运经验。临时池子必须清零才能保存；每门最多加到「当前境界下一阈值」，最低 1。</div>
+        <div class="warn-box">拖动滑块在武功之间搬运经验。临时池子必须清零才能保存；每门最多加到「当前总境界上限」（不越界），最低 1。</div>
         <div id="redistribute-pool" style="margin:8px 0; font-size:14px; color:#4af;">临时池子：0 exp</div>
         <div id="redistribute-body" class="modal-body-dyn">
             <p class="loading-hint">加载中……</p>

@@ -8,7 +8,7 @@ import colorama
 import threading
 # 在 main.py 中删除原来的定义，改为导入
 from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, MAIN_LOOP_SESSION_ID, CLOUD_MEM_SLOT_ID, thinking_extra_body, is_glm53, strip_think_tags, adjust_max_tokens
-from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node #导入作弊器代码
+from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node, format_money_liang #导入作弊器代码
 from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 from option_gen import clean_action_options  # 行动选项清洗（主循环解析与兜底共用）
 # ===== 骰子检定系统（最小侵入导入） =====
@@ -22,6 +22,7 @@ from task_manager import create_task, list_tasks, complete_task, delete_task,upd
 from save_manager import save_game, load_game, list_saves, delete_save
 
 from file_utils import save_json, load_json, ensure_dir, load_context_cache, save_context_cache, append_interact_log, rewrite_interact_log
+import npc_age
 from practice_system import do_practice
 from openai import OpenAI
 # 导入动态主线模块
@@ -220,7 +221,7 @@ STATIC_SYSTEM_PROMPT = """
 14. **NPC身体状态**：一律通过 vitality_change 的HP数值体现，禁止通过文本或其它字段直接标记NPC死亡。
 15. **self_state**：主角身体/精神状态变化时填写，30字内。
 16. **novel_node**：必须以"YYYY年M季，"开头（如"1751年春，萧半和寿宴在即"）；无变化时填空字符串。
-17. **money_delta**：银两变化时填写（正数获得/收入，负数花费/失去，单位：两）。仅本轮剧情实际发生钱财收支时填写；闲聊、赶路、练功等无交易场景一律不填。参考清代物价：小额打赏/食宿/日用±1~5，宴请/买药/雇佣/置办兵器马匹±5~50，酬金/押镖/赎金/悬赏±50~500，赃银/家产等巨款±500~5000。若无法调用工具，必须在正文末尾单独输出【金钱结算】±N两 兜底。
+17. **money_delta**：银两变化时填写（正数获得/收入，负数花费/失去，单位：两，可含小数、保留2位，如0.4两）。仅本轮剧情实际发生钱财收支时填写；闲聊、赶路、练功等无交易场景一律不填。参考清代物价：小额打赏/食宿/日用±1~5，宴请/买药/雇佣/置办兵器马匹±5~50，酬金/押镖/赎金/悬赏±50~500，赃银/家产等巨款±500~5000。★若在正文或状态栏里体现银两变化，必须写成带**最终值**的格式「银两+3两（现8.91→11.91两）」（即 `银两±N两（现X→Y两）`），不得只写增量；若无法调用工具，才在正文末尾单独输出【金钱结算】±N两（可小数） 兜底。
 
 ## 禁止
 - 替玩家发言、做决定、说出玩家内心想法
@@ -866,23 +867,53 @@ BACKGROUND_STARTS = [
     "你心中暗", "你暗自", "你默念", "你心想",
 ]
 # ===== 银两结算（工具优先+正则兜底，对齐HP/MP双管线）=====
-MONEY_MAX_DELTA = 5000        # 单轮银两变化量上限（防AI乱写）
-_MONEY_NUM = r"[+−-]?\d+"
-_MONEY_REGEX = re.compile(r"【金钱结算】\s*(" + _MONEY_NUM + r")\s*两?\s*(?:[（(][^）)]*[）)])?")
+MONEY_MAX_DELTA = 100000000   # 单轮银两变化量上限（1亿两，防AI乱写）
+_MONEY_SIGN = r"[+＋−\-－]"
+_MONEY_NUM = r"\d+(?:\.\d+)?"
+_MONEY_REGEX = re.compile(r"【金钱结算】\s*(" + _MONEY_SIGN + r"?" + _MONEY_NUM + r")\s*两?\s*(?:[（(][^）)]*[）)])?")
+# 状态栏「银两±N两（现X→Y两）」：捕获 符号、增量、可选最终值Y
+_MONEY_STATUS_REGEX = re.compile(
+    r"银两\s*[:：]?\s*(" + _MONEY_SIGN + r")\s*(" + _MONEY_NUM + r")\s*两?"
+    r"(?:\s*[（(]\s*(?:现|当前|余额)?\s*(" + _MONEY_NUM + r")\s*[→\-－>=]+\s*(" + _MONEY_NUM + r")\s*两?\s*[）)])?"
+)
+
+
+def _norm_sign(s):
+    return str(s).replace("＋", "+").replace("－", "-").replace("−", "-")
+
+
+def parse_money_change(reply_text):
+    """解析正文里的钱的「兜底」变化。返回 (mode, value) 或 None：
+      ("delta", D)  —— 增量式：①【金钱结算】±D两 ②状态栏无最终值
+      ("set",   Y)  —— 覆盖式：状态栏「银两±D两（现X→Y两）」→ 以最终值 Y 覆盖（幂等，防跨轮重复结算）
+    """
+    if not reply_text:
+        return None
+    text = str(reply_text)
+    m = _MONEY_REGEX.search(text)
+    if m:
+        try:
+            return ("delta", round(float(_norm_sign(m.group(1))), 2))
+        except ValueError:
+            return None
+    m2 = _MONEY_STATUS_REGEX.search(text)
+    if m2:
+        try:
+            after = m2.group(4)
+            if after is not None:
+                return ("set", round(float(after), 2))
+            return ("delta", round(float(_norm_sign(m2.group(1)) + m2.group(2)), 2))
+        except ValueError:
+            return None
+    return None
 
 
 def parse_money_regex(reply_text):
-    """解析正文【金钱结算】兜底行（仅工具未上报 money_delta 时调用）。
-    兼容全角减号、'两'可省略、数字后括号注释，如【金钱结算】-50两（付了酒钱）"""
-    if not reply_text:
-        return None
-    m = _MONEY_REGEX.search(str(reply_text))
-    if not m:
-        return None
-    try:
-        return int(m.group(1).replace("−", "-"))
-    except ValueError:
-        return None
+    """兼容旧接口：仅返回增量(delta)或 None（覆盖式不在此返回）。"""
+    ch = parse_money_change(reply_text)
+    if ch and ch[0] == "delta":
+        return ch[1]
+    return None
 # ===== add_milestone 先定义 =====
 def add_milestone(cache, text):
     if "milestones" not in cache:
@@ -3941,8 +3972,8 @@ def process_one_round(user_input: str, is_web: bool = False):
                         },
                         # ========== 新增：银两字段 ==========
                         "money_delta": {
-                            "type": "integer",
-                            "description": "银两变化量（正数获得/收入，负数花费/失去，单位：两）。仅本轮剧情实际涉及银两收支时填写；闲聊、赶路、练功等无交易场景一律省略。参考清代物价：小额打赏/食宿/日用±1~5，宴请/买药/雇佣/置办兵器马匹±5~50，酬金/押镖/赎金/悬赏±50~500，赃银/家产等巨款±500~5000"
+                            "type": "number",
+                            "description": "银两变化量（正数获得/收入，负数花费/失去，单位：两，可含小数、保留2位，如0.4）。仅本轮剧情实际涉及银两收支时填写；闲聊、赶路、练功等无交易场景一律省略。参考清代物价：小额打赏/食宿/日用±1~5，宴请/买药/雇佣/置办兵器马匹±5~50，酬金/押镖/赎金/悬赏±50~500，赃银/家产等巨款±500~5000"
                         }
                     },
                     "required": ["skill_exp_gain"]   # 至少需要提供这个空数组
@@ -4201,13 +4232,12 @@ def process_one_round(user_input: str, is_web: bool = False):
         active_lines = []
         passive_list = []
         all_deceased_npcs = []
-        # 当前剧情年份（novel_node正则提一次，供活跃NPC计算年龄）
-        _cur_year = 0
-        for _ym in re.finditer(r"(\d{1,4})年", player_obj.novel_node or ""):
-            _yv = int(_ym.group(1))
-            if 1500 <= _yv <= 2049:
-                _cur_year = _yv
-                break
+        # 当前剧情年份 + 刷新NPC年龄阶段（使用驱动：用到时现算，有变化才原子写盘）
+        _cur_year = npc_age.get_current_year(player_obj.novel_node)
+        try:
+            npc_age.refresh_npc_age_stages(npc_full_data, _cur_year, write=True)
+        except Exception as _nae:
+            print(f"{COLOR_WARN}⚠️ NPC年龄阶段刷新异常: {_nae}{COLOR_END}")
         # 状态中文映射：补全健康状态，所有情况都明确标注
         status_label = {
             "normal": "健康",
@@ -4236,12 +4266,9 @@ def process_one_round(user_input: str, is_web: bool = False):
                 relation = npc.get("relation_to_player", "")
                 relation_part = f"·关系:{relation}" if relation else ""
                 status_text = status_label.get(status, " 健康")
-                # 年龄（档案year + 当前剧情年份推算，数据不全则省略）
-                _birth = npc.get("year", 0)
-                _age_part = ""
-                if _cur_year and _birth and 0 < _cur_year - int(_birth) <= 120:
-                    _age_part = f"年龄:{_cur_year - int(_birth)} "
-                _age_block = f"{_age_part.rstrip()} " if _age_part else ""
+                # 年龄阶段（age_stage 已由 refresh_npc_age_stages 落盘；这里注入到AI）
+                _age_sfx = npc_age.age_stage_suffix(npc, _cur_year)
+                _age_block = f"{_age_sfx} " if _age_sfx else ""
                 npc_line = f"丨 {name}（{identity}）{status_text} {_age_block}态度:{attitude}{relation_part}丨"
                 active_lines.append(npc_line)
             else:
@@ -4415,7 +4442,7 @@ def process_one_round(user_input: str, is_web: bool = False):
 ・武学：{skills_compact} ← 仅玩家当面施展时NPC才能提及
 ・随身装备：{equipped_str} ← 随身佩戴的武器/防具/物品，比行李内物品更显眼，但未主动展示时NPC仍可能不知
 ・物品（行李）：{item_str} ← 正常藏在行李中，除非特殊剧情需要取出展示，否则NPC不可知
-・银两：{player_obj.money}两 ← 随身钱财，NPC不可全知（当面露财/被搜刮除外）
+・银两：{format_money_liang(player_obj.money)} ← 随身钱财，NPC不可全知（当面露财/被搜刮除外）
 ・名气：{rep_title}（{rep_value}） ← 可被江湖见闻提及
 ──以下信息NPC可能知道──
 ・年龄：{_age_display} ← 江湖可打听的公开信息
@@ -5179,35 +5206,52 @@ __L4_MERGE_SLOT__
                 player_obj.save()
 
         # ===== 银两结算（工具优先 + 正则兜底，对齐HP/MP双管线）=====
-        _money_delta = None
+        _money_change = None
+        _money_src = ""
         if tool_calls:
             for tc in tool_calls:
                 if tc.function.name == "update_game_state":
                     try:
                         _mtargs = json.loads(tc.function.arguments)
                         if "money_delta" in _mtargs:
-                            _money_delta = _mtargs.get("money_delta")
+                            _money_change = ("delta", _mtargs.get("money_delta"))
+                            _money_src = "tool"
                             break
                     except Exception:
                         pass
-        if _money_delta is None:
-            _money_delta = parse_money_regex(reply)
-        if _money_delta is not None:
+        if _money_change is None:
+            _money_change = parse_money_change(reply)
+            _money_src = "text"
+        # ★ 无条件剥离 AI 正文里的系统标记行【金钱结算】（防重复/防泄漏到展示）
+        if plot_content and "【金钱结算】" in plot_content:
+            plot_content = re.sub(r'【金钱结算】[^\n]*\n?', '', plot_content).rstrip()
+        if _money_change is not None and player_obj:
+            _mm, _mv = _money_change
             try:
-                _md = int(_money_delta)
+                _v = round(float(_mv), 2)
             except (TypeError, ValueError):
-                _md = None
-            if _md is not None and _md != 0:
-                _md = max(-MONEY_MAX_DELTA, min(MONEY_MAX_DELTA, _md))
-                if player_obj:
-                    player_obj.money = player_obj.money + _md  # setter 已钳下限0
-                    player_obj.save()
-                    _sign = "+" if _md > 0 else ""
-                    _money_log = f"💰银两结算：{_sign}{_md}两"
-                    print(f"{COLOR_GREEN}{_money_log}{COLOR_END}")
-                    # ★ 先剥离AI正文里自带的兜底行（防重复），再追加正式结算 ★
-                    plot_content = re.sub(r'【金钱结算】[^\n]*\n?', '', plot_content).rstrip()
-                    plot_content = f"{plot_content}\n{_money_log}"
+                _v = None
+            if _v is not None:
+                if _mm == "set":
+                    # 覆盖式（幂等）：状态栏带最终值 → 直接设为该值；重复出现（Y==当前）自动跳过，防跨轮重复结算
+                    _old = player_obj.money
+                    _new = round(max(0.0, _v), 2)
+                    if _new != _old:
+                        player_obj.money = _new
+                        player_obj.save()
+                        _money_log = f"💰银两结算：{format_money_liang(_old)} → {format_money_liang(_new)}"
+                        print(f"{COLOR_GREEN}{_money_log} [src={_money_src}]{COLOR_END}")
+                        plot_content = f"{plot_content}\n{_money_log}"
+                else:
+                    # 增量式
+                    _md = max(-MONEY_MAX_DELTA, min(MONEY_MAX_DELTA, _v))
+                    if _md != 0:
+                        player_obj.money = player_obj.money + _md  # setter 已钳下限0
+                        player_obj.save()
+                        _sign = "+" if _md > 0 else ""
+                        _money_log = f"💰银两结算：{_sign}{_md:g}两"
+                        print(f"{COLOR_GREEN}{_money_log} [src={_money_src}]{COLOR_END}")
+                        plot_content = f"{plot_content}\n{_money_log}"
 
         # ===== 特效挂载日志拼入剧情（网页可见，含1轮特效的当轮挂载提示） =====
         try:
@@ -5286,7 +5330,10 @@ __L4_MERGE_SLOT__
                     print(f"{COLOR_GREEN}{_br_log}{COLOR_END}")
         except Exception as _bre:
             print(f"{COLOR_WARN}⚠️ 对战回气异常：{_bre}{COLOR_END}")
-        update_context_cache(plot_content, actual_user_action)
+        # ★ 上下文与显示分离：结算日志（💰银两结算）只用于网页显示，剥离后再喂给AI，
+        #   防止 AI 看到上一轮结算记录后重复上报（跨轮重复结算）
+        _ctx_plot = re.sub(r'\n?💰银两结算：[^\n]*', '', plot_content).rstrip()
+        update_context_cache(_ctx_plot, actual_user_action)
 
         # 推进进度
         progress_delta = PLOT_PROGRESS_PER_ACTION
@@ -5408,18 +5455,8 @@ __L4_MERGE_SLOT__
         npc_full_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
         related_npc_status = []
         npc_status_lines = []
-        # 当前剧情年份（novel_node正则提一次，供web端NPC显示年龄）
-        _cur_year_web = 0
-        try:
-            import re as _re_web
-            if player_obj and player_obj.novel_node:
-                for _ym in _re_web.finditer(r"(\d{1,4})年", player_obj.novel_node or ""):
-                    _yv = int(_ym.group(1))
-                    if 1500 <= _yv <= 2049:
-                        _cur_year_web = _yv
-                        break
-        except Exception:
-            _cur_year_web = 0
+        # 当前剧情年份（供web端NPC显示年龄阶段）
+        _cur_year_web = npc_age.get_current_year(player_obj.novel_node) if player_obj else 0
         for npc in npc_full_data.get("npc_list", []):
             name = npc.get("name", "")
             if not name:
@@ -5431,17 +5468,17 @@ __L4_MERGE_SLOT__
                 rel_text = f"·{relation}" if relation else ""
                 body_map = {"normal": "健康", "light_injured": "轻伤", "injured": "重伤", "heavy_injured": "重伤", "dying": "濒死", "deceased": "已故", "poisoned": "中毒", "missing": "失踪"}
                 body = body_map.get(npc.get("body_status", "normal"), "健康")
-                # 年龄（档案year + 当前剧情年份推算，数据不全省略）
-                _birth = npc.get("year", 0)
+                # 年龄阶段（age_stage：使用已落盘/现算值）
+                _age_sfx = npc_age.age_stage_suffix(npc, _cur_year_web)
+                _age_text = f"{_age_sfx} " if _age_sfx else ""
                 _age_web = None
-                if _cur_year_web and _birth:
-                    try:
-                        _a = _cur_year_web - int(_birth)
-                        if 0 < _a <= 120:
+                try:
+                    if _cur_year_web and npc.get("year"):
+                        _a = _cur_year_web - int(npc["year"])
+                        if 0 <= _a <= 120:
                             _age_web = _a
-                    except Exception:
-                        pass
-                _age_text = f"{_age_web}岁 " if _age_web is not None else ""
+                except Exception:
+                    _age_web = None
                 npc_line = f"{name} {_age_text}{attitude}{rel_text} 好感{favor} {body}"
                 npc_status_lines.append(npc_line)
                 related_npc_status.append({
@@ -5469,7 +5506,7 @@ __L4_MERGE_SLOT__
             item_lines.append(f"状态：{player_disp.self_state}")
             if player_disp.age and player_disp.age > 0:
                 item_lines.append(f"年龄：{player_disp.age}岁")
-            item_lines.append(f"银两：{player_disp.money}两")
+            item_lines.append(f"银两：{format_money_liang(player_disp.money)}")
         item_status_display = "\n".join(item_lines) if item_lines else "无变化"
         # 追加本轮经验增益/感悟更新到【状态】
         if _player_update_info:

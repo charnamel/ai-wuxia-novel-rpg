@@ -784,16 +784,24 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     body.innerHTML = '<p class="loading-hint">当前没有习得任何武功。</p>';
                     return;
                 }
+                // 上限 = 当前总境界对应的 exp 上限（不越境：下一阈值 − 1）
+                const _ovr = (data.data && data.data.overall_realm) || '';
+                let _oi = _RD_REALMS.indexOf(_ovr);
+                if (_oi < 0) _oi = 0;
+                let _overallCap = null;
+                if (_oi < _RD_THRESHOLDS.length - 1) _overallCap = _RD_THRESHOLDS[_oi + 1] - 1;
                 const items = [];
                 let total = 0;
+                let maxExp = 0;
                 for (const sk of skills) {
                     const name = sk.skill_name || '';
                     const exp = parseInt(sk.exp) || 0;
-                    const idx = _rdRealmIdx(exp);
-                    const cap = (idx >= _RD_THRESHOLDS.length - 1) ? exp : _RD_THRESHOLDS[idx + 1];
-                    items.push({name: name, exp: exp, cap: cap});
+                    items.push({name: name, exp: exp});
                     total += exp;
+                    if (exp > maxExp) maxExp = exp;
                 }
+                const cap = (_overallCap === null) ? maxExp : _overallCap;
+                for (const it of items) { it.cap = cap; }
                 _redistState = {items: items, total: total};
                 renderRedistribute();
             } catch (e) {
@@ -1699,7 +1707,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                         color:${isSelected ? '#fff' : '#8af'};" 
                         onclick="npcSelect('${escapeHtml(npc.name)}')">
                         <div style="font-weight:bold;">${idx + 1}. ${escapeHtml(npc.name)}</div>
-                        <div style="font-size:11px; color:#668; margin-top:3px;">${escapeHtml(npc.identity || '未知身份')}</div>
+                        <div style="font-size:11px; color:#668; margin-top:3px;">${escapeHtml(npc.identity || '未知身份')}${npc.age_stage ? ' · ' + (npc.age_stage_locked ? '🔒' : '') + escapeHtml(npc.age_stage) : ''}</div>
                     </div>
                 `;
             });
@@ -1724,12 +1732,43 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     document.getElementById('npc-editor').value = JSON.stringify(data.npc, null, 2);
                     renderNpcVitalityPanel(data.npc);
                     renderNpcEffectPanel(data.npc);
+                    renderNpcAgeLockPanel(data.npc);
                 } else {
                     alert('加载失败：' + data.message);
                 }
             } catch(e) {
                 alert('加载失败：' + e);
             }
+        }
+
+        // ===== NPC 年龄阶段锁定（特殊剧情：长生不老等） =====
+        function renderNpcAgeLockPanel(npc) {
+            const inp = document.getElementById('npc-age-lock-input');
+            const st = document.getElementById('npc-age-lock-status');
+            if (!inp || !st) return;
+            const locked = !!(npc && npc.age_stage_locked);
+            inp.value = locked ? (npc.age_stage || '') : '';
+            st.textContent = locked ? ('🔒 ' + (npc.age_stage || '')) : '未锁定';
+        }
+        async function npcAgeStageLock(locked) {
+            if (!npcCurrentName) { alert('请先选择NPC'); return; }
+            const stage = (document.getElementById('npc-age-lock-input').value || '').trim();
+            if (locked && !stage) { alert('锁定内容不能为空'); return; }
+            try {
+                const res = await fetch('/npc/lock_age_stage', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: npcCurrentName, stage: stage, locked: !!locked})
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    document.getElementById('npc-age-lock-status').textContent = data.age_stage_locked ? ('🔒 ' + data.age_stage) : '未锁定';
+                    npcRefresh();
+                    npcSelect(npcCurrentName);
+                } else {
+                    alert('失败：' + (data.message || '未知错误'));
+                }
+            } catch(e) { alert('网络错误：' + e); }
         }
 
         function renderNpcVitalityPanel(npc) {

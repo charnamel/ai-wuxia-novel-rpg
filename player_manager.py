@@ -16,6 +16,15 @@ PLAYER_FILE = "data/player.json"
 # 武功书文件路径（仿DND法术书，记录武功品阶与加成）
 MARTIAL_ARTS_BOOK_FILE = "data/martial_arts_bonus.json"
 
+
+def format_money_liang(value):
+    """银两显示（去尾零）：0.4两 / 20两 / 0两；非法值→0两"""
+    try:
+        v = round(float(value), 2)
+    except (TypeError, ValueError):
+        v = 0.0
+    return f"{v:g}两"
+
 # 武功书缓存（模块级，避免每次查表都读文件）
 _martial_arts_book_cache = None
 
@@ -298,18 +307,18 @@ class Player:
 
     @property
     def money(self):
-        # 银两（整数，单位：两，下限0；旧档无字段按初始20两）
+        # 银两（浮点，单位：两，2位小数，下限0；旧档无字段按初始20两）
         try:
-            return int(self._data.get("money", 20))
+            return round(float(self._data.get("money", 20)), 2)
         except (TypeError, ValueError):
-            return 20
+            return 20.0
 
     @money.setter
     def money(self, value):
         try:
-            self._data["money"] = max(0, int(value))
+            self._data["money"] = round(max(0.0, float(value)), 2)
         except (TypeError, ValueError):
-            self._data["money"] = 0
+            self._data["money"] = 0.0
 
     @property
     def rumor_list(self):
@@ -426,9 +435,8 @@ class Player:
 
         规则：
           1. 仅限已学武功，且必须与当前 martial_skill_list 一一对应
-          2. 每门 1 <= 新exp <= cap
-             cap = 该武功「当前境界」的下一阈值；
-             已达顶层境界（破碎虚空）则 cap = 当前exp（不可再升）
+          2. 每门 1 <= 新exp <= cap，其中 cap = 当前「总境界」对应的 exp 上限
+             （= 总境界的下一阈值 − 1，保证不越过当前总境界；顶层境界为最高者当前值）
           3. 总量守恒：sum(新exp) 必须等于 sum(原exp)，否则视为池子有剩余 → 保存失败
           4. 不触碰瓶颈进度，仅改 exp 后调用同步函数（境界由同步函数重算）
 
@@ -438,22 +446,22 @@ class Player:
             return False, "当前没有习得任何武功。"
 
         base = {}
-        caps = {}
         for sk in self.martial_skill_list:
             name = sk.get("skill_name", "")
             if not name:
                 continue
-            exp = int(sk.get("exp", 0))
-            base[name] = exp
-            realm = self.get_realm(exp)
-            try:
-                idx = self.REALM_LIST.index(realm)
-            except ValueError:
-                idx = 0
-            if idx >= len(self.EXP_THRESHOLDS) - 1:
-                caps[name] = exp  # 顶层境界：不可再升
-            else:
-                caps[name] = self.EXP_THRESHOLDS[idx + 1]
+            base[name] = int(sk.get("exp", 0))
+
+        # ★ 上限统一 = 当前总境界对应的 exp 上限（不越过当前总境界）
+        try:
+            _oidx = self.REALM_LIST.index(self.overall_realm)
+        except ValueError:
+            _oidx = 0
+        if _oidx >= len(self.EXP_THRESHOLDS) - 1:
+            _overall_cap = max(base.values()) if base else 0   # 顶层境界：最高者不可再升
+        else:
+            _overall_cap = self.EXP_THRESHOLDS[_oidx + 1] - 1  # 下一阈值 − 1（不越境）
+        caps = {_n: _overall_cap for _n in base}
 
         if set(target_map.keys()) != set(base.keys()):
             return False, "武功列表与存档不一致，请刷新后重试。"
@@ -464,7 +472,7 @@ class Player:
             if newexp < 1:
                 return False, f"「{name}」经验不能低于 1。"
             if newexp > caps[name]:
-                return False, f"「{name}」超过当前境界上限（上限 {caps[name]}）。"
+                return False, f"「{name}」超过当前总境界上限（上限 {caps[name]}）。"
 
         if sum(target_map.values()) != sum(base.values()):
             return False, "经验池尚有剩余，保存失败（分配总量须与原有总量一致）。"

@@ -18,6 +18,8 @@ import random
 import re
 import logging
 
+import npc_age
+
 logger = logging.getLogger("dice_system")
 
 
@@ -1295,7 +1297,9 @@ def build_active_npcs_brief(npc_list_data, user_action: str,
         skill_text = "、".join(skill_parts) if skill_parts else "武功不详"
         _vit = _vit_text_for_npc(npc, player_name=player_name)
         _vit_part = f" {_vit}" if _vit else ""
-        lines.append(f"{name}（{identity}）：{skill_text} [{status}]{_vit_part}（注:此为完全体档案数据,需结合场景判断当前实际境界）")
+        _age_hint = npc_age.age_stage_dc_hint(npc)
+        _age_part = f" {_age_hint}" if _age_hint else ""
+        lines.append(f"{name}（{identity}）：{skill_text} [{status}]{_vit_part}{_age_part}（注:此为完全体档案数据,需结合场景判断当前实际境界）")
 
     return "\n".join(lines)
 
@@ -1329,8 +1333,10 @@ def build_target_npc_line(npc: dict, player_name: str = None) -> str:
         skill_text = f"{skill_text}（当前境界：{level}）"
     _vit = _vit_text_for_npc(npc, player_name=player_name)
     _vit_part = f" {_vit}" if _vit else ""
+    _age_hint = npc_age.age_stage_dc_hint(npc)
+    _age_part = f" {_age_hint}" if _age_hint else ""
     id_part = f"（{identity}）" if identity else ""
-    return f"{name}{id_part}：{skill_text} [{status}]{_vit_part}（注:此为完全体档案数据,需结合场景判断当前实际境界）"
+    return f"{name}{id_part}：{skill_text} [{status}]{_vit_part}{_age_part}（注:此为完全体档案数据,需结合场景判断当前实际境界）"
 
 
 # ========== V5 分量制 DC：AI 分项给值，程序加总 ==========
@@ -1492,6 +1498,7 @@ def build_v4_dc_judge_prompt(scene: str, user_action: str,
   对战=对手【当前实际境界】对应DC。对手档案是完全体数据，须按场景上下文修正（受伤/年迈/初学→降，奇遇/发威→升）：
   无武功5·初学入门8·初窥门径11·略有小成14·略有所成17·渐入佳境20·融会贯通23·登堂入室26·炉火纯青29·出神入化32·登峰造极35·超凡入圣38·返璞归真40·天人合一40·破碎虚空40
   日常=行动固有难度：喝水吃饭5·日常行走8·普通施展10·演练熟练12·演练生疏14·突破瓶颈16·强行运功18·疗重伤20
+■ 年龄阶段（软建议·强建议遵守）：若「对手/活跃NPC」档案行带「年龄阶段:XX（base_dc 在境界对应值基础上…）」，请在境界对应 base_dc 基础上按该括号说明调整（区间内结合剧情取一个值；标"不调整"或无标注则不变）。此项只针对对战NPC，与玩家自身无关
 ■ environment_mod(-4~+4)天时地利与战术态势（对玩家有利为负，对玩家不利为正）：天时不利+1·开阔有利-1·偷袭得手-1~-2·玩家群战围杀NPC-1~-3·玩家以一敌多NPC+1~+3
 ■ situation_mod(-3~+3)人和战况（对玩家有利为负）：对手负伤-1~-3·对手受制-1~-3·玩家受制+1~+3·心神不宁+1~+2。双方当前HP/MP见档案行：对手HP≤70%按负伤降档·对手MP=0（内力枯竭）按受制降档·玩家HP≤70%或MP=0按带伤加档
 ■ equipment_mod(-2~+2)装备利钝（对玩家有利为负，参考【玩家装备】自行判断利钝）：神兵利刃且用对应武功或精良防具-1~-2·对手持神兵或徒手对兵刃+1~+2·装备与行动无关填0

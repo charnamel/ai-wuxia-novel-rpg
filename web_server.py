@@ -14,6 +14,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from player_manager import get_player, set_player, Player,edit_player_raw, save_player_raw, set_player_field, clear_martial_arts_book_cache
+import npc_age
 # ===== 骰子检定系统导入 =====
 import dice_system
 from dice_system import should_skip as dice_should_skip
@@ -588,8 +589,21 @@ def handle_battle_action(web_input: str, dice_confirm=None):
                         if _last_dc and WEB_BATTLE_STATE.get("round_num", 0) >= 1:
                             _dc_scene = f"{_dc_scene}\n【上一轮检定事实】\n{_last_dc}"
 
+                        _battle_npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
+                        try:
+                            npc_age.refresh_npc_age_stages(_battle_npc_data, _cur_novel_year(), write=True)
+                        except Exception as _nae:
+                            print(f"[WARN] NPC年龄阶段刷新异常: {_nae}")
+                        # 把刷新后的年龄阶段同步到战斗对手副本（供DC软建议）
+                        if WEB_BATTLE_STATE.get("target_npc"):
+                            _tname = WEB_BATTLE_STATE.get("target_name")
+                            for _n in _battle_npc_data.get("npc_list", []):
+                                if _n.get("name") == _tname:
+                                    WEB_BATTLE_STATE["target_npc"]["age_stage"] = _n.get("age_stage", "")
+                                    WEB_BATTLE_STATE["target_npc"]["age_stage_locked"] = bool(_n.get("age_stage_locked"))
+                                    break
                         _battle_npcs_brief = dice_system.build_active_npcs_brief(
-                            load_json(NPC_AGENT_FILE), player_attack,
+                            _battle_npc_data, player_attack,
                             _dc_scene,
                             extra_npcs=[WEB_BATTLE_STATE["target_npc"]] if WEB_BATTLE_STATE.get("target_npc") else []
                         )
@@ -1123,8 +1137,8 @@ def create_player():
     except (TypeError, ValueError):
         pass
     try:
-        _m = int(data.get('money') or 20)
-        if 0 <= _m <= 999999:
+        _m = round(float(data.get('money') or 20), 2)
+        if 0 <= _m <= 100000000:
             money = _m
     except (TypeError, ValueError):
         pass
@@ -2042,8 +2056,13 @@ def chat():
 
                         # AI只给DC
                         _l1_scene = CURRENT_PLOT_TEXT[-300:] if CURRENT_PLOT_TEXT else ""
+                        _dc_npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
+                        try:
+                            npc_age.refresh_npc_age_stages(_dc_npc_data, _cur_novel_year(), write=True)
+                        except Exception as _nae:
+                            print(f"[WARN] NPC年龄阶段刷新异常: {_nae}")
                         _active_npcs_brief = dice_system.build_active_npcs_brief(
-                            load_json(NPC_AGENT_FILE), user_action, _l1_scene
+                            _dc_npc_data, user_action, _l1_scene
                         )
                         try:
                             _dc, _dc_reason = dice_ai_judge_dc_only(
@@ -2643,14 +2662,31 @@ def api_md_save():
         return jsonify({"status": "error", "message": str(e)})
 
 # ======= NPC 管理器 API =======
+def _cur_novel_year():
+    """当前剧情年份（供NPC年龄阶段显示/计算）"""
+    try:
+        _p = get_player()
+        return npc_age.get_current_year(_p.novel_node) if _p else 0
+    except Exception:
+        return 0
+
+
 @app.route('/npc/list', methods=['GET'])
 def api_npc_list():
     """获取NPC列表"""
     try:
         npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
+        # 年龄阶段：仅算、仅显示，不写盘
+        try:
+            npc_age.refresh_npc_age_stages(npc_data, _cur_novel_year(), write=False)
+        except Exception:
+            pass
         npc_list = npc_data.get("npc_list", [])
-        # 返回精简列表（只包含 name 和 identity）
-        simplified = [{"name": n.get("name", ""), "identity": n.get("identity", "")} for n in npc_list]
+        # 返回精简列表（含姓名/身份/出生年/年龄阶段）
+        simplified = [{"name": n.get("name", ""), "identity": n.get("identity", ""),
+                       "year": n.get("year", 0), "age_stage": n.get("age_stage", ""),
+                       "age_stage_locked": bool(n.get("age_stage_locked"))}
+                      for n in npc_list]
         return jsonify({"status": "success", "npc_list": simplified})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
@@ -2669,6 +2705,14 @@ def api_npc_get():
                 npc["vitality"] = vitality_system.read_npc_vitality(npc)
                 # 展示层守门：desc 与HP档位矛盾时降级显示（只改返回值，不改存档）
                 npc["body_status_desc"] = vitality_system.sanitize_desc(npc)
+                # 年龄阶段：仅算、仅显示（不写盘）；已锁定则不覆盖
+                try:
+                    if not npc.get("age_stage_locked"):
+                        _, _st = npc_age.calc_npc_age(npc, _cur_novel_year())
+                        if _st:
+                            npc["age_stage"] = _st
+                except Exception:
+                    pass
                 return jsonify({"status": "success", "npc": npc})
         return jsonify({"status": "error", "message": f"NPC「{name}」不存在"})
     except Exception as e:
@@ -2697,10 +2741,54 @@ def api_npc_update():
                 break
         if not found:
             return jsonify({"status": "error", "message": f"NPC「{name}」不存在"})
+        # 若 year 变化 → 重算年龄阶段（只算，随 save_json 落盘）
+        try:
+            npc_age.refresh_npc_age_stages(npc_data, _cur_novel_year(), write=False)
+        except Exception:
+            pass
         save_json(NPC_AGENT_FILE, npc_data)
         return jsonify({"status": "success", "message": "保存成功"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route('/npc/lock_age_stage', methods=['POST'])
+def api_npc_lock_age_stage():
+    """锁定/解锁NPC年龄阶段（特殊剧情用）。
+    body: {name, stage, locked}  locked=True 时 stage 为锁定文字（≤12字）；False 为解锁恢复自动。"""
+    data = request.get_json(force=True, silent=True) or {}
+    name = str(data.get('name', '')).strip()
+    stage = str(data.get('stage', '')).strip()[:12]
+    locked = bool(data.get('locked', True))
+    if not name:
+        return jsonify({"status": "error", "message": "缺少NPC姓名"})
+    if locked and not stage:
+        return jsonify({"status": "error", "message": "锁定内容不能为空"})
+    try:
+        npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
+        for npc in npc_data.get("npc_list", []):
+            if npc.get("name") == name:
+                if locked:
+                    npc["age_stage_locked"] = True
+                    npc["age_stage"] = stage
+                else:
+                    npc["age_stage_locked"] = False
+                    npc.pop("age_stage", None)
+                    try:
+                        _, _st = npc_age.calc_npc_age(npc, _cur_novel_year())
+                    except Exception:
+                        _st = None
+                    if _st:
+                        npc["age_stage"] = _st
+                save_json(NPC_AGENT_FILE, npc_data)
+                return jsonify({"status": "success",
+                                "message": "已锁定年龄阶段" if locked else "已解除锁定",
+                                "age_stage": npc.get("age_stage", ""),
+                                "age_stage_locked": bool(npc.get("age_stage_locked"))})
+        return jsonify({"status": "error", "message": f"NPC「{name}」不存在"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
 
 @app.route('/npc/delete', methods=['POST'])
 def api_npc_delete():

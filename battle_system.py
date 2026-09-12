@@ -655,6 +655,19 @@ def run_battle_system(
                             _grade = _skill_info["grade"] if _skill_info else 0
                             # AI只判DC（传入target_npc作为extra_npcs，支持临时生成的对手）
                             _extra_npcs = [target_npc] if target_npc else []
+                            try:
+                                import npc_age as _npc_age
+                                _cur_y = _npc_age.get_current_year(player_obj.novel_node) if player_obj else 0
+                                _npc_age.refresh_npc_age_stages(npc_data_raw, _cur_y, write=True)
+                                # 同步到对手副本（供DC软建议）
+                                if isinstance(target_npc, dict) and target_npc.get("name"):
+                                    for _n in npc_data_raw.get("npc_list", []):
+                                        if _n.get("name") == target_npc.get("name"):
+                                            target_npc["age_stage"] = _n.get("age_stage", "")
+                                            target_npc["age_stage_locked"] = bool(_n.get("age_stage_locked"))
+                                            break
+                            except Exception:
+                                pass
                             _active_npcs_brief = dice_build_active_npcs_brief(
                                 npc_data_raw, player_attack, last_round_process or "",
                                 extra_npcs=_extra_npcs,
