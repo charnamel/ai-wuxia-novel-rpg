@@ -1181,6 +1181,45 @@ def api_save_raw():
     success, msg = save_player_raw(player_data)
     return jsonify({"status": "success" if success else "error", "message": msg})
 
+# ========== 银两手动结算（玩家在网页注入【金钱结算】±N两） ==========
+# 说明：AI 已不再自动改动银两（main.py 结算逻辑已删除）。此函数识别用户输入
+# 前导的【金钱结算】±N两 标记，直接改 player.json，并把标记从行动文字中剥离，
+# 剩余文字照常走剧情。支持叠加多个连续标记。
+_MONEY_MAX_DELTA = 100000000  # 单次手动调整上下限，防误填
+# 前导标记：可多段，如：【金钱结算】-0.2两，【金钱结算】+1两 我的行动...
+_MONEY_MARKER_RE = re.compile(r'\(?\s*【金钱结算】\s*([+＋\-－−])(\d+(?:\.\d+)?)\s*两?\s*\)?\s*[,，]?\s*')
+
+
+def apply_money_marker(action):
+    """剥离/入账前导【金钱结算】±N两 标记。
+    返回 (cleaned_action, applied_msgs)。applied_msgs 非空表示发生了入账。"""
+    if not action:
+        return action, []
+    msgs = []
+    player = get_player()
+    rest = action
+    while True:
+        m = _MONEY_MARKER_RE.match(rest)
+        if not m:
+            break
+        sign_char, num_str = m.group(1), m.group(2)
+        try:
+            amount = abs(float(num_str))
+        except (TypeError, ValueError):
+            break
+        if amount <= 0:
+            break
+        delta = amount if sign_char in "+＋" else -amount
+        delta = max(-_MONEY_MAX_DELTA, min(_MONEY_MAX_DELTA, delta))
+        if player is not None:
+            old = player.money
+            player.money = player.money + delta   # setter 已钳下限 0
+            player.save()
+            msgs.append(f"💴 银两手动调整：{old:g} → {player.money:g} 两")
+        rest = rest[m.end():].lstrip(" ,，。")
+    return rest, msgs
+
+
 @app.route('/chat', methods=['POST'])
 def chat():
     global CURRENT_PLOT_TEXT
@@ -1192,6 +1231,16 @@ def chat():
     
     data = request.get_json()
     user_action = data.get('action', '').strip()
+    # ========== 银两手动结算：剥离前导【金钱结算】±N两 并修改 player.json ==========
+    user_action, _money_msgs = apply_money_marker(user_action)
+    # 只发了银两标记、无其它行动 → 短路提示，不调用剧情 AI
+    if not user_action and _money_msgs:
+        return jsonify({
+            "status": "success",
+            "type": "system",
+            "plot": "\n".join(_money_msgs),
+            "message": "\n".join(_money_msgs),
+        })
     # ===== 骰子确认标志（True=确认掷骰, False=跳过, None=无待确认） =====
     dice_confirm = data.get('dice_confirm', None)
     # ========== DEBUG 开始 ==========
@@ -2151,7 +2200,10 @@ def chat():
             print(f"{'='*60}\n")
             # ========== DEBUG5 结束 ==========
 
-            # 返回结果给前端
+            # 返回结果给前端（若本轮同时做了银两手动调整，把提示拼进剧情末尾显示）
+            if _money_msgs and result.get("plot"):
+                result = dict(result)
+                result["plot"] = result["plot"] + "\n" + "\n".join(_money_msgs)
             return jsonify({"status": "success", **result})
         
     except Exception as e:

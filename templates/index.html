@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>江湖 · AI 武侠交互小说</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* 银两手工收支小弹窗（输入框上方） */
+        .money-panel{
+            position:absolute; bottom:56px; left:0; right:0; display:none;
+            background:#12121e; border:1px solid #caa; border-radius:8px;
+            padding:10px 12px; z-index:60; box-shadow:0 4px 16px rgba(0,0,0,.55);
+        }
+        .money-panel-title{ color:#caa; font-size:13px; font-weight:bold; margin-bottom:6px; }
+        .money-current{ color:#8f8; font-size:12px; margin-bottom:8px; }
+        .money-row{ display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+        .money-label{ color:#ccc; font-size:12px; }
+        .money-input{ flex:1; min-width:0; padding:4px 6px; background:#111; border:1px solid #444;
+            color:#0f0; border-radius:4px; }
+        .money-actions{ display:flex; gap:8px; }
+        .money-actions .btn{ flex:1; }
+    </style>
 </head>
 <body>
 
@@ -88,9 +104,25 @@
 
         <main class="main-col">
             <div id="output" class="story-output"></div>
-            <div id="input-area" class="input-area">
+            <div id="input-area" class="input-area" style="position:relative;">
                 <input type="text" id="user_input" class="input-main" placeholder="描述你的行动……" onkeypress="if(event.key==='Enter') send()"/>
+                <button onclick="toggleMoneyPanel()" class="btn btn-primary btn-send" title="银两收支（给予/收下）"
+                        style="width:42px; padding:0; flex:none;">💰</button>
                 <button onclick="send()" class="btn btn-primary btn-send">出 招</button>
+                <!-- 银两手工收支小弹窗 -->
+                <div id="money-panel" class="money-panel" style="display:none">
+                    <div class="money-panel-title">银两收支</div>
+                    <div id="money-current" class="money-current">余额：读取中…</div>
+                    <div class="money-row">
+                        <span class="money-label">金额</span>
+                        <input type="number" id="money-amount" min="0" step="0.2" value="0.2" class="money-input">
+                        <span class="money-label">两</span>
+                    </div>
+                    <div class="money-actions">
+                        <button onclick="injectMoney('+')" class="btn btn-primary">收下 +</button>
+                        <button onclick="injectMoney('-')" class="btn btn-danger">给予 -</button>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

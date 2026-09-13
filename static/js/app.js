@@ -46,6 +46,40 @@
             input.value = '';
             await handleMessage(msg);
         }
+        // ===== 银两手工收支（Web 端手动给予/收下，AI 已不再自动改钱） =====
+        async function refreshMoneyDisplay() {
+            try {
+                const r = await fetch('/player/get');
+                const d = await r.json();
+                const el = document.getElementById('money-current');
+                if (el && d.status === 'success' && d.data) {
+                    const m = d.data.money;
+                    el.textContent = '余额：' + (m === undefined || m === null ? '?' : Number(m).toFixed(2)) + ' 两';
+                }
+            } catch(e) {}
+        }
+        function toggleMoneyPanel() {
+            const panel = document.getElementById('money-panel');
+            if (!panel) return;
+            const show = panel.style.display === 'none';
+            panel.style.display = show ? 'block' : 'none';
+            if (show) refreshMoneyDisplay();
+        }
+        function injectMoney(sign) {
+            const amountInput = document.getElementById('money-amount');
+            const panel = document.getElementById('money-panel');
+            let v = amountInput ? parseFloat(amountInput.value) : NaN;
+            if (!(v > 0)) {
+                alert('请输入大于 0 的金额');
+                return;
+            }
+            v = Math.round(v * 100) / 100;  // 保留 2 位小数
+            const mark = '(' + '【金钱结算】' + (sign === '-' ? '-' : '+') + v + '两' + ')';
+            const cur = (input.value || '').trim();
+            input.value = cur ? (mark + ' ' + cur) : mark;
+            if (panel) panel.style.display = 'none';
+            input.focus();
+        }
         // ===== 任务系统 Web 函数 =====
         async function taskAction(action, name) {
             const cmd = `task_action|${action}|${name}`;

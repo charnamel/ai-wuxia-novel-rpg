@@ -221,7 +221,7 @@ STATIC_SYSTEM_PROMPT = """
 14. **NPC身体状态**：一律通过 vitality_change 的HP数值体现，禁止通过文本或其它字段直接标记NPC死亡。
 15. **self_state**：主角身体/精神状态变化时填写，30字内。
 16. **novel_node**：必须以"YYYY年M季，"开头（如"1751年春，萧半和寿宴在即"）；无变化时填空字符串。
-17. **money_delta**：银两变化时填写（正数获得/收入，负数花费/失去，单位：两，可含小数、保留2位，如0.4两）。仅本轮剧情实际发生钱财收支时填写；闲聊、赶路、练功等无交易场景一律不填。参考清代物价：小额打赏/食宿/日用±1~5，宴请/买药/雇佣/置办兵器马匹±5~50，酬金/押镖/赎金/悬赏±50~500，赃银/家产等巨款±500~5000。★若在正文或状态栏里体现银两变化，必须写成带**最终值**的格式「银两+3两（现8.91→11.91两）」（即 `银两±N两（现X→Y两）`），不得只写增量；若无法调用工具，才在正文末尾单独输出【金钱结算】±N两（可小数） 兜底。
+17. **银两（money）**：银两由玩家在网页**手工管理**，你**不得**通过工具 `money_delta` 或正文改写玩家的银两；剧情即便体现钱财收支，也不要输出【金钱结算】标记或声称扣减/获得玩家的银两数值，数字交由玩家操作，你只驱动剧情。
 
 ## 禁止
 - 替玩家发言、做决定、说出玩家内心想法
@@ -866,54 +866,6 @@ BACKGROUND_STARTS = [
     "原著中", "你算了算日子", "你回忆起", "你你",
     "你心中暗", "你暗自", "你默念", "你心想",
 ]
-# ===== 银两结算（工具优先+正则兜底，对齐HP/MP双管线）=====
-MONEY_MAX_DELTA = 100000000   # 单轮银两变化量上限（1亿两，防AI乱写）
-_MONEY_SIGN = r"[+＋−\-－]"
-_MONEY_NUM = r"\d+(?:\.\d+)?"
-_MONEY_REGEX = re.compile(r"【金钱结算】\s*(" + _MONEY_SIGN + r"?" + _MONEY_NUM + r")\s*两?\s*(?:[（(][^）)]*[）)])?")
-# 状态栏「银两±N两（现X→Y两）」：捕获 符号、增量、可选最终值Y
-_MONEY_STATUS_REGEX = re.compile(
-    r"银两\s*[:：]?\s*(" + _MONEY_SIGN + r")\s*(" + _MONEY_NUM + r")\s*两?"
-    r"(?:\s*[（(]\s*(?:现|当前|余额)?\s*(" + _MONEY_NUM + r")\s*[→\-－>=]+\s*(" + _MONEY_NUM + r")\s*两?\s*[）)])?"
-)
-
-
-def _norm_sign(s):
-    return str(s).replace("＋", "+").replace("－", "-").replace("−", "-")
-
-
-def parse_money_change(reply_text):
-    """解析正文里的钱的「兜底」变化。返回 (mode, value) 或 None：
-      ("delta", D)  —— 增量式：①【金钱结算】±D两 ②状态栏无最终值
-      ("set",   Y)  —— 覆盖式：状态栏「银两±D两（现X→Y两）」→ 以最终值 Y 覆盖（幂等，防跨轮重复结算）
-    """
-    if not reply_text:
-        return None
-    text = str(reply_text)
-    m = _MONEY_REGEX.search(text)
-    if m:
-        try:
-            return ("delta", round(float(_norm_sign(m.group(1))), 2))
-        except ValueError:
-            return None
-    m2 = _MONEY_STATUS_REGEX.search(text)
-    if m2:
-        try:
-            after = m2.group(4)
-            if after is not None:
-                return ("set", round(float(after), 2))
-            return ("delta", round(float(_norm_sign(m2.group(1)) + m2.group(2)), 2))
-        except ValueError:
-            return None
-    return None
-
-
-def parse_money_regex(reply_text):
-    """兼容旧接口：仅返回增量(delta)或 None（覆盖式不在此返回）。"""
-    ch = parse_money_change(reply_text)
-    if ch and ch[0] == "delta":
-        return ch[1]
-    return None
 # ===== add_milestone 先定义 =====
 def add_milestone(cache, text):
     if "milestones" not in cache:
@@ -3969,11 +3921,6 @@ def process_one_round(user_input: str, is_web: bool = False):
                         "location": {
                             "type": "string",
                             "description": "地点变更，仅移动时填写新地点全称，未移动时填空字符串"
-                        },
-                        # ========== 新增：银两字段 ==========
-                        "money_delta": {
-                            "type": "number",
-                            "description": "银两变化量（正数获得/收入，负数花费/失去，单位：两，可含小数、保留2位，如0.4）。仅本轮剧情实际涉及银两收支时填写；闲聊、赶路、练功等无交易场景一律省略。参考清代物价：小额打赏/食宿/日用±1~5，宴请/买药/雇佣/置办兵器马匹±5~50，酬金/押镖/赎金/悬赏±50~500，赃银/家产等巨款±500~5000"
                         }
                     },
                     "required": ["skill_exp_gain"]   # 至少需要提供这个空数组
@@ -5205,53 +5152,9 @@ __L4_MERGE_SLOT__
                 }
                 player_obj.save()
 
-        # ===== 银两结算（工具优先 + 正则兜底，对齐HP/MP双管线）=====
-        _money_change = None
-        _money_src = ""
-        if tool_calls:
-            for tc in tool_calls:
-                if tc.function.name == "update_game_state":
-                    try:
-                        _mtargs = json.loads(tc.function.arguments)
-                        if "money_delta" in _mtargs:
-                            _money_change = ("delta", _mtargs.get("money_delta"))
-                            _money_src = "tool"
-                            break
-                    except Exception:
-                        pass
-        if _money_change is None:
-            _money_change = parse_money_change(reply)
-            _money_src = "text"
-        # ★ 无条件剥离 AI 正文里的系统标记行【金钱结算】（防重复/防泄漏到展示）
+        # ★ 无条件剥离 AI 正文里的系统标记行【金钱结算】（仅清理展示，银两已改由玩家在Web手动管理，见 web_server.apply_money_marker）
         if plot_content and "【金钱结算】" in plot_content:
             plot_content = re.sub(r'【金钱结算】[^\n]*\n?', '', plot_content).rstrip()
-        if _money_change is not None and player_obj:
-            _mm, _mv = _money_change
-            try:
-                _v = round(float(_mv), 2)
-            except (TypeError, ValueError):
-                _v = None
-            if _v is not None:
-                if _mm == "set":
-                    # 覆盖式（幂等）：状态栏带最终值 → 直接设为该值；重复出现（Y==当前）自动跳过，防跨轮重复结算
-                    _old = player_obj.money
-                    _new = round(max(0.0, _v), 2)
-                    if _new != _old:
-                        player_obj.money = _new
-                        player_obj.save()
-                        _money_log = f"💰银两结算：{format_money_liang(_old)} → {format_money_liang(_new)}"
-                        print(f"{COLOR_GREEN}{_money_log} [src={_money_src}]{COLOR_END}")
-                        plot_content = f"{plot_content}\n{_money_log}"
-                else:
-                    # 增量式
-                    _md = max(-MONEY_MAX_DELTA, min(MONEY_MAX_DELTA, _v))
-                    if _md != 0:
-                        player_obj.money = player_obj.money + _md  # setter 已钳下限0
-                        player_obj.save()
-                        _sign = "+" if _md > 0 else ""
-                        _money_log = f"💰银两结算：{_sign}{_md:g}两"
-                        print(f"{COLOR_GREEN}{_money_log} [src={_money_src}]{COLOR_END}")
-                        plot_content = f"{plot_content}\n{_money_log}"
 
         # ===== 特效挂载日志拼入剧情（网页可见，含1轮特效的当轮挂载提示） =====
         try:
