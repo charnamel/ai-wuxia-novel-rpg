@@ -30,6 +30,7 @@ Mobile: commands live in a bottom drawer (tap the "☰ 命令" button to open it
 - Worldbook retrieval: 2,000+ lore entries injected on demand, so the AI sticks to the setting
 - A main quest line built from original novel episodes, which you can also skip around
 - Play in the browser — works on both desktop and mobile, with panels for the map, quests, equipment, and more
+- Structured input: `@Character` to direct an NPC, `#Narration` for the environment — no more confusion over who is speaking or acting
 
 ## Requirements
 
@@ -102,6 +103,31 @@ A few things worth knowing:
 - Pick a location on the map to travel there
 
 For what every UI button does and how to write battle/save/debug commands, see the [Web UI & Command Guide](docs/05-网页界面与指令指南.md) (in Chinese).
+
+## Structured Input: @Character / #Narration
+
+By default, everything you type is treated as **your own (the player's) words and actions**. To write narration, or to direct an NPC, mark the attribution with two symbols:
+
+| Syntax | Meaning |
+|---|---|
+| `@CharacterName：content` | Performed by that character (speech / thought / action is judged by the AI from the text) |
+| `#content` | Narration / environment |
+| no marker | The player's own words and actions (default) |
+
+Example:
+
+```
+@陆菲青：前辈，晚辈告辞。
+@玩家：那晚辈先走一步。
+#窗外雨声渐密
+```
+
+- Two quick buttons, `@` and `#`, sit beside the input box. Typing `@` opens a candidate dropdown ordered **active > temporary > full roster**; click to insert.
+- Names after `@` are auto-matched against the NPC roster; names outside the roster also work — just separate them with `：` or `，` (e.g. `@黑衣人：你等着`).
+- To type a literal `@` or `#`, write `\@` or `\#`.
+- After you pick a target on the map, the system injects a `【场景目标】` (scene target) line automatically.
+
+Why it helps: the AI won't mistake an NPC line you wrote for the player's own speech, and you can direct NPC scenes like a screenwriter. See the [Web UI & Command Guide](docs/05-网页界面与指令指南.md) (in Chinese) for details.
 
 ## Project Layout
 
