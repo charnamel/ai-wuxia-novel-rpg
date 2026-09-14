@@ -26,6 +26,13 @@ def _env_int(key, default=90):
     except (ValueError, TypeError):
         return default
 
+def _env_float(key, default=0.0):
+    """安全读取环境变量（浮点数）"""
+    try:
+        return float(os.getenv(key, str(default)))
+    except (ValueError, TypeError):
+        return default
+
 # ====== 百炼配置（cloud_memory_v2.py 也直接读取 .env，此处仅做透传）======
 DASHSCOPE_API_KEY = _env("DASHSCOPE_API_KEY")
 BAILIAN_PLOT_MEMORY_ID = _env("BAILIAN_PLOT_MEMORY_ID")
@@ -59,6 +66,18 @@ DEEPSEEK_MODEL = _env(f"AUX_{_aux_active}_MODEL")
 COMMON_TIMEOUT = _env_int(f"AUX_{_aux_active}_TIMEOUT", 90)
 if not DEEPSEEK_API_KEY:
     print(f"[config] 警告: AUX_{_aux_active}_API_KEY 未设置，请检查 .env")
+
+# ====== LLM 温度与 top_p 设置（两套：主循环 / 辅助）======
+# 均从 .env 读取（MAIN_LOOP_TEMP 等），未设置时用下方默认值；可在 Web「API 设置」面板编辑
+# 主循环（剧情生成，main.py 主循环 / web 主剧情共用）
+MAIN_LOOP_TEMP = _env_float("MAIN_LOOP_TEMP", 0.65)
+MAIN_LOOP_TOP_P = _env_float("MAIN_LOOP_TOP_P", 1.0)
+# 辅助（后台总结/传记/记忆/章节摘要/世界观/任务/NPC档案等）
+AUX_LOOP_TEMP = _env_float("AUX_LOOP_TEMP", 0.3)
+AUX_LOOP_TOP_P = _env_float("AUX_LOOP_TOP_P", 1.0)
+# 特殊辅助常量（保留较高创造性，不并入统一0.3）
+OPENING_INSIGHT_TEMP = _env_float("OPENING_INSIGHT_TEMP", 0.7)   # 开局面貌 / 初始感悟
+TEMP_NPC_PROFILE_TEMP = _env_float("TEMP_NPC_PROFILE_TEMP", 0.6)  # web 临时对手档案生成
 
 # ====== 配图 LLM（2选1，IMG_GEN_ACTIVE=A/B）======
 _img_active = _env("IMG_GEN_ACTIVE", "A")

@@ -105,7 +105,9 @@
         <main class="main-col">
             <div id="output" class="story-output"></div>
             <div id="input-area" class="input-area" style="position:relative;">
-                <input type="text" id="user_input" class="input-main" placeholder="描述你的行动……" onkeypress="if(event.key==='Enter') send()"/>
+                <input type="text" id="user_input" class="input-main" placeholder="描述你的行动……（@角色  #旁白）" onkeypress="if(event.key==='Enter') send()" oninput="onInputChanged()" onblur="setTimeout(hideAtSuggest,150)"/>
+                <button onclick="insertMark('@')" class="btn btn-primary btn-send" title="指定角色：@名字" style="width:34px; padding:0; flex:none;">@</button>
+                <button onclick="insertMark('#')" class="btn btn-primary btn-send" title="旁白：#内容" style="width:34px; padding:0; flex:none;">#</button>
                 <button onclick="toggleMoneyPanel()" class="btn btn-primary btn-send" title="银两收支（给予/收下）"
                         style="width:42px; padding:0; flex:none;">💰</button>
                 <button onclick="send()" class="btn btn-primary btn-send">出 招</button>
@@ -286,6 +288,14 @@
                             <button onclick="npcAgeStageLock(false)" class="btn" style="padding:2px 10px; font-size:11px;">解除</button>
                             <span id="npc-age-lock-status" style="color:#888;"></span>
                         </div>
+                    </div>
+                    <div id="npc-secret-panel" style="background:#111; border:1px solid #333; border-radius:6px; padding:8px 10px; margin-bottom:8px; font-size:12px;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                            <span style="color:#c9f;">原著隐秘（secret）</span>
+                            <span style="color:#888; font-size:11px;">暗线/隐藏信息，作为【!原著隐秘!】注入AI，非铁律</span>
+                            <button onclick="npcSecretApply()" class="btn btn-green" style="padding:2px 10px; font-size:11px; margin-left:auto;">应用到JSON</button>
+                        </div>
+                        <textarea id="npc-secret-input" class="textarea-code ta-s" style="min-height:64px;" placeholder="该NPC的原著隐秘/暗线（可留空）……"></textarea>
                     </div>
                     <textarea id="npc-editor" class="textarea-code ta-s" placeholder="选择左侧 NPC 开始编辑，或点击「新增 NPC」创建新角色……"></textarea>
                     <div class="btn-row">

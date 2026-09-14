@@ -195,6 +195,95 @@
                 document.getElementById('init-panel').style.display = 'block';
             }
         }
+        // ===== 输入结构化辅助：@角色 / #旁白（@ 自动补全） =====
+        let _rosterCache = { t: 0, list: [] };
+        async function _loadRoster() {
+            const now = Date.now();
+            if (now - _rosterCache.t < 10000 && _rosterCache.list.length) return _rosterCache.list;
+            try {
+                const res = await fetch('/npc/roster');
+                const data = await res.json();
+                if (data.status === 'success' && Array.isArray(data.ordered)) {
+                    _rosterCache = { t: now, list: data.ordered };
+                }
+            } catch(e) {}
+            return _rosterCache.list;
+        }
+        function insertMark(ch) {
+            const inp = document.getElementById('user_input');
+            if (!inp) return;
+            const start = (inp.selectionStart !== null && inp.selectionStart !== undefined) ? inp.selectionStart : inp.value.length;
+            const end = (inp.selectionEnd !== null && inp.selectionEnd !== undefined) ? inp.selectionEnd : start;
+            let pre = inp.value.slice(0, start);
+            const post = inp.value.slice(end);
+            if (pre && !/\s$/.test(pre)) pre += ' ';
+            inp.value = pre + ch + post;
+            const pos = (pre + ch).length;
+            inp.focus();
+            inp.setSelectionRange(pos, pos);
+            if (ch === '@') { onInputChanged(); } else { hideAtSuggest(); }
+        }
+        function _atContext() {
+            const inp = document.getElementById('user_input');
+            if (!inp) return null;
+            const pos = (inp.selectionStart !== null && inp.selectionStart !== undefined) ? inp.selectionStart : 0;
+            const before = inp.value.slice(0, pos);
+            const at = before.lastIndexOf('@');
+            if (at < 0) return null;
+            const partial = before.slice(at + 1);
+            if (/[\s\n]/.test(partial)) return null;
+            return { inp: inp, at: at, pos: pos, partial: partial };
+        }
+        async function onInputChanged() {
+            const ctx = _atContext();
+            if (!ctx) { hideAtSuggest(); return; }
+            const roster = await _loadRoster();
+            if (!roster.length) { hideAtSuggest(); return; }
+            const q = ctx.partial;
+            let hits = roster.filter(n => n.startsWith(q));
+            if (hits.length < 8 && q) {
+                hits = hits.concat(roster.filter(n => !n.startsWith(q) && n.includes(q)));
+            }
+            hits = hits.slice(0, 8);
+            if (!hits.length) { hideAtSuggest(); return; }
+            showAtSuggestList(ctx, hits);
+        }
+        function showAtSuggestList(ctx, hits) {
+            const area = document.getElementById('input-area');
+            if (!area) return;
+            let box = document.getElementById('at-suggest');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'at-suggest';
+                area.appendChild(box);
+            }
+            box.style.cssText = 'display:block; position:absolute; left:8px; right:8px; bottom:100%; margin-bottom:4px; max-height:210px; overflow:auto; background:#161a22; border:1px solid #345; border-radius:6px; z-index:60; box-shadow:0 -2px 10px rgba(0,0,0,.5);';
+            box.innerHTML = '';
+            hits.forEach(function(nm) {
+                const el = document.createElement('div');
+                el.textContent = nm;
+                el.style.cssText = 'padding:7px 10px; cursor:pointer; color:#cdf; font-size:13px; border-bottom:1px solid #223;';
+                el.onmouseenter = function(){ el.style.background = '#243a33'; };
+                el.onmouseleave = function(){ el.style.background = 'transparent'; };
+                el.onmousedown = function(ev) {
+                    ev.preventDefault();
+                    const inp = ctx.inp;
+                    const before = inp.value.slice(0, ctx.at);
+                    const after = inp.value.slice(ctx.pos);
+                    inp.value = before + '@' + nm + ' ' + after;
+                    const pos = (before + '@' + nm + ' ').length;
+                    inp.focus();
+                    inp.setSelectionRange(pos, pos);
+                    hideAtSuggest();
+                };
+                box.appendChild(el);
+            });
+        }
+        function hideAtSuggest() {
+            const box = document.getElementById('at-suggest');
+            if (box) box.style.display = 'none';
+        }
+
         async function handleMessage(msg, diceConfirm) {
             append("> " + msg, "system");
             // 用唯一 DOM 引用替代 querySelectorAll，防止并发时删错元素
@@ -1767,6 +1856,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     renderNpcVitalityPanel(data.npc);
                     renderNpcEffectPanel(data.npc);
                     renderNpcAgeLockPanel(data.npc);
+                    renderNpcSecretPanel(data.npc);
                 } else {
                     alert('加载失败：' + data.message);
                 }
@@ -1803,6 +1893,24 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     alert('失败：' + (data.message || '未知错误'));
                 }
             } catch(e) { alert('网络错误：' + e); }
+        }
+
+        // ===== NPC 原著隐秘（secret） =====
+        function renderNpcSecretPanel(npc) {
+            const ta = document.getElementById('npc-secret-input');
+            if (!ta) return;
+            ta.value = (npc && npc.secret) ? String(npc.secret) : '';
+        }
+        function npcSecretApply() {
+            let npcData;
+            try {
+                npcData = JSON.parse(document.getElementById('npc-editor').value);
+            } catch(e) {
+                alert('JSON 格式错误，无法应用：' + e);
+                return;
+            }
+            npcData.secret = document.getElementById('npc-secret-input').value;
+            document.getElementById('npc-editor').value = JSON.stringify(npcData, null, 2);
         }
 
         function renderNpcVitalityPanel(npc) {
@@ -3395,6 +3503,9 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                             html += `<input type="text" id="${fid}" value="${escapeHtml(f.value)}" style="flex:1; padding:5px 8px; background:#222; color:#0f0; border:1px solid #446; border-radius:4px; font-size:12px; font-family:monospace;">`;
                         }
                         html += `</div>`;
+                        if (f.desc) {
+                            html += `<div style="font-size:11px; color:#788; margin:-4px 0 10px 138px;">${escapeHtml(f.desc)}</div>`;
+                        }
                     }
                     html += `</div>`;
                 }

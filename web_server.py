@@ -189,7 +189,7 @@ from main import (
     CONTEXT_CACHE_FILE,CLOUD_MEM_SLOT_ID,
     COLOR_SYSTEM, COLOR_END,    # <--- 这里加上了 COLOR_GREEN 和 COLOR_WARN
     PLAYER_FILE, NPC_AGENT_FILE, PLOT_PROGRESS_PER_ACTION,
-    DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, latest_plot1_text, # noqa: F401
+    DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, latest_plot1_text, AUX_LOOP_TEMP, AUX_LOOP_TOP_P, TEMP_NPC_PROFILE_TEMP, # noqa: F401
     WORLD_FILE, client, DEEPSEEK_MODEL, load_location_time,  # noqa: F401
 )
 # 导入配图和战斗模块组件
@@ -225,9 +225,9 @@ WEB_BATTLE_STATE = {
 }
 
 def _llm_dc_low_temp(sys_p, user_p, **kwargs):
-    """DC判定专用低温封装：判数值要一致（0.25），剧情生成仍走默认0.65
+    """DC判定专用封装（辅助温度 AUX_LOOP_TEMP），判数值需一致，剧情生成走主循环
     **kwargs 透传 tools/tool_choice（V5分量制DC的tool call）"""
-    return llm_call_common(sys_p, user_p, temp=0.25, **kwargs)
+    return llm_call_common(sys_p, user_p, temp=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, **kwargs)
 
 def reset_web_battle():
     """【修改点1】增加日志输出，便于追踪状态重置"""
@@ -1352,7 +1352,7 @@ def chat():
 }}
 """
                 # 安全提取AI返回文本，兼容字典/字符串两种返回，彻底避免 strip 报错
-                llm_result = llm_call_common(gen_prompt, f"生成临时对手 {target_name} 档案", temp=0.6, max_tokens=1200, timeout=60)
+                llm_result = llm_call_common(gen_prompt, f"生成临时对手 {target_name} 档案", temp=TEMP_NPC_PROFILE_TEMP, top_p=AUX_LOOP_TOP_P, max_tokens=1200, timeout=60)
                 raw_text = get_llm_content(llm_result)
                 if not raw_text or not isinstance(raw_text, str):
                     raw_text = "{}"
@@ -2743,6 +2743,54 @@ def api_npc_list():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+@app.route('/npc/roster', methods=['GET'])
+def api_npc_roster():
+    """@ 补全候选：活跃(最近剧情出现) > 临时(战斗目标) > 全量名单。"""
+    try:
+        npc_data = load_json(NPC_AGENT_FILE) or {"npc_list": []}
+        all_names = [str(n.get("name", "")).strip()
+                     for n in npc_data.get("npc_list", [])
+                     if isinstance(n, dict) and str(n.get("name", "")).strip()]
+        all_set = set(all_names)
+        # 临时：战斗目标
+        temp = []
+        try:
+            if WEB_BATTLE_STATE.get("active") and WEB_BATTLE_STATE.get("target_name"):
+                temp.append(str(WEB_BATTLE_STATE["target_name"]))
+        except Exception:
+            pass
+        # 活跃：最近 2 轮剧情里出现过的名单名（最多 30）
+        active = []
+        try:
+            cache = load_context_cache() or {}
+            recent = "\n".join(cache.get("interact_log", [])[-2:])
+            if recent:
+                for nm in all_names:
+                    if nm in recent:
+                        active.append(nm)
+                        if len(active) >= 30:
+                            break
+        except Exception:
+            pass
+        # 玩家（别名，方便 @玩家）
+        player_names = ["玩家"]
+        try:
+            _p = get_player()
+            if _p and getattr(_p, "name", ""):
+                player_names.append(str(_p.name))
+        except Exception:
+            pass
+        ordered, seen = [], set()
+        for nm in player_names + active + temp + all_names:
+            if nm and nm not in seen:
+                seen.add(nm)
+                ordered.append(nm)
+        return jsonify({"status": "success", "ordered": ordered,
+                        "active": active, "temp": temp, "all": all_names})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
 @app.route('/npc/get', methods=['GET'])
 def api_npc_get():
     """获取单个NPC详情"""
@@ -2959,7 +3007,7 @@ effect_triggers 说明（可选字段，NPC反手招）：
         except Exception:
             pass
 
-        llm_result = llm_call_common(sys_prompt, user_prompt, temp=0.6, max_tokens=1200, timeout=60)
+        llm_result = llm_call_common(sys_prompt, user_prompt, temp=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, max_tokens=1200, timeout=60)
         raw_text = get_llm_content(llm_result)
         if not raw_text or not isinstance(raw_text, str):
             return jsonify({"status": "error", "message": "AI 未返回有效内容"})
@@ -3282,6 +3330,24 @@ def _build_editable_schema():
     """构建可编辑环境变量的 schema（分组 + 字段元数据）"""
     schema = [
         {
+            "group": "llm_params",
+            "label": "🎚️ LLM 采样参数（temperature / top_p，可编辑，重启生效）",
+            "fields": [
+                {"key": "MAIN_LOOP_TEMP", "label": "主循环·温度", "type": "text", "default": "0.65",
+                 "desc": "主循环剧情生成温度（0~1，越高越有创造力）。web 主剧情共用。默认 0.65"},
+                {"key": "MAIN_LOOP_TOP_P", "label": "主循环·top_p", "type": "text", "default": "1.0",
+                 "desc": "主循环 nucleus 采样门限，越小越保守。默认 1.0"},
+                {"key": "AUX_LOOP_TEMP", "label": "辅助·温度", "type": "text", "default": "0.3",
+                 "desc": "辅助统一温度：后台总结/传记/记忆评分/章节摘要/世界观/任务/NPC档案等。默认 0.3"},
+                {"key": "AUX_LOOP_TOP_P", "label": "辅助·top_p", "type": "text", "default": "1.0",
+                 "desc": "辅助循环 top_p。默认 1.0"},
+                {"key": "OPENING_INSIGHT_TEMP", "label": "开局面貌·温度", "type": "text", "default": "0.7",
+                 "desc": "开局面貌/初始感悟生成温度（保留较高创造性）。默认 0.7"},
+                {"key": "TEMP_NPC_PROFILE_TEMP", "label": "临时对手档案·温度", "type": "text", "default": "0.6",
+                 "desc": "web 对战「临时对手」人物档案生成温度。默认 0.6"},
+            ]
+        },
+        {
             "group": "bailian",
             "label": "☁️ 阿里云百炼配置",
             "fields": [
@@ -3386,6 +3452,9 @@ def api_get_env_config():
     for group in schema:
         for field in group["fields"]:
             val = os.getenv(field["key"], "")
+            # 环境变量未设置时，回退显示 schema 里的默认值（如 LLM 采样参数）
+            if not val and field.get("default") is not None:
+                val = field["default"]
             if field["type"] == "password" and val:
                 field["value"] = "*" * max(len(val) - 4, 0) + val[-4:]
                 field["masked"] = True
@@ -3622,7 +3691,7 @@ def generate_task_summary(task_name, stage_hist):
                 {"role": "system", "content": "你是武侠小说总结者。根据任务过程记录，写一段180~200字的任务剧情总结。"},
                 {"role": "user", "content": summary_prompt}
             ],
-            max_tokens=400, temperature=0.4, timeout=60,
+            max_tokens=400, temperature=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, timeout=60,
             extra_body=_teb(DEEPSEEK_MODEL)
         )
         # 安全检查：message.content 可能为 None
@@ -3760,7 +3829,7 @@ def api_task_ai_generate():
 只输出标准JSON，格式：
 {{"display_name": "", "description": "", "type": "", "current_stage": "", "progress_percent": 0}}"""
 
-        raw_resp = llm_call_common(prompt, "AI生成任务", temp=0.6, max_tokens=600, timeout=60)
+        raw_resp = llm_call_common(prompt, "AI生成任务", temp=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, max_tokens=600, timeout=60)
         raw_text = get_llm_content(raw_resp)
         if not raw_text or not isinstance(raw_text, str):
             return jsonify({"status": "error", "message": "AI未返回有效内容，请重试"})
@@ -4085,7 +4154,7 @@ def api_martial_ai_generate():
         except Exception:
             pass
 
-        llm_result = llm_call_common(sys_prompt, user_prompt, temp=0.6, max_tokens=800, timeout=60)
+        llm_result = llm_call_common(sys_prompt, user_prompt, temp=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, max_tokens=800, timeout=60)
         raw_text = get_llm_content(llm_result)
         if not raw_text or not isinstance(raw_text, str):
             return jsonify({"status": "error", "message": "AI 未返回有效内容"})
@@ -4559,7 +4628,7 @@ def api_items_ai_generate():
         except Exception:
             pass
 
-        llm_result = llm_call_common(sys_prompt, user_prompt, temp=0.6, max_tokens=800, timeout=60)
+        llm_result = llm_call_common(sys_prompt, user_prompt, temp=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, max_tokens=800, timeout=60)
         raw_text = get_llm_content(llm_result)
         if not raw_text or not isinstance(raw_text, str):
             return jsonify({"status": "error", "message": "AI 未返回有效内容"})
@@ -4914,7 +4983,7 @@ def api_faction_ai_generate():
         except Exception:
             pass
 
-        llm_result = llm_call_common(sys_prompt, user_prompt, temp=0.6, max_tokens=1500, timeout=60)
+        llm_result = llm_call_common(sys_prompt, user_prompt, temp=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, max_tokens=1500, timeout=60)
         raw_text = get_llm_content(llm_result)
         if not raw_text or not isinstance(raw_text, str):
             return jsonify({"status": "error", "message": "AI 未返回有效内容"})
