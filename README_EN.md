@@ -31,6 +31,7 @@ Mobile: commands live in a bottom drawer (tap the "☰ 命令" button to open it
 - A main quest line built from original novel episodes, which you can also skip around
 - Play in the browser — works on both desktop and mobile, with panels for the map, quests, equipment, and more
 - Structured input: `@Character` to direct an NPC, `#Narration` for the environment — no more confusion over who is speaking or acting
+- Plot Guard: write down what must not happen as "current facts", injected every round so the AI steers clear
 
 ## Requirements
 
@@ -128,6 +129,18 @@ Example:
 - After you pick a target on the map, the system injects a `【场景目标】` (scene target) line automatically.
 
 Why it helps: the AI won't mistake an NPC line you wrote for the player's own speech, and you can direct NPC scenes like a screenwriter. See the [Web UI & Command Guide](docs/05-网页界面与指令指南.md) (in Chinese) for details.
+
+## Plot Guard (steer the story away from what you don't want)
+
+Open "百科管理 → 剧本红线" (Plot Guard) in the left nav and add a few red lines. They are injected into every round as "current facts", so the AI avoids those outcomes.
+
+| Write this | Not this |
+|---|---|
+| ✅ A positive fact: `陆菲青不死不伤` (Lu Feiqing is never hurt or killed) | ❌ A negation: `不要让陆菲青死` (don't kill Lu Feiqing) — negations tend to make the model bring the thing up |
+
+- Add / delete / clear supported; up to 30 lines, 80 characters each; **nothing is injected while the list is empty** (no token cost)
+- Stored in `data/plot_guard.json` and **travels with your save**; changes take effect from the **next round**
+- To force something to happen instead, start your input with `！！` — that round's story is then played out from your directive (highest priority)
 
 ## Project Layout
 
