@@ -2647,6 +2647,100 @@ def api_notepad_raw_save():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+# ======= 剧本红线（玩家设定的既定事实，空则不注入）=======
+PLOT_GUARD_FILE = "data/plot_guard.json"
+PLOT_GUARD_MAX_ITEMS = 30
+PLOT_GUARD_MAX_LEN = 80
+
+
+def _load_plot_guard():
+    """读取红线条目；缺文件/坏文件一律视为空。"""
+    empty = {"items": [], "updated_at": ""}
+    if not os.path.exists(PLOT_GUARD_FILE):
+        return empty
+    try:
+        with open(PLOT_GUARD_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            return empty
+        items = data.get("items") or []
+        if not isinstance(items, list):
+            items = []
+        return {
+            "items": [str(x) for x in items if str(x).strip()],
+            "updated_at": data.get("updated_at", ""),
+        }
+    except Exception:
+        return empty
+
+
+def _save_plot_guard(items):
+    data = {"items": items, "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")}
+    with open(PLOT_GUARD_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return data
+
+
+@app.route('/plot/guard', methods=['GET'])
+def api_plot_guard_get():
+    """剧本红线：读取全部条目"""
+    try:
+        return jsonify({"status": "success", **_load_plot_guard()})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route('/plot/guard/add', methods=['POST'])
+def api_plot_guard_add():
+    """剧本红线：追加一条（去空白 / 去重 / 限长 / 限数）"""
+    try:
+        payload = request.get_json() or {}
+        text = (payload.get("text") or "").strip()
+        if not text:
+            return jsonify({"status": "error", "message": "内容不能为空"})
+        if len(text) > PLOT_GUARD_MAX_LEN:
+            text = text[:PLOT_GUARD_MAX_LEN]
+        items = _load_plot_guard()["items"]
+        if text in items:
+            return jsonify({"status": "error", "message": "该条目已存在"})
+        if len(items) >= PLOT_GUARD_MAX_ITEMS:
+            return jsonify({"status": "error", "message": f"最多 {PLOT_GUARD_MAX_ITEMS} 条，请先删减"})
+        items.append(text)
+        _save_plot_guard(items)
+        return jsonify({"status": "success", "message": "已添加", "items": items})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route('/plot/guard/delete', methods=['POST'])
+def api_plot_guard_delete():
+    """剧本红线：按索引删除一条"""
+    try:
+        payload = request.get_json() or {}
+        items = _load_plot_guard()["items"]
+        try:
+            idx = int(payload.get("index"))
+        except Exception:
+            return jsonify({"status": "error", "message": "索引非法"})
+        if idx < 0 or idx >= len(items):
+            return jsonify({"status": "error", "message": "索引越界"})
+        items.pop(idx)
+        _save_plot_guard(items)
+        return jsonify({"status": "success", "message": "已删除", "items": items})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route('/plot/guard/clear', methods=['POST'])
+def api_plot_guard_clear():
+    """剧本红线：清空（清空后不再注入）"""
+    try:
+        _save_plot_guard([])
+        return jsonify({"status": "success", "message": "已清空", "items": []})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
 # ======= MD 文件 API（最小侵入，仅限项目根目录及 data/ 子目录）=======
 _PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 _ALLOWED_SUBDIRS = ['', 'data']

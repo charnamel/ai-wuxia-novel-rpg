@@ -5,7 +5,7 @@
 
 【语法】
   @名字[：，,（(]内容   →  {名字}：{内容}     角色演出（台词/心理/动作，由AI按文义判断）
-  #内容                →  旁白：{内容}        环境/镜头叙述
+  #内容                →  〖旁白〗{内容}      环境/镜头叙述（剧情走向的表述）
   无标记文字           →  玩家：{内容}        玩家本人言行
   行首（下一轮地点往XXX前进） → 【场景目标】…   程序注入的地图目标（独立行）
 
@@ -38,7 +38,7 @@ _RE_MAP_PREFIX = re.compile(r'^[（(]\s*下一轮地点往(.+?)前进\s*[）)]\s
 
 # 输出标签
 LBL_PLAYER = "玩家"
-LBL_ASIDE = "旁白"
+LBL_ASIDE = "〖旁白〗"
 LBL_SCENE = "【场景目标】"
 
 # 自由名末尾的常见"言语/心思"动词后缀（仅用于"名单外自由名"的边界修正）
@@ -195,7 +195,7 @@ def parse_player_input(raw, roster=None, names=None):
                 disp = LBL_PLAYER if name in PLAYER_ALIASES else name
                 body.append(f"{disp}：{content}" if content else f"{disp}：")
             elif kind == "aside":
-                body.append(f"{LBL_ASIDE}：{content}" if content else f"{LBL_ASIDE}：")
+                body.append(f"{LBL_ASIDE}{content}" if content else LBL_ASIDE)
             else:
                 if content:
                     body.append(f"{LBL_PLAYER}：{content}")

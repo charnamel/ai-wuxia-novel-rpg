@@ -85,6 +85,8 @@ _SEASON_POOL_MAP = {
 # ===== 统一触发常量 =====
 _WEATHER_ROLL_INTERVAL = 5   # 每N轮一次抽奖机会
 _WEATHER_ROLL_PROB = 0.25    # 到达阈值后的中奖概率
+# 玩家旁白指定天气后，跳过接下来 N 次抽奖机会（抽奖 5 轮才一次，1 次≈最多锁 5 轮）
+_PLAYER_WEATHER_LOCK_ROLLS = 1
 # 季节解析正则（优先匹配"YYYY年X(天/季)"，抓不到再全文抓第一个春夏秋冬字兜底）
 _RE_YEAR_SEASON = re.compile(r"(\d{1,4})年\s*(春|夏|秋|冬)(?:天|季)?")
 _RE_FIRST_SEASON = re.compile(r"(春|夏|秋|冬)(?:天|季)?")
@@ -225,6 +227,22 @@ def roll_weather_if_needed(round_num, novel_node_text=""):
 
         data = load_location_time()
         old = data.get("weather", "")
+
+        # ===== 玩家旁白指定过天气 → 跳过接下来 N 次抽奖机会（不覆盖玩家的指定）=====
+        try:
+            lock_rolls = int(data.get("weather_lock_rolls") or 0)
+        except Exception:
+            lock_rolls = 0
+        if lock_rolls > 0:
+            lock_rolls -= 1
+            if lock_rolls > 0:
+                data["weather_lock_rolls"] = lock_rolls
+            else:
+                data.pop("weather_lock_rolls", None)
+            save_location_time(data)
+            print(f"[天气] 玩家指定锁定中（还剩 {lock_rolls} 次抽奖），本轮跳过")
+            return None
+
         if new_weather == old:
             return None  # 抽到相同就静默，不写盘不日志
 
@@ -247,4 +265,215 @@ def roll_weather_if_needed(round_num, novel_node_text=""):
         return (old, new_weather)
     except Exception as e:
         print(f"[天气] roll异常（已吞）：{e}")
+        return None
+
+
+# ============================================================================
+# ★ 玩家旁白指定天气（#旁白段）→ 匹配天气词 → 就近落进「当前季节池」
+#   规则：最长词优先 → 否定/结束句处理 → 同族裸词不改写 → 跨季同族降级
+# ============================================================================
+
+# 每族「候选天气名」按强度分组（weak 温和 / none 裸词 / strong 猛烈），
+# 取值时取第一个「在当前季节池里」的；池内没有该族 → 按 _FAMILY_FALLBACK 换族再来。
+_FAMILY_CANDIDATES = {
+    "晴":   {"weak": ["晴"],                      "none": ["晴"],                      "strong": ["艳阳高照", "万里无云", "晴"]},
+    "云":   {"weak": ["多云", "晴"],              "none": ["多云", "晴"],              "strong": ["阴天", "多云"]},
+    "阴":   {"weak": ["阴天", "多云"],            "none": ["阴天", "多云"],            "strong": ["阴天", "多云"]},
+    "雾":   {"weak": ["雾霾", "大雾"],            "none": ["大雾", "雾霾"],            "strong": ["大雾", "雾霾"]},
+    "雨":   {"weak": ["毛毛雨", "小雨"],          "none": ["小雨", "毛毛雨"],          "strong": ["大雨", "雷雨", "小雨"]},
+    "雷":   {"weak": ["雷雨", "大雨"],            "none": ["雷雨", "大雨"],            "strong": ["雷雨", "大雨"]},
+    "雪":   {"weak": ["小雪"],                    "none": ["小雪"],                    "strong": ["大雪", "小雪"]},
+    "夹雪": {"weak": ["雨夹雪", "小雪"],          "none": ["雨夹雪", "小雪"],          "strong": ["大雪", "雨夹雪"]},
+    "风":   {"weak": ["微风", "大风"],            "none": ["大风", "微风"],            "strong": ["狂风", "大风"]},
+    "闷热": {"weak": ["闷热"],                    "none": ["闷热"],                    "strong": ["闷热", "艳阳高照", "晴"]},
+    "霜":   {"weak": ["霜冻"],                    "none": ["霜冻"],                    "strong": ["霜冻"]},
+    "晴后": {"weak": ["雨过天晴"],                "none": ["雨过天晴"],                "strong": ["雨过天晴"]},
+}
+
+# 跨季降级：当前季节池里没有这个族时，改用这些族（同强度再就近取）
+_FAMILY_FALLBACK = {
+    "雪": "雨", "夹雪": "雨", "霜": "雾", "闷热": "晴", "雷": "雨", "晴后": "晴",
+    "雨": "雪",
+}
+
+# 同族内强度降级顺序（请求的强度在池里没有时，按这个顺序退而求其次）
+_INTENSITY_ORDER = {
+    "strong": ["none", "weak"],
+    "none": ["weak", "strong"],
+    "weak": ["none", "strong"],
+}
+
+# 天气名 → 族（用于「同族裸词不改写」判定，覆盖通用池全部名字）
+_NAME_FAMILY = {
+    "晴": "晴", "万里无云": "晴", "艳阳高照": "晴",
+    "多云": "云", "阴天": "阴", "雾霾": "雾", "大雾": "雾",
+    "小雨": "雨", "毛毛雨": "雨", "大雨": "雨", "雨过天晴": "晴后", "雷雨": "雷",
+    "小雪": "雪", "大雪": "雪", "雨夹雪": "夹雪",
+    "微风": "风", "大风": "风", "狂风": "风", "沙尘暴": "风",
+    "闷热": "闷热", "霜冻": "霜",
+}
+
+# 关键词 → (族, 强度)；匹配时按长度倒序，长词优先。
+# 注意：不收录「风/云/阴/雾/霜」等单字，避免「风光/风俗/云游」这类误触发。
+_WEATHER_KEYWORDS = {
+    # —— 晴 ——
+    "万里无云": ("晴", "strong"), "艳阳高照": ("晴", "strong"),
+    "阳光明媚": ("晴", "strong"), "烈日当空": ("晴", "strong"),
+    "骄阳似火": ("晴", "strong"),
+    "晴空万里": ("晴", "none"), "晴朗": ("晴", "none"), "大晴天": ("晴", "none"),
+    "放晴": ("晴", "none"), "转晴": ("晴", "none"), "天晴": ("晴", "none"),
+    "晴天": ("晴", "none"), "阳光": ("晴", "none"), "日头": ("晴", "none"),
+    "艳阳": ("晴", "strong"), "烈日": ("晴", "strong"), "骄阳": ("晴", "strong"),
+    "晴": ("晴", "none"),
+    # —— 云 / 阴 ——
+    "乌云密布": ("阴", "strong"), "乌云翻滚": ("阴", "strong"),
+    "阴云密布": ("阴", "strong"), "天色阴沉": ("阴", "none"),
+    "天色暗": ("阴", "none"), "阴云": ("阴", "none"),
+    "乌云": ("云", "none"), "云层": ("云", "none"), "云彩": ("云", "none"),
+    "转多云": ("云", "none"), "多云": ("云", "none"),
+    "阴天": ("阴", "none"), "转阴": ("阴", "none"), "天阴": ("阴", "none"),
+    # —— 雾 ——
+    "浓雾弥漫": ("雾", "strong"), "雾气弥漫": ("雾", "strong"),
+    "雾蒙蒙": ("雾", "weak"),
+    "浓雾": ("雾", "strong"), "大雾": ("雾", "strong"),
+    "雾气": ("雾", "none"), "起雾": ("雾", "none"), "雾霾": ("雾", "weak"),
+    # —— 雨 ——
+    "倾盆大雨": ("雨", "strong"), "瓢泼大雨": ("雨", "strong"),
+    "大雨倾盆": ("雨", "strong"), "暴雨倾盆": ("雨", "strong"),
+    "狂风暴雨": ("雨", "strong"), "风雨交加": ("雨", "strong"),
+    "暴风骤雨": ("雨", "strong"), "暴雨如注": ("雨", "strong"),
+    "蒙蒙细雨": ("雨", "weak"), "毛毛雨": ("雨", "weak"),
+    "淅淅沥沥": ("雨", "weak"), "细雨": ("雨", "weak"), "小雨": ("雨", "weak"),
+    "暴雨": ("雨", "strong"), "骤雨": ("雨", "strong"),
+    "阵雨": ("雨", "strong"), "大雨": ("雨", "strong"),
+    "雷雨": ("雷", "strong"),
+    "下雨": ("雨", "none"), "落雨": ("雨", "none"), "雨天": ("雨", "none"),
+    "雨声": ("雨", "none"), "雨点": ("雨", "none"), "雨水": ("雨", "none"),
+    # —— 雷 ——
+    "电闪雷鸣": ("雷", "strong"), "雷电交加": ("雷", "strong"),
+    "雷阵雨": ("雷", "strong"), "打雷": ("雷", "strong"),
+    "雷声": ("雷", "strong"), "雷霆": ("雷", "strong"),
+    # —— 雪 ——
+    "鹅毛大雪": ("雪", "strong"), "大雪纷飞": ("雪", "strong"),
+    "风雪交加": ("雪", "strong"), "暴风雪": ("雪", "strong"),
+    "暴雪": ("雪", "strong"), "风雪": ("雪", "strong"), "大雪": ("雪", "strong"),
+    "雪花": ("雪", "none"), "飘雪": ("雪", "none"), "飞雪": ("雪", "none"),
+    "落雪": ("雪", "none"), "雪片": ("雪", "none"), "下雪": ("雪", "none"),
+    "小雪": ("雪", "weak"),
+    "雨夹雪": ("夹雪", "none"),
+    # —— 风 ——
+    "狂风大作": ("风", "strong"), "狂风呼啸": ("风", "strong"),
+    "北风呼啸": ("风", "strong"), "微风拂面": ("风", "weak"),
+    "朔风": ("风", "strong"), "狂风": ("风", "strong"), "大风": ("风", "strong"),
+    "风沙": ("风", "strong"), "沙尘": ("风", "strong"), "风大": ("风", "strong"),
+    "微风": ("风", "weak"), "清风": ("风", "weak"), "和风": ("风", "weak"),
+    "起风": ("风", "none"), "刮风": ("风", "none"), "风起": ("风", "none"),
+    # —— 冷热 ——
+    "天寒地冻": ("霜", "strong"), "寒风刺骨": ("霜", "strong"),
+    "酷热": ("闷热", "strong"), "炎热": ("闷热", "strong"),
+    "暑气": ("闷热", "strong"), "热浪": ("闷热", "strong"),
+    "闷热": ("闷热", "none"), "天热": ("闷热", "none"),
+    "严寒": ("霜", "strong"), "结冰": ("霜", "strong"), "结霜": ("霜", "strong"),
+    "寒冷": ("霜", "none"), "白霜": ("霜", "none"), "霜冻": ("霜", "none"),
+}
+_WEATHER_KEYWORDS_ORDERED = sorted(_WEATHER_KEYWORDS.keys(), key=len, reverse=True)
+
+# 旁白段提取：未转义的 # 开头到行尾/下一个 #
+_RE_NARRATION_SEG = re.compile(r"(?<!\\)#([^\n#]+)")
+# 否定词（命中词「之前」出现 → 不是在说天气，跳过）
+_RE_NEG_BEFORE = re.compile(r"(不|没|没有|无|未|别|莫|岂|哪)\s*\S{0,2}$")
+# 否定词（命中词「之后」出现 → 否定当前说法，跳过）
+_RE_NEG_AFTER = re.compile(r"^\s*(不|没|无|未|别)")
+# 天气「结束句」独立识别（不依赖词表）：雨停了 / 雪住了 / 风不刮了 → 雨过天晴
+_RE_WEATHER_OVER = re.compile(
+    r"(雨|雪|风|雾|雷)\s*(停|住|散|歇|止|过)了?"
+    r"|(雨|雪|风)\s*(也)?\s*不\s*(下|刮|飘|落|见|停)?了"
+)
+
+
+def _resolve_weather_name(family, intensity, pool):
+    """把 (族, 强度) 落到池内的具体天气名。
+    顺序：该强度候选 → 同族其它强度 → 跨季换族 → 放弃(None)。
+    """
+    cands = _FAMILY_CANDIDATES.get(family, {})
+    for key in [intensity] + _INTENSITY_ORDER.get(intensity, []):
+        for name in (cands.get(key) or []):
+            if name in pool:
+                return name
+    fb = _FAMILY_FALLBACK.get(family)
+    if fb and fb != family:
+        return _resolve_weather_name(fb, intensity, pool)
+    return None
+
+
+def _match_weather_in_text(text, pool, old=""):
+    """在一段旁白里找天气意图 → 返回池内天气名（无命中/无需改动返回 None）。"""
+    # 1) 天气结束句：雨停了 / 雪住了 / 风不刮了 → 雨过天晴（池内没有则同族降级）
+    if _RE_WEATHER_OVER.search(text):
+        return _resolve_weather_name("晴后", "none", pool)
+
+    for kw in _WEATHER_KEYWORDS_ORDERED:
+        idx = text.find(kw)
+        if idx < 0:
+            continue
+        before = text[max(0, idx - 3):idx]
+        after = text[idx + len(kw):idx + len(kw) + 3]
+        # 2) 否定句：不下雪 / 没有下雨 / 雪不下了 → 跳过
+        if _RE_NEG_BEFORE.search(before) or _RE_NEG_AFTER.match(after):
+            continue
+        family, intensity = _WEATHER_KEYWORDS[kw]
+        # 3) 同族裸词不改写（"窗外雨声渐密"不该把 大雨 降级成 小雨）
+        if intensity == "none" and _NAME_FAMILY.get(old) == family:
+            return None
+        return _resolve_weather_name(family, intensity, pool)
+    return None
+
+
+def apply_player_weather(user_text, novel_node_text="", round_num=None):
+    """玩家旁白（#段）指定天气 → 就近写入当前季节池对应的天气。
+
+    - user_text：玩家原始输入（只认未转义的 # 段）
+    - novel_node_text：用于解析当前季节（"1755年秋，..."）
+    - round_num：轮次（保留参数，便于日志/后续扩展）
+    写入时会给天气打上 _PLAYER_WEATHER_LOCK_ROLLS 次抽奖的锁定期。
+    返回写入后的天气名；未命中/无变化/异常 → None（绝不影响主流程）
+    """
+    try:
+        if not user_text or "#" not in user_text:
+            return None
+        pool = get_season_weather_pool(novel_node_text)
+        data = load_location_time()
+        if data is None:
+            return None
+        old = data.get("weather", "")
+
+        target = None
+        for m in _RE_NARRATION_SEG.finditer(user_text):
+            chunk = m.group(1).strip()
+            if not chunk:
+                continue
+            target = _match_weather_in_text(chunk, pool, old)
+            if target:
+                break
+        if not target or target == old:
+            return None
+
+        data["weather"] = target
+        if _PLAYER_WEATHER_LOCK_ROLLS > 0:
+            data["weather_lock_rolls"] = _PLAYER_WEATHER_LOCK_ROLLS
+        if "_weather_tick" in data:
+            del data["_weather_tick"]
+        save_location_time(data)
+
+        season_tag = ""
+        mm = _RE_YEAR_SEASON.search(novel_node_text or "")
+        if mm:
+            season_tag = mm.group(2) + "季池"
+        else:
+            mm2 = _RE_FIRST_SEASON.search(novel_node_text or "")
+            season_tag = (mm2.group(1) + "季池") if mm2 else "通用池"
+        print(f"[天气] 玩家旁白指定（{season_tag}）：{old} → {target}")
+        return target
+    except Exception as e:
+        print(f"[天气] 玩家指定异常（已吞）：{e}")
         return None

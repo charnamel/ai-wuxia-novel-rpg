@@ -85,6 +85,7 @@
                 <button class="nav-btn" onclick="sendCommand('任务')">任务速览</button>
                 <button class="nav-btn" onclick="toggleMapPanel()">地图</button>
                 <button class="nav-btn" onclick="toggleNotepad()">记事本</button>
+<button class="nav-btn" onclick="togglePlotGuard()">剧本红线</button>
                 <button class="nav-btn" onclick="sendCommand('存档列表')">存档 · 读档</button>
             </div>
             <div class="nav-group">
@@ -229,6 +230,23 @@
     </div>
 
     <!-- ═══════════ NPC 管理器 ═══════════ -->
+    <!-- ═══════════ 剧本红线（玩家设定的既定事实） ═══════════ -->
+    <div id="plot-guard-modal" style="display:none" class="modal modal-md">
+        <div class="modal-head">
+            <h3 class="modal-title">剧本红线</h3>
+            <div class="modal-tools">
+                <button onclick="plotGuardClear()" class="btn btn-ghost">清空</button>
+                <button onclick="togglePlotGuard()" class="btn btn-ghost">关闭</button>
+            </div>
+        </div>
+        <div id="plot-guard-list" style="max-height:320px; overflow:auto; border:1px solid var(--line); border-radius:6px;"></div>
+        <div class="md-box-row" style="margin-top:10px;">
+            <input id="plot-guard-input" class="input-main" style="flex:1; max-width:none;" placeholder="例：陆菲青不死不伤" onkeypress="if(event.key==='Enter') plotGuardAdd()">
+            <button onclick="plotGuardAdd()" class="btn btn-green">添加</button>
+        </div>
+        <div class="modal-hint">红线作为「当前既定事实」每轮注入；条目为空时完全不注入。<br>建议写成正面事实（如"陆菲青不死不伤"），别写"禁止…"——否定句容易被模型反弹。</div>
+    </div>
+
     <div id="npc-manager-modal" style="display:none" class="modal modal-lg">
         <div class="modal-head">
             <h3 class="modal-title">NPC 管理器</h3>

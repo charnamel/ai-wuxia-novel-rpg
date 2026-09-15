@@ -257,7 +257,7 @@
                 box.id = 'at-suggest';
                 area.appendChild(box);
             }
-            box.style.cssText = 'display:block; position:absolute; left:8px; right:8px; bottom:100%; margin-bottom:4px; max-height:210px; overflow:auto; background:#161a22; border:1px solid #345; border-radius:6px; z-index:60; box-shadow:0 -2px 10px rgba(0,0,0,.5);';
+            box.style.cssText = 'display:block; position:absolute; left:8px; right:8px; bottom:100%; margin-bottom:4px; max-height:210px; overflow:auto; background:#161a22; border:1px solid #345; border-radius:6px; z-index:95; box-shadow:0 -2px 10px rgba(0,0,0,.5);';
             box.innerHTML = '';
             hits.forEach(function(nm) {
                 const el = document.createElement('div');
@@ -634,7 +634,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     output.appendChild(optContainer);
 
                     const fillInput = (text) => {
-                        input.value = '（' + text + '）';
+                        input.value = text;
                         input.focus();
                         input.scrollIntoView({block:'nearest'});
                     };
@@ -1667,6 +1667,98 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
             // 滚动到地图区域
             document.getElementById('map-panel').scrollIntoView({behavior: 'smooth', block: 'start'});
         }
+        // ======= 剧本红线（玩家设定的既定事实）=======
+        function togglePlotGuard() {
+            const modal = document.getElementById('plot-guard-modal');
+            if (modal.style.display === 'none' || !modal.style.display) {
+                modal.style.display = 'block';
+                renderPlotGuard();
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        async function renderPlotGuard() {
+            const box = document.getElementById('plot-guard-list');
+            if (!box) return;
+            box.innerHTML = '';
+            try {
+                const res = await fetch('/plot/guard');
+                const data = await res.json();
+                const items = (data && data.items) || [];
+                if (!items.length) {
+                    const empty = document.createElement('div');
+                    empty.style.cssText = 'padding:12px; color:#789; font-size:13px;';
+                    empty.textContent = '（暂无红线；为空时完全不注入）';
+                    box.appendChild(empty);
+                    return;
+                }
+                items.forEach(function(text, i) {
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid #223;';
+                    const label = document.createElement('div');
+                    label.style.cssText = 'flex:1; color:#cdf; font-size:13px; word-break:break-all;';
+                    label.textContent = (i + 1) + '. ' + text;
+                    const del = document.createElement('button');
+                    del.className = 'btn btn-ghost btn-xs';
+                    del.textContent = '✕';
+                    del.onclick = function() { plotGuardDel(i); };
+                    row.appendChild(label);
+                    row.appendChild(del);
+                    box.appendChild(row);
+                });
+            } catch (e) {
+                box.textContent = '读取失败：' + e;
+            }
+        }
+
+        async function plotGuardAdd() {
+            const inp = document.getElementById('plot-guard-input');
+            if (!inp) return;
+            const text = (inp.value || '').trim();
+            if (!text) return;
+            try {
+                const res = await fetch('/plot/guard/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text: text})
+                });
+                const data = await res.json();
+                if (data.status !== 'success') { alert(data.message || '添加失败'); return; }
+                inp.value = '';
+                renderPlotGuard();
+            } catch (e) {
+                alert('网络错误：' + e);
+            }
+        }
+
+        async function plotGuardDel(idx) {
+            try {
+                const res = await fetch('/plot/guard/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({index: idx})
+                });
+                const data = await res.json();
+                if (data.status !== 'success') { alert(data.message || '删除失败'); return; }
+                renderPlotGuard();
+            } catch (e) {
+                alert('网络错误：' + e);
+            }
+        }
+
+        async function plotGuardClear() {
+            if (!confirm('确定清空全部红线？清空后不再注入。')) return;
+            try {
+                const res = await fetch('/plot/guard/clear', {method: 'POST'});
+                const data = await res.json();
+                if (data.status !== 'success') { alert(data.message || '清空失败'); return; }
+                renderPlotGuard();
+            } catch (e) {
+                alert('网络错误：' + e);
+            }
+        }
+
         // ======= 记事本 JavaScript =======
         function toggleNotepad() {
             const modal = document.getElementById('notepad-modal');
