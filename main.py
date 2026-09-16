@@ -4183,7 +4183,7 @@ def process_one_round(user_input: str, is_web: bool = False):
             if name not in mentioned_npcs:
                 mentioned_npcs.append(name)
         # 方案B①：被动检索统一参照 = 玩家消息 + 近3轮GM【本轮剧情内容】（纯规则）
-        _recent_ctx = _build_passive_recall_context(force_plot if force_plot_active else stripped_input, interact_logs)
+        _recent_ctx = _build_passive_recall_context(actual_user_action, interact_logs)
         _kw_text = _recent_ctx  # NPC记忆检索的 query 参照
         # 扩候选：近3轮剧情中已出现但玩家未点名的NPC也纳入回忆（白名单、去重、纯substring判定）
         for _n in all_npc_names:
@@ -4193,9 +4193,11 @@ def process_one_round(user_input: str, is_web: bool = False):
             mem_result = get_relevant_history(
                 user_id=CLOUD_MEM_SLOT_ID,
                 query=f"{npc_name} {_kw_text}".strip(),
-                top_k=2,  # 蒸馏记忆+原始记忆都能召回
+                top_k=3,  # 蒸馏记忆+原始记忆都能召回
                 min_score=0.45,
-                category_filter=[MemoryCategory.NPC_MEMORY]
+                category_filter=[MemoryCategory.NPC_MEMORY],
+                entity_filter=[npc_name],   # ★ 前置硬过滤：只取这个人的记忆（治"张冠李戴"）
+                keyword_boost=[npc_name],   # ★ 混合检索：内容命中人名小幅加权
             )
             if mem_result:
                 lines = mem_result.strip().split("\n")
@@ -4260,7 +4262,9 @@ def process_one_round(user_input: str, is_web: bool = False):
                 # 年龄阶段（age_stage 已由 refresh_npc_age_stages 落盘；这里注入到AI）
                 _age_sfx = npc_age.age_stage_suffix(npc, _cur_year)
                 _age_block = f"{_age_sfx} " if _age_sfx else ""
-                npc_line = f"丨 {name}（{identity}）{status_text} {_age_block}态度:{attitude}{relation_part}丨"
+                _pers = str(npc.get("personality", "") or "").strip()[:40]
+                _pers_part = f"｜性格:{_pers}" if _pers else ""
+                npc_line = f"丨 {name}（{identity}）{status_text} {_age_block}态度:{attitude}{relation_part}{_pers_part}丨"
                 active_lines.append(npc_line)
             else:
                 passive_list.append(f"丨{name}（{identity}）")
@@ -4487,7 +4491,7 @@ def process_one_round(user_input: str, is_web: bool = False):
                 _recent_logs_for_active = interact_logs[-3:] if len(interact_logs) >= 3 else interact_logs
                 _recent_context_for_active = "\n\n".join(_recent_logs_for_active) if _recent_logs_for_active else ""
                 _active_npcs_for_retrieval = mentioned_npcs[:5] if 'mentioned_npcs' in dir() else []
-                _active_input_for_retrieval = force_plot if force_plot_active else stripped_input
+                _active_input_for_retrieval = actual_user_action
                 _known_npc_names = all_npc_names if 'all_npc_names' in dir() else []
                 def _run_active_retrieval():
                     nonlocal _active_retrieval_result
@@ -4507,7 +4511,7 @@ def process_one_round(user_input: str, is_web: bool = False):
 # ===== 向量检索 L4 相关历史线索 =====
         # 检索用文本：强制剧情模式下去掉!!前缀，避免污染向量检索
         # 方案B②：L4 检索参照与被动①统一 = 玩家消息 + 近3轮GM【本轮剧情内容】
-        query_text = _build_passive_recall_context(force_plot if force_plot_active else stripped_input, interact_logs)
+        query_text = _build_passive_recall_context(actual_user_action, interact_logs)
         # L4 双通道：CHAPTER取最高1条 + PLOT_ROUND取最高1条（云端召回2条，按score降序取前1）
         relevant_l4_nodes = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
@@ -4624,7 +4628,7 @@ def process_one_round(user_input: str, is_web: bool = False):
                 import traceback as _tb
                 _tb.print_exc()
                 _wb_text = ""
-        worldbook_section = f"\n【*世界书检索*】（关键词匹配背景知识，仅供参考，需结合当前场景判断相关性）\n{_wb_text}\n" if _wb_text else ""
+        worldbook_section = f"\n【*世界书检索·权威设定*】以下为相关人物/门派/地点的既定设定，演绎必须与之一致：「性格」决定该人物的言行方式；「原著隐秘」属隐藏信息，只在剧情合理推进时逐步流露，不得无故和盘托出。\n{_wb_text}\n" if _wb_text else ""
 
         # ===== 【DEBUG】把传给AI上下文的世界书检索信息打印到后台（CLI/Web端都会在各自进程 stdout 看到）=====
         print(f"\n{COLOR_SYSTEM}========== 第 {current_round} 轮 世界书检索 =========={COLOR_END}")
@@ -4653,7 +4657,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         # 构建 NPC 记忆块（移至 L4 区域）
         npc_memory_lines = []
         for npc_name, recall_text in npc_recalled.items():
-            if recall_text not in stripped_input and stripped_input not in recall_text and recall_text not in current_goal and current_goal not in recall_text:
+            if recall_text not in actual_user_action and actual_user_action not in recall_text and recall_text not in current_goal and current_goal not in recall_text:
                 npc_memory_lines.append(f"【{npc_name}的记忆】{recall_text}")
         npc_memory_block = "\n    ".join(npc_memory_lines) if npc_memory_lines else ""
         #读取当前小说节点

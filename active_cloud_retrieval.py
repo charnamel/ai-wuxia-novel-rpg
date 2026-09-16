@@ -41,9 +41,9 @@ _BASE_URL = os.getenv("ACTIVE_RETRIEVAL_BASE_URL", "") or _FALLBACK_URL
 _MODEL = os.getenv("ACTIVE_RETRIEVAL_MODEL", "") or "deepseek-v4-flash"
 
 _MAX_GROUPS = 3
-_L4_TOP_K = 2
-_NPC_TOP_K = 2
-_QUEST_TOP_K = 2
+_L4_TOP_K = 3
+_NPC_TOP_K = 3
+_QUEST_TOP_K = 3
 _MIN_SCORE = 0.40
 _THINKING_TIMEOUT = 15
 _MAX_NPC_LINES = 4  # 注入L4-1的主动NPC记忆条数上限
@@ -113,10 +113,13 @@ _THINKING_PROMPT = """你是一个游戏记忆检索助手。根据当前局面�
 {active_npcs}
 
 请调用 retrieve_cloud_memory 工具生成检索关键词。要求：
-1. 给出2-3组关键词，每组聚焦一个维度
+1. 给出2-3组检索词，每组聚焦一个维度（如"人物/事件""地点/行程""武功/伏笔"）
 2. 主动联想：玩家没提到但可能需要的记忆（如NPC上次见面的情景、某武功习得经历、某地点探索历史）
 3. 不要超过3组
-4. 关键词要具体（人名+事件，而非单独的"刀法"）
+4. 每组写 3~5 个"专名/实词"（人名、地名、物名、事件名词），用空格分隔
+5. 禁止抽象泛词：线索、情况、近况、路途、经过、相关、信息、事情、回忆等
+   正例：东昌府 闸河 漕船 返程 保定 ｜ 萧半和 身体 安康 袁依依 外公
+   反例：东昌府一带的行程线索，闸河堵塞与官道北上的路途情况
 5. 你必须调用 retrieve_cloud_memory 工具，不要用文字回答
 """
 
@@ -169,6 +172,10 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
     """执行单组关键词的云向量检索（3个分类查询，支持取消）"""
     results = {"l4": "", "npc": "", "quest": "", "l4_count": 0, "npc_count": 0, "quest_count": 0}
     uid = slot_id or os.environ.get("CLOUD_MEM_SLOT_ID", "default_player_XSFH6")
+    _tokens = [n.strip() for n in str(query or "").split() if len(n.strip()) >= 2]
+    _kw_terms = [str(n).strip() for n in (known_npcs or []) if str(n).strip()]
+    _kw_terms += [t for t in _tokens if 2 <= len(t) <= 8]
+    _kw_terms = _kw_terms[:6]
 
     def _cancelled():
         return cancel_event is not None and cancel_event.is_set()
@@ -183,11 +190,12 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
             top_k=_L4_TOP_K,
             min_score=_MIN_SCORE,
             category_filter=[MemoryCategory.CHAPTER, MemoryCategory.RUMOR, MemoryCategory.PLOT_ROUND],
+            keyword_boost=_kw_terms,
         )
         results["l4"] = l4_result or ""
         results["l4_count"] = len([l for l in (l4_result or "").split("\n") if re.match(r'^\d+\.', l.strip())])
-    except Exception:
-        pass
+    except Exception as _e:
+        print(f"[主动检索] 检索分支失败（已降级）: {str(_e)[:100]}")
 
     if _cancelled():
         return results
@@ -196,7 +204,10 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
     try:
         tokens = [n.strip() for n in query.split() if len(n.strip()) >= 2]
         known_set = set(known_npcs or [])
-        npc_names = [t for t in tokens if t in known_set][:2]
+        # 人名改为「子串命中」判定：检索句已改为自然语言（无空格分词），split() 拿不到人名
+        npc_names = [n for n in (known_npcs or []) if n and n in str(query)][:2]
+        npc_names += [t for t in tokens if t in known_set and t not in npc_names][:2]
+        npc_names = npc_names[:2]
         npc_texts = []
         for name in npc_names:
             if _cancelled():
@@ -207,13 +218,15 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
                 top_k=_NPC_TOP_K,
                 min_score=_MIN_SCORE,
                 category_filter=[MemoryCategory.NPC_MEMORY],
+                entity_filter=[name],
+                keyword_boost=_kw_terms + [name],
             )
             if mem and "暂无" not in mem:
                 npc_texts.append(mem)
         results["npc"] = "\n".join(npc_texts) if npc_texts else ""
         results["npc_count"] = len(npc_texts)
-    except Exception:
-        pass
+    except Exception as _e:
+        print(f"[主动检索] 检索分支失败（已降级）: {str(_e)[:100]}")
 
     if _cancelled():
         return results
@@ -225,11 +238,12 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
             top_k=_QUEST_TOP_K,
             min_score=_MIN_SCORE,
             category_filter=[MemoryCategory.TASK],
+            keyword_boost=_kw_terms,
         )
         results["quest"] = quest_result or ""
         results["quest_count"] = len([l for l in (quest_result or "").split("\n") if re.match(r'^\d+\.', l.strip())])
-    except Exception:
-        pass
+    except Exception as _e:
+        print(f"[主动检索] 检索分支失败（已降级）: {str(_e)[:100]}")
 
     return results
 
@@ -378,6 +392,10 @@ def active_retrieve_cloud(recent_context, player_input, active_npcs, slot_id=Non
     if not query_groups:
         print(f"[主动检索] 小模型未生成有效关键词，降级")
         return {"text": "", "count": 0, "groups": [], "error": "no_keywords"}
+
+    _raw_q = str(player_input or "").strip()[:100]
+    if _raw_q and not any(str(g.get("query", "")).strip() == _raw_q for g in query_groups):
+        query_groups = [{"query": _raw_q, "dimension": "玩家原话"}] + query_groups
 
     t1 = time.time()
     print(f"[主动检索] 小模型耗时: {t1-t0:.2f}s, 生成{len(query_groups)}组关键词")

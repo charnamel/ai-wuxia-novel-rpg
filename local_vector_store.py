@@ -113,6 +113,21 @@ def _rank_bonus(entry, latest):
     return bonus
 
 
+def _kw_bonus(entry, terms):
+    """轻量混合检索信号：内容里命中关键词（人名/专名/事件词）→ 小幅加权（最高 +0.08）。
+    用于补足纯语义检索对"精确匹配"的盲区（行业标准做法：dense + keyword 混合）。"""
+    if not terms:
+        return 0.0
+    text = str(entry.get("content") or "")
+    hits = 0
+    for t in terms:
+        if t and t in text:
+            hits += 1
+            if hits >= 2:
+                break
+    return 0.04 * hits
+
+
 # ========== 存储核心 ==========
 class _LocalStore:
     def __init__(self):
@@ -387,7 +402,8 @@ class _LocalStore:
                 self._flush_locked()
 
     # ---------- 检索 ----------
-    def search(self, user_id, query, top_k=4, min_score=0.45, category_filter=None):
+    def search(self, user_id, query, top_k=4, min_score=0.45, category_filter=None,
+               entity_filter=None, keyword_boost=None):
         """语义检索，返回 (文本, 节点列表)——文本格式与云端 get_relevant_history 一致。
         【铁律】模型未就绪立即返回空：绝不等待、绝不触发模型加载。
         否则请求线程会阻塞30-60秒 → gunicorn WORKER TIMEOUT → worker被杀 → 死循环。"""
@@ -396,9 +412,11 @@ class _LocalStore:
         if self._model is None or self._vectors is None:
             return "", []  # 模型还在加载/失败：本轮跳过记忆召回，游戏照常进行
         with self._lock:
+            _ent_set = set(str(x).strip() for x in entity_filter) if entity_filter else None
             cand = [(e, i) for i, e in enumerate(self._entries)
                     if (not user_id or e["user_id"] == user_id)
-                    and (not category_filter or e["category"] in category_filter)]
+                    and (not category_filter or e["category"] in category_filter)
+                    and (not _ent_set or str(e.get("entity") or "").strip() in _ent_set)]
             if not cand:
                 return "", []
             sub_matrix = self._vectors[[i for _, i in cand]]  # (n, D) 快照
@@ -415,7 +433,11 @@ class _LocalStore:
             return "", []
         # ---- 加法评分：排名 = 原始相似度 + 新近奖励(≤+0.10) + 状态奖励(active+0.05) ----
         latest = self._latest_date_by_user.get(user_id)
-        final = sims + np.array([_rank_bonus(e, latest) for e in entries_snapshot], dtype=sims.dtype)
+        _kw_terms = [str(t).strip() for t in (keyword_boost or []) if str(t).strip()]
+        final = sims + np.array(
+            [_rank_bonus(e, latest) + _kw_bonus(e, _kw_terms) for e in entries_snapshot],
+            dtype=sims.dtype,
+        )
         order = np.where(mask)[0]
         order = order[np.argsort(-final[order])][:top_k]
 
@@ -601,10 +623,12 @@ def upload_rumor_item(user_id, rumor_text, novel_node=""):
 
 
 # ========== 检索接口（签名/返回格式与 cloud_memory_v2.get_relevant_history 一致） ==========
-def get_relevant_history(user_id, query, top_k=4, min_score=0.55, category_filter=None):
-    """语义召回历史记忆（本地版）。返回格式化文本，失败/无结果返回空字符串"""
+def get_relevant_history(user_id, query, top_k=4, min_score=0.55, category_filter=None,
+                         entity_filter=None, keyword_boost=None):
+    """语义召回历史记忆（本地版）。返回格式化文本，失败/无结果返回空字符串。"""
     try:
-        text, _nodes = _store.search(user_id, query, top_k, min_score, category_filter)
+        text, _nodes = _store.search(user_id, query, top_k, min_score, category_filter,
+                                     entity_filter, keyword_boost)
         return text
     except Exception as e:
         print(f"[本地记忆] 检索失败: {str(e)[:80]}")

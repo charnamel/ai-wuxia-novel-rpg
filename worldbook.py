@@ -33,7 +33,7 @@ _SOURCE_FILES = [
 ]
 
 # ====== 检索配置 ======
-_DEFAULT_MAX_CHARS = 2000   # 每轮注入AI上下文字数上限
+_DEFAULT_MAX_CHARS = 3000   # 每轮注入AI上下文字数上限
 _DEFAULT_TOP_K = 24         # 最大返回条目数（6类 × 4条 ≈ 24）
 _BUILD_INTERVAL = 5         # 最小重建间隔（秒），防止高频操作抖动
 
@@ -198,7 +198,7 @@ def _build_npc_entries(npc_data):
         if not name:
             continue
         identity = npc.get("identity", "")
-        background = npc.get("background", "")
+        background = str(npc.get("background") or npc.get("life_experience") or "").strip()
         skills = str(npc.get("skills", ""))
         faction = npc.get("faction", "")
         martial_skills = npc.get("martial_skills", [])
@@ -229,8 +229,9 @@ def _build_npc_entries(npc_data):
             content_bits.append(identity)
         if faction:
             content_bits.append(f"门派：{faction}")
-        if background and len(background) <= 30:
-            content_bits.append(background)
+        if background:
+            _bg = background if len(background) <= 60 else background[:60] + "…"
+            content_bits.append(f"经历：{_bg}")
 
         # v3: 追加 personality（2-8字精简版）
         personality = npc.get("personality", "").strip()
@@ -245,7 +246,7 @@ def _build_npc_entries(npc_data):
         # v5: 追加原著隐秘（【!…!】暗线标记：隐藏信息 + 游戏可按剧情改编，非铁律）
         _secret = str(npc.get("secret") or "").strip()
         if _secret:
-            content_bits.append(f"【!原著隐秘!】{_secret[:80]}")
+            content_bits.append(f"【!原著隐秘!】{_secret[:120]}")
 
         # v2: 追加武功简要（最多4门主要武功）
         if isinstance(martial_skills, list) and martial_skills:
@@ -946,7 +947,7 @@ class WorldbookIndex:
                 for eid in ids:
                     content = self._entries[eid]["content"]
                     if group_chars[g] + len(content) > limit:
-                        break
+                        continue
                     group_lines[g].append(content)
                     group_chars[g] += len(content)
 
