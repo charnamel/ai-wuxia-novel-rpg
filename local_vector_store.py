@@ -144,6 +144,7 @@ class _LocalStore:
         self._dirty_count = 0      # 未落盘条目计数
         self._entries_dirty = False   # 条目状态变更（archived）待重写标记
         self._latest_date_by_user = {}  # {user_id: (year, season)} 库内最新游戏日期（新近奖励基准/无日期继承源）
+        self._query_cache = {}          # 查询编码缓存 {query: (1,D)向量}——主循环同一轮4类查询共用同一query，免重复编码
         self._load()
 
     # ---------- 持久化 ----------
@@ -232,12 +233,28 @@ class _LocalStore:
             print(f"[本地记忆] 警告：记忆写入被丢弃（模型未就绪），60秒内自动重试恢复")
 
     def _encode(self, texts):
-        """单条或批量编码，返回归一化向量 (N, D)。快照取用绝不阻塞——未就绪返回 None（注册表顺带踢后台加载）"""
+        """单条或批量编码，返回归一化向量 (N, D)。快照取用绝不阻塞——未就绪返回 None（注册表顺带踢后台加载）
+        查询缓存：主循环每轮对同一 query_text 独立发起4次分类查询（CHAPTER/PLOT/TASK/RUMOR），
+        命中缓存后整轮只编码1次（bge-base 单次编码30-100ms，省约200-400ms/轮）。
+        缓存向量只读共享（调用方仅做矩阵乘），GIL 下并发安全；批量重建传 list 不走缓存。"""
         model = embedding_registry.get_model_nowait(_MODEL_NAME)
         if model is None:
             return None
         if isinstance(texts, str):
+            cached = self._query_cache.get(texts)
+            if cached is not None:
+                return cached
             texts = [texts]
+            vecs = []
+            for i in range(0, len(texts), _ENCODE_BATCH):
+                batch = texts[i:i + _ENCODE_BATCH]
+                v = model.encode(batch, normalize_embeddings=True, show_progress_bar=False)
+                vecs.append(np.asarray(v, dtype=np.float32))
+            result = np.vstack(vecs)
+            if len(self._query_cache) >= 64:  # 超限清空（768维×4B×64≈200KB，量级无压力）
+                self._query_cache.clear()
+            self._query_cache[texts[0]] = result
+            return result
         vecs = []
         for i in range(0, len(texts), _ENCODE_BATCH):
             batch = texts[i:i + _ENCODE_BATCH]

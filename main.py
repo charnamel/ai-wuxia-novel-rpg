@@ -1825,6 +1825,32 @@ def update_context_cache(new_plot, user_action=""):
         save_context_cache(latest_disk_cache)
     # ========== 线程安全写入结束 ==========
 
+    # ===== 周期性自然恢复（每5轮：气血+10/内力+20，亡故冻结/濒死不恢复） =====
+    # 【v3修复】从 process_one_round 末尾挪到"轮次推进唯一入口"：
+    # 旧位置只有主流程能走到——战斗结束/回归主线冷却/任务完成也消耗轮次号却跳过恢复，
+    # 5的倍数轮经常恰好落在这些路径上，表现为"每5轮恢复时不时失效"。
+    # 上面的防重复校验保证同轮绝不双跑；save_context_cache 已落盘，崩溃也不会重复结算。
+    try:
+        _regen_log = vit_sys.natural_regen(new_round)
+        if _regen_log:
+            print(f"{COLOR_GREEN}[自然恢复] 第{new_round}轮：\n{_regen_log}{COLOR_END}")
+            # ★ 恢复后同步回内存单例：防后续 player_obj.save()（名声变动/战斗感悟等）
+            #   用旧 vitality 整体覆盖文件（settle 路径早已修过同款坑，regen 此前漏了）
+            _rp = get_player()
+            if _rp:
+                _rp._data["vitality"] = vit_sys.get_player_vitality()
+    except Exception as _regen_e:
+        print(f"{COLOR_WARN}⚠️ 自然恢复异常：{_regen_e}{COLOR_END}")
+
+    # ===== ★ 统一天气抽奖（每5轮·25%概率·按novel_node季节选池） =====
+    # 【v3修复】同样从 process_one_round 末尾上移：战斗结束/冷却早退/任务完成等消耗
+    # 轮次号的路径此前同样跳过天气抽奖；周期改回 5 轮（天气更鲜活）
+    try:
+        _nn_weather = player.novel_node if player and player.novel_node else ""
+        roll_weather_if_needed(new_round, _nn_weather)
+    except Exception as _weather_e:
+        print(f"{COLOR_WARN}⚠️ 天气抽奖异常（已吞，不中断剧情）：{_weather_e}{COLOR_END}")
+
     # 原函数的 return 保持不变
     return cache["last_plot_summary"]
 
@@ -3649,6 +3675,19 @@ def _build_passive_recall_context(player_text, interact_logs, max_char=None):
     return ctx
 
 
+def _is_dup_recall(recall_text, ref_text):
+    """防重复注入：记忆核心段与参照文本的字符集重合率>70% 才视为重复。
+    替代旧版"子串互包含"判定——玩家输入"我找周晴"这类短句只要碰巧出现在记忆文本里，
+    整条记忆就被误杀；重合率判定只在两者确实讲了同一件事时才拦截。"""
+    if not recall_text or not ref_text:
+        return False
+    core = set(recall_text[-60:])   # 记忆尾部更接近内容本体（头部多为时间/人名前缀）
+    ref = set(ref_text[-150:])
+    if not core:
+        return False
+    return len(core & ref) / len(core) > 0.7
+
+
 def process_one_round(user_input: str, is_web: bool = False):
       
      # Web端入口加锁，超时30秒防死锁
@@ -4161,7 +4200,7 @@ def process_one_round(user_input: str, is_web: bool = False):
             if not force_plot_active:
                 # ★ 输入结构化（独立模块 input_parser）：@角色 / #旁白 / 无标记=玩家
                 actual_user_action = input_parser.parse_player_input(stripped_input)
-                # ★ 玩家旁白（#段）指定天气 → 本轮即时生效（写入当前季节池内天气 + 2 轮锁定）
+                # ★ 玩家旁白（#段）指定天气 → 本轮即时生效（写入当前季节池内天气 + 锁 1 个抽奖周期）
                 try:
                     _nn_now = (player_obj.novel_node or "") if player_obj is not None else ""
                     _w_new = apply_player_weather(stripped_input, _nn_now, current_round)
@@ -4513,9 +4552,11 @@ def process_one_round(user_input: str, is_web: bool = False):
         # 方案B②：L4 检索参照与被动①统一 = 玩家消息 + 近3轮GM【本轮剧情内容】
         query_text = _build_passive_recall_context(actual_user_action, interact_logs)
         # L4 双通道：CHAPTER取最高1条 + PLOT_ROUND取最高1条（云端召回2条，按score降序取前1）
+        # 【v2】检索query截断100→200：以"上一轮剧情+玩家输入"为主体适当放大——
+        # 旧[:100]玩家输入偏长时近3轮剧情参照整段被截没，语义信号残缺
         relevant_l4_nodes = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=query_text[:100],
+            query=query_text[:200],
             top_k=1,
             min_score=0.45,
             category_filter=[MemoryCategory.CHAPTER]
@@ -4523,7 +4564,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         # PLOT_ROUND：仅任务完成时上传，量少但高价值，保留检索
         relevant_plot = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=query_text[:100],
+            query=query_text[:200],
             top_k=1,
             min_score=0.45,
             category_filter=[MemoryCategory.PLOT_ROUND]
@@ -4539,7 +4580,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         # TASK：任务完成总结，量少但高价值
         relevant_task = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=query_text[:100],
+            query=query_text[:200],
             top_k=1, min_score=0.45,
             category_filter=[MemoryCategory.TASK]
         )
@@ -4554,7 +4595,7 @@ def process_one_round(user_input: str, is_web: bool = False):
         # RUMOR：玩家剧情记录，每轮上传，语义召回相关历史记录
         relevant_rumor = get_relevant_history(
             user_id=CLOUD_MEM_SLOT_ID,
-            query=query_text[:100],
+            query=query_text[:200],
             top_k=3, min_score=0.45,
             category_filter=[MemoryCategory.RUMOR]
         )
@@ -4597,14 +4638,16 @@ def process_one_round(user_input: str, is_web: bool = False):
         _wb_query_debug = ""  # 给后台 debug 打印保留原始 Query
         if _WORLDBOOK_AVAILABLE:
             try:
-                # 【v2 按用户要求】检索Query范围：
-                # ① 上一轮完整AI输出（_raw_last_log = interact_logs[-1] 完整记录，仍保留 600 字防止过长）
-                # ② 玩家最新输入（stripped_input）
+                # 【v3 按用户要求】检索Query范围：
+                # ① 上一轮AI输出尾部（_raw_last_log[-200:]，场景衔接够用即可——
+                #    旧600字+玩家输入+近3轮剧情轻松超出bge的512 token截断线，编码时
+                #    大半取的是"已演完的上轮内容"，反而稀释了"玩家接下来要做的事"的语义信号）
+                # ② 玩家最新输入 + 近3轮剧情（query_text，主体）
                 #
                 # ★ 注意：上方 3321 行的 local 变量 `last_log` 已被重写为【单字符串】
                 #   （"本轮剧情内容[-250:]"），不可再对它用 [-1] 切片，否则取到的是"最后一个中文字"。
                 #   此处必须使用 3316 行保存的原始完整交互日志 _raw_last_log。
-                _last_ai_output = _raw_last_log[-600:] if _raw_last_log else ""
+                _last_ai_output = _raw_last_log[-200:] if _raw_last_log else ""
                 _wb_query = f"{_last_ai_output} {query_text}"
                 _wb_query_debug = _wb_query
                 # 尝试提取当前年代（novel_node_info 可能在此路径未赋值，安全取值）
@@ -4657,7 +4700,8 @@ def process_one_round(user_input: str, is_web: bool = False):
         # 构建 NPC 记忆块（移至 L4 区域）
         npc_memory_lines = []
         for npc_name, recall_text in npc_recalled.items():
-            if recall_text not in actual_user_action and actual_user_action not in recall_text and recall_text not in current_goal and current_goal not in recall_text:
+            # 防重复：与玩家输入/当前目标讲同一件事才跳过（v2 重合率判定，替代旧子串互包含误杀）
+            if not _is_dup_recall(recall_text, actual_user_action) and not _is_dup_recall(recall_text, current_goal):
                 npc_memory_lines.append(f"【{npc_name}的记忆】{recall_text}")
         npc_memory_block = "\n    ".join(npc_memory_lines) if npc_memory_lines else ""
         #读取当前小说节点
@@ -4860,11 +4904,11 @@ __L4_MERGE_SLOT__
         # ===== 等待主动检索完成（DC检定期间已并行执行，超时则取消） =====
         _active_l4_text = ""
         if _active_retrieval_thread:
-            _active_retrieval_thread.join(timeout=10)
+            _active_retrieval_thread.join(timeout=12)
             if _active_retrieval_thread.is_alive():
                 # 超时：置取消标志，线程在下一个检查点自行中止（已发出的HTTP请求无法中断），本轮降级为被动检索
                 _active_cancel_event.set()
-                print("[主动检索] 等待超时(10s)，已发出取消信号，本轮降级为被动检索")
+                print("[主动检索] 等待超时(12s)，已发出取消信号，本轮降级为被动检索")
             if _active_retrieval_result and _active_retrieval_result.get("text"):
                 _active_l4_text = _active_retrieval_result["text"]
                 print(f"[主动检索] 注入成功，{_active_retrieval_result.get('count', 0)}条结果")
@@ -5508,20 +5552,8 @@ __L4_MERGE_SLOT__
         with _plot_text_lock:
             latest_plot1_text = plot_content
 
-        # ===== 周期性自然恢复（每5轮：气血+10/内力+20，亡故冻结/濒死不恢复） =====
-        try:
-            regen_log = vit_sys.natural_regen(current_round)
-            if regen_log:
-                print(f"{COLOR_GREEN}[自然恢复] 第{current_round}轮：\n{regen_log}{COLOR_END}")
-        except Exception as e:
-            print(f"{COLOR_WARN}⚠️ 自然恢复异常：{e}{COLOR_END}")
-
-        # ===== ★ 统一天气抽奖（唯一入口：每5轮·25%概率·按novel_node季节选池）★ =====
-        try:
-            _nn_for_weather = (player_obj.novel_node or "") if player_obj is not None else ""
-            roll_weather_if_needed(current_round, _nn_for_weather)
-        except Exception as e:
-            print(f"{COLOR_WARN}⚠️ 天气抽奖异常（已吞，不中断剧情）：{e}{COLOR_END}")
+        # ===== 周期性自然恢复 + 天气抽奖均已上移至 update_context_cache（轮次推进唯一入口，v3修复：
+        #       战斗结束/回归主线冷却/任务完成等消耗轮次号的路径此前全部跳过；天气周期 5 轮）=====
 
         # ★ 最终返回前再读取一次，确保一致 ★
         final_loc_time = load_location_time()

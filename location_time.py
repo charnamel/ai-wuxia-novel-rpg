@@ -83,9 +83,11 @@ _SEASON_POOL_MAP = {
 }
 
 # ===== 统一触发常量 =====
-_WEATHER_ROLL_INTERVAL = 5   # 每N轮一次抽奖机会
+_WEATHER_ROLL_INTERVAL = 5   # 每N轮一次抽奖机会（v3: 10→5 改回，天气更鲜活）
 _WEATHER_ROLL_PROB = 0.25    # 到达阈值后的中奖概率
-# 玩家旁白指定天气后，跳过接下来 N 次抽奖机会（抽奖 5 轮才一次，1 次≈最多锁 5 轮）
+# 玩家旁白指定天气后，跳过接下来 N 次抽奖机会：每到抽奖轮必消耗一次（v3修复：
+# 旧版只在25%命中时才消耗，75%未命中锁原样保留→保护期无上限，与注释矛盾）。
+# 1 次锁约护 5~9 轮（由指定轮相位决定），到期后抽奖恢复自由。
 _PLAYER_WEATHER_LOCK_ROLLS = 1
 # 季节解析正则（优先匹配"YYYY年X(天/季)"，抓不到再全文抓第一个春夏秋冬字兜底）
 _RE_YEAR_SEASON = re.compile(r"(\d{1,4})年\s*(春|夏|秋|冬)(?:天|季)?")
@@ -219,16 +221,14 @@ def roll_weather_if_needed(round_num, novel_node_text=""):
             return None
         if round_num % _WEATHER_ROLL_INTERVAL != 0:
             return None
-        if random.random() >= _WEATHER_ROLL_PROB:
-            return None
 
-        pool = get_season_weather_pool(novel_node_text)
-        new_weather = random.choice(pool)
-
+        # ===== 玩家旁白指定过天气 → 跳过接下来 N 个抽奖周期（不覆盖玩家的指定）=====
+        # 【v3修复】锁检查移到概率门前：每到抽奖轮必消耗一次锁。旧版只在25%命中时
+        # 才消耗，75%未命中锁原样保留 → 保护期无上限（实测41%种子扛过3个周期仍锁），
+        # 与注释"1次≈最多锁N轮"矛盾。现在1次锁≈护一个周期(5~9轮)，精确可控。
         data = load_location_time()
-        old = data.get("weather", "")
-
-        # ===== 玩家旁白指定过天气 → 跳过接下来 N 次抽奖机会（不覆盖玩家的指定）=====
+        if data is None:
+            return None
         try:
             lock_rolls = int(data.get("weather_lock_rolls") or 0)
         except Exception:
@@ -242,6 +242,14 @@ def roll_weather_if_needed(round_num, novel_node_text=""):
             save_location_time(data)
             print(f"[天气] 玩家指定锁定中（还剩 {lock_rolls} 次抽奖），本轮跳过")
             return None
+
+        if random.random() >= _WEATHER_ROLL_PROB:
+            return None
+
+        pool = get_season_weather_pool(novel_node_text)
+        new_weather = random.choice(pool)
+
+        old = data.get("weather", "")
 
         if new_weather == old:
             return None  # 抽到相同就静默，不写盘不日志
@@ -378,8 +386,9 @@ _WEATHER_KEYWORDS = {
 }
 _WEATHER_KEYWORDS_ORDERED = sorted(_WEATHER_KEYWORDS.keys(), key=len, reverse=True)
 
-# 旁白段提取：未转义的 # 开头到行尾/下一个 #
-_RE_NARRATION_SEG = re.compile(r"(?<!\\)#([^\n#]+)")
+# 旁白段提取：未转义的 # 开头，到下一个 #/@ 为止（与 input_parser 旁白范围一致，
+# 可跨行——旧版 [^\n#] 不跨行，多行旁白第二行的天气词漏检）
+_RE_NARRATION_SEG = re.compile(r"(?<!\\)#([^#@]+)")
 # 否定词（命中词「之前」出现 → 不是在说天气，跳过）
 _RE_NEG_BEFORE = re.compile(r"(不|没|没有|无|未|别|莫|岂|哪)\s*\S{0,2}$")
 # 否定词（命中词「之后」出现 → 否定当前说法，跳过）
@@ -389,6 +398,12 @@ _RE_WEATHER_OVER = re.compile(
     r"(雨|雪|风|雾|雷)\s*(停|住|散|歇|止|过)了?"
     r"|(雨|雪|风)\s*(也)?\s*不\s*(下|刮|飘|落|见|停)?了"
 )
+# 【v3】回忆/追忆守卫：命中词之前出现 → 描写的是过去，不是当前天气（回忆那年鹅毛大雪）
+_RE_FLASHBACK_GUARD = re.compile(r"(回忆|想起|追忆|那年|当年|往昔|从前|旧时|梦中|仿佛|依稀|往事)")
+# 【v3】隐喻守卫（前置，窄窗口6字）：直接修饰天气词的心境描写（愁云惨雾 / 心头的乌云）
+_RE_METAPHOR_BEFORE = re.compile(r"(愁云|心头|心事)")
+# 【v3】隐喻守卫（后置，仅天气结束句）：风停了·纷争总算过去 —— 说的是局势不是天气
+_RE_METAPHOR_AFTER = re.compile(r"(纷争|恩怨|争斗|战事|风波)")
 
 
 def _resolve_weather_name(family, intensity, pool):
@@ -409,8 +424,16 @@ def _resolve_weather_name(family, intensity, pool):
 def _match_weather_in_text(text, pool, old=""):
     """在一段旁白里找天气意图 → 返回池内天气名（无命中/无需改动返回 None）。"""
     # 1) 天气结束句：雨停了 / 雪住了 / 风不刮了 → 雨过天晴（池内没有则同族降级）
-    if _RE_WEATHER_OVER.search(text):
-        return _resolve_weather_name("晴后", "none", pool)
+    #    【v3】隐喻/回忆守卫：「愁云惨雾散去」「风停了，这场纷争总算过去」是心境/局势
+    #    描写，不当天气；守卫命中时降级走关键词路径（隐喻句通常无真天气词，自然落空）
+    m_over = _RE_WEATHER_OVER.search(text)
+    if m_over:
+        _ov_before = text[max(0, m_over.start() - 8):m_over.start()]
+        _ov_after = text[m_over.end():m_over.end() + 8]
+        if not (_RE_FLASHBACK_GUARD.search(_ov_before)
+                or _RE_METAPHOR_BEFORE.search(_ov_before)
+                or _RE_METAPHOR_AFTER.search(_ov_after)):
+            return _resolve_weather_name("晴后", "none", pool)
 
     for kw in _WEATHER_KEYWORDS_ORDERED:
         idx = text.find(kw)
@@ -425,6 +448,11 @@ def _match_weather_in_text(text, pool, old=""):
         # 3) 同族裸词不改写（"窗外雨声渐密"不该把 大雨 降级成 小雨）
         if intensity == "none" and _NAME_FAMILY.get(old) == family:
             return None
+        # 4) 【v3】回忆/隐喻守卫：命中词前面是追忆（回忆那年鹅毛大雪）或
+        #    心境修饰（心头的乌云）→ 说的是过去/心事，不改当前天气
+        _kw_before = text[max(0, idx - 10):idx]
+        if _RE_FLASHBACK_GUARD.search(_kw_before) or _RE_METAPHOR_BEFORE.search(text[max(0, idx - 6):idx]):
+            continue
         return _resolve_weather_name(family, intensity, pool)
     return None
 

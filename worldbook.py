@@ -942,6 +942,7 @@ class WorldbookIndex:
             # 每组按上限截断
             group_lines = {g: [] for g in group_ids}
             group_chars = {g: 0 for g in group_ids}
+            group_added = {g: set() for g in group_ids}  # v4: 已采纳eid集合（溢出判重用）
             for g, ids in group_ids.items():
                 limit = group_limits[g]
                 for eid in ids:
@@ -950,16 +951,20 @@ class WorldbookIndex:
                         continue
                     group_lines[g].append(content)
                     group_chars[g] += len(content)
+                    group_added[g].add(eid)
 
             # 溢出分配：某类配额没耗尽时，按 _GROUP_OVERFLOW_PRIORITY 补给其他组
             # v2: 移除 item（物品自身配额已够）；加门槛（候选≥2条才接收溢出）
+            # v4 修复：旧版用"切片位置[len(group_lines):]"推已采纳集合——但字数被跳过的条目
+            #   会使切片错位，导致同一eid在溢出阶段被二次注入（实测吴癞子重复两次）。改用集合判重。
             used_total = sum(group_chars.values())
             leftover = max_chars - used_total
             if leftover > 0:
                 for g_priority in _GROUP_OVERFLOW_PRIORITY:
                     if leftover <= 0:
                         break
-                    remaining_ids = group_ids[g_priority][len(group_lines[g_priority]):]
+                    remaining_ids = [eid for eid in group_ids[g_priority]
+                                     if eid not in group_added[g_priority]]
                     # v2 门槛：剩余候选不足2条时不接收溢出（避免1条吃满）
                     if len(remaining_ids) < 2:
                         continue
@@ -969,6 +974,7 @@ class WorldbookIndex:
                             continue
                         group_lines[g_priority].append(content)
                         group_chars[g_priority] += len(content)
+                        group_added[g_priority].add(eid)
                         leftover -= len(content)
                         if leftover <= 0:
                             break

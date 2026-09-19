@@ -45,14 +45,37 @@ _L4_TOP_K = 3
 _NPC_TOP_K = 3
 _QUEST_TOP_K = 3
 _MIN_SCORE = 0.40
-_THINKING_TIMEOUT = 15
-_MAX_NPC_LINES = 4  # 注入L4-1的主动NPC记忆条数上限
-_MAX_L4_LINES = 5   # 注入L4-2的主动剧情/任务条数上限
+_THINKING_TIMEOUT = 12  # 与主循环 join(timeout=12) 对齐——旧15s时10~15s间返回的小模型调用会白白丢弃
+_MAX_NPC_LINES = 6  # 注入L4-1的主动NPC记忆条数上限（v2: 4→6，实测多NPC场景4条触顶截断）
+_MAX_L4_LINES = 8   # 注入L4-2的主动剧情/任务条数上限（v2: 5→8，实测5条触顶截断）
 
 # 条目前缀（[维度] 或 "1." 序号，可任意组合），去重key计算时剥离
 _PREFIX_RE = re.compile(r'^(?:(?:\[[^\]]+\]|\d+\.|[📜📋📰])\s*)+')
 # 行首序号前缀，如 "1. "
 _NUM_PREFIX_RE = re.compile(r'^\d+\.\s*')
+# 行首时间前缀（如 "1751年秋，" / "1752年春·"）：去重key计算时剥离——
+# 记忆开头多为时间头，同季节不同事件的前30字极易撞车，导致不同的记忆被误判重复丢弃
+_TIME_PREFIX_RE = re.compile(r'^\d{1,4}\s*年\s*[\u4e00-\u9fa5]{0,2}[春夏秋冬][\u4e00-\u9fa5]{0,2}[\s，,、·。]*')
+
+
+def _dedup_key(line):
+    """统一去重key：剥序号/分类标签/emoji/时间前缀后的正文前30字"""
+    clean = _NUM_PREFIX_RE.sub('', str(line or "").strip())
+    clean = _PREFIX_RE.sub('', clean)
+    clean = _TIME_PREFIX_RE.sub('', clean)
+    return clean[:30]
+
+
+def _clean_result_lines(text):
+    """剥掉检索输出里的占位标题行（【相关历史线索】…/暂无相关历史线索），只留真实条目行
+    ——text 字段与日志直接可读，不再出现三层嵌套前缀"""
+    lines = []
+    for ln in str(text or "").split("\n"):
+        s = ln.strip()
+        if not s or s.startswith("【相关历史线索】") or s in ("暂无相关历史线索", "无相关历史线索"):
+            continue
+        lines.append(s)
+    return "\n".join(lines)
 
 _client = None
 
@@ -184,16 +207,16 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
         return results
 
     try:
-        l4_result = get_relevant_history(
+        l4_result = _clean_result_lines(get_relevant_history(
             user_id=uid,
             query=query[:100],
             top_k=_L4_TOP_K,
             min_score=_MIN_SCORE,
             category_filter=[MemoryCategory.CHAPTER, MemoryCategory.RUMOR, MemoryCategory.PLOT_ROUND],
             keyword_boost=_kw_terms,
-        )
-        results["l4"] = l4_result or ""
-        results["l4_count"] = len([l for l in (l4_result or "").split("\n") if re.match(r'^\d+\.', l.strip())])
+        ))
+        results["l4"] = l4_result
+        results["l4_count"] = len([l for l in l4_result.split("\n") if re.match(r'^\d+\.', l.strip())])
     except Exception as _e:
         print(f"[主动检索] 检索分支失败（已降级）: {str(_e)[:100]}")
 
@@ -205,14 +228,15 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
         tokens = [n.strip() for n in query.split() if len(n.strip()) >= 2]
         known_set = set(known_npcs or [])
         # 人名改为「子串命中」判定：检索句已改为自然语言（无空格分词），split() 拿不到人名
-        npc_names = [n for n in (known_npcs or []) if n and n in str(query)][:2]
-        npc_names += [t for t in tokens if t in known_set and t not in npc_names][:2]
-        npc_names = npc_names[:2]
+        # 【v2】不设上限：查询是短关键词组，能命中的NPC名天然≤3个，本地单次检索~30ms无压力；
+        # 旧版[:2]会把第3位NPC（如"袁依依 萧半和 周晴"里的周晴）的记忆整段漏掉
+        npc_names = [n for n in (known_npcs or []) if n and n in str(query)]
+        npc_names += [t for t in tokens if t in known_set and t not in npc_names]
         npc_texts = []
         for name in npc_names:
             if _cancelled():
                 break
-            mem = get_relevant_history(
+            mem = _clean_result_lines(get_relevant_history(
                 user_id=uid,
                 query=f"{name} {query}",
                 top_k=_NPC_TOP_K,
@@ -220,8 +244,8 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
                 category_filter=[MemoryCategory.NPC_MEMORY],
                 entity_filter=[name],
                 keyword_boost=_kw_terms + [name],
-            )
-            if mem and "暂无" not in mem:
+            ))
+            if mem:
                 npc_texts.append(mem)
         results["npc"] = "\n".join(npc_texts) if npc_texts else ""
         results["npc_count"] = len(npc_texts)
@@ -232,16 +256,16 @@ def _search_one_group(query, slot_id=None, known_npcs=None, cancel_event=None):
         return results
 
     try:
-        quest_result = get_relevant_history(
+        quest_result = _clean_result_lines(get_relevant_history(
             user_id=uid,
             query=query[:100],
             top_k=_QUEST_TOP_K,
             min_score=_MIN_SCORE,
             category_filter=[MemoryCategory.TASK],
             keyword_boost=_kw_terms,
-        )
-        results["quest"] = quest_result or ""
-        results["quest_count"] = len([l for l in (quest_result or "").split("\n") if re.match(r'^\d+\.', l.strip())])
+        ))
+        results["quest"] = quest_result
+        results["quest_count"] = len([l for l in quest_result.split("\n") if re.match(r'^\d+\.', l.strip())])
     except Exception as _e:
         print(f"[主动检索] 检索分支失败（已降级）: {str(_e)[:100]}")
 
@@ -393,9 +417,9 @@ def active_retrieve_cloud(recent_context, player_input, active_npcs, slot_id=Non
         print(f"[主动检索] 小模型未生成有效关键词，降级")
         return {"text": "", "count": 0, "groups": [], "error": "no_keywords"}
 
-    _raw_q = str(player_input or "").strip()[:100]
-    if _raw_q and not any(str(g.get("query", "")).strip() == _raw_q for g in query_groups):
-        query_groups = [{"query": _raw_q, "dimension": "玩家原话"}] + query_groups
+    # 【v2】移除"玩家原话"兜底组：被动检索已用玩家输入+近3轮剧情查过同一内容，
+    # 主动再查一次经 merge_with_passive 去重后基本全被丢弃，白占配额——
+    # 主动检索的价值在小模型的"联想维度"（玩家没提但可能需要的记忆）
 
     t1 = time.time()
     print(f"[主动检索] 小模型耗时: {t1-t0:.2f}s, 生成{len(query_groups)}组关键词")
@@ -493,7 +517,7 @@ def _parse_npc_lines(raw_lines):
         clean = re.sub(r'^\[[^\]]*\]\s*', '', clean)
         if not clean.startswith("【") or "的记忆】" not in clean:
             continue
-        key = clean[:30]
+        key = _dedup_key(clean)
         if key in seen:
             continue
         seen.add(key)
@@ -517,7 +541,7 @@ def _parse_l4_lines(raw_l4_lines, raw_quest_lines):
         # 过滤检索输出的标题行/占位符（非真实条目）
         if clean.startswith("【相关历史线索】") or clean in ("暂无相关历史线索", "无相关历史线索"):
             continue
-        key = _PREFIX_RE.sub('', clean)[:30]
+        key = _dedup_key(clean)
         if not key or key in seen:
             continue
         seen.add(key)
@@ -550,15 +574,15 @@ def merge_with_passive(passive_text, active_result, passive_npc_block=""):
     if not npc_lines and not l4_lines:
         return {"l4": passive_text or "", "npc": ""}
 
-    # --- NPC记忆：与被动L4-1按前30字去重，格式不变 ---
+    # --- NPC记忆：与被动L4-1统一key去重（剥时间前缀），格式不变 ---
     npc_keys = set()
     for line in (passive_npc_block or "").split("\n"):
-        k = line.strip()[:30]
+        k = _dedup_key(line)
         if k:
             npc_keys.add(k)
     deduped_npc = []
     for line in npc_lines:
-        k = line.strip()[:30]
+        k = _dedup_key(line)
         if k and k not in npc_keys:
             npc_keys.add(k)
             deduped_npc.append(line)
@@ -572,7 +596,7 @@ def merge_with_passive(passive_text, active_result, passive_npc_block=""):
     max_num = 0
     for line in passive_body.split("\n"):
         s = line.strip()
-        k = _PREFIX_RE.sub('', s)[:30]
+        k = _dedup_key(s)
         if k:
             l4_keys.add(k)
         m = _NUM_PREFIX_RE.match(s)
@@ -582,7 +606,7 @@ def merge_with_passive(passive_text, active_result, passive_npc_block=""):
     new_entries = []
     for line in l4_lines:
         s = line.strip()
-        k = _PREFIX_RE.sub('', s)[:30]
+        k = _dedup_key(s)
         if k and k not in l4_keys:
             l4_keys.add(k)
             new_entries.append(s)
