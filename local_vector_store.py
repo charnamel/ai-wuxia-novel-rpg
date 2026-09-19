@@ -4,8 +4,8 @@ local_vector_store.py — 本地向量记忆库（替代百炼云向量库）
 ============================================================
 【定位】与 cloud_memory_v2.py 的公开 API 完全一致（函数名/参数/返回格式），
        由 cloud_memory_v2.py 末尾的路由开关（MEMORY_BACKEND=local）切换生效。
-【模型】独立加载 BAAI/bge-small-zh-v1.5（与世界书 semantic_index.py 互不干扰，
-       各自一个模型实例，故障隔离 + 主动检索线程可真并行）
+【模型】经 embedding_registry 共享加载（与世界书 semantic_index.py 同名共用一个实例，内存减半；
+       失败策略统一为注册表级 TTL 冻结 + 退避重试，编码快照不加锁仍可真并行）
 【存储】data/local_memory_entries.jsonl（内容） + data/local_memory_vectors.npy（向量矩阵）
 【检索】numpy 余弦相似度（向量归一化后内积即余弦），单次 ~20-50ms
 【去重】unique_id 规则与云端完全一致（迁移时 ID 可对齐校验覆盖率）
@@ -27,6 +27,9 @@ import hashlib
 import threading
 
 import numpy as np
+
+# 共享向量模型注册表：与世界书 semantic_index.py 同名共用一个实例（设计见 docs/08 文档 §5）
+import embedding_registry
 
 try:
     from dotenv import load_dotenv
@@ -52,7 +55,7 @@ _META_FILE = os.path.join(_DATA_DIR, "local_memory_meta.json")
 _MODEL_NAME = (os.getenv("LOCAL_MEMORY_MODEL", "") or "").strip() or "BAAI/bge-small-zh-v1.5"
 _ENCODE_BATCH = 64          # 批量重建向量时的批大小（避免内存尖峰）
 _SAVE_EVERY = 8             # 攒N条落盘一次（迁移提速；进程退出前强制落盘）
-_MODEL_ERROR_TTL = 60       # 模型加载失败冻结期(秒)：超时自动解冻重试，防一过性失败永久固化
+# 模型失败冻结/退避常量已随加载逻辑移入 embedding_registry（_ERROR_TTL/_BACKOFF_*）
 
 # ========== L4 业务分类常量（值与 cloud_memory_v2.MemoryCategory 完全一致） ==========
 class MemoryCategory:
@@ -132,13 +135,11 @@ def _kw_bonus(entry, terms):
 class _LocalStore:
     def __init__(self):
         self._lock = threading.RLock()       # 数据锁：只保护内存结构（毫秒级操作，绝不在持锁期间加载模型/编码）
-        self._model_lock = threading.Lock()  # 模型锁：只保护模型加载（30-60秒，期间读写照常进行）
+        # 模型加载锁已上移 embedding_registry（共享实例的加载互斥/失败冻结由注册表统一负责）
         self._ids = set()          # 已写入 unique_id 集合（去重）
         self._entries = []         # [{"unique_id","user_id","content","category","meta"}]
         self._vectors = None       # np.ndarray (N, D) float32 已归一化
-        self._model = None
-        self._model_error = None
-        self._model_error_at = 0.0      # 模型加载失败时间戳（TTL 解冻重试用）
+        self._model = None         # 注册表就绪实例的本地缓存引用（_load_model 时刷新）
         self._last_write_fail_log = 0.0  # 写入失败限频告警时间戳（60秒最多1条防刷屏）
         self._dirty_count = 0      # 未落盘条目计数
         self._entries_dirty = False   # 条目状态变更（archived）待重写标记
@@ -217,37 +218,11 @@ class _LocalStore:
 
     # ---------- 模型 ----------
     def _load_model(self):
-        """加载模型（阻塞，服务器上约30-60秒）。只持有模型锁——加载期间检索/写入完全不受影响。
+        """加载模型（阻塞，服务器上约30-60秒）。走共享 embedding_registry（与语义层共用实例）。
         调用方：后台预热线程 / 写入线程 / 重建接口。检索路径绝不调用本方法（防请求超时拖死worker）。
-        失败缓存于 _model_error 并冻结 _MODEL_ERROR_TTL 秒（防重试风暴）；超时自动解冻重试，
-        预热线程清除错误标记后亦立即重试——一过性故障无需人工干预。"""
-        if self._model is not None:
-            return self._model
-        if self._model_error and (time.time() - self._model_error_at) < _MODEL_ERROR_TTL:
-            return self._model
-        with self._model_lock:
-            if self._model is not None:
-                return self._model
-            try:
-                t0 = time.time()
-                # colorama 护栏仅用于 Windows 本地开发环境；Linux 服务器不执行此分支，
-                # 也不需要部署 win_console_guard.py（进度条已由环境变量全局禁用）
-                if sys.platform == "win32":
-                    try:
-                        from win_console_guard import ensure_safe_console
-                        ensure_safe_console()
-                    except Exception:
-                        pass
-                from sentence_transformers import SentenceTransformer
-                self._model = SentenceTransformer(_MODEL_NAME, device="cpu")
-                self._model_error = None
-                self._model_error_at = 0.0
-                print(f"[本地记忆] 模型加载完成: {_MODEL_NAME} ({time.time()-t0:.1f}s)")
-            except Exception as e:
-                self._model_error = str(e)
-                self._model_error_at = time.time()
-                print(f"[本地记忆] 模型加载失败: {str(e)[:120]}")
-            return self._model
+        失败冻结与退避重试由注册表统一管理；预热线程 clear_error 解冻后立即重试——一过性故障无需人工干预。"""
+        self._model = embedding_registry.ensure_loaded(_MODEL_NAME)
+        return self._model
 
     def _log_write_fail(self):
         """写入丢弃限频告警（60秒最多1条；模型预热期不刷屏，但不再静默丢数据）"""
@@ -257,8 +232,8 @@ class _LocalStore:
             print(f"[本地记忆] 警告：记忆写入被丢弃（模型未就绪），60秒内自动重试恢复")
 
     def _encode(self, texts):
-        """单条或批量编码，返回归一化向量 (N, D)。不触发模型加载——未就绪直接返回 None"""
-        model = self._model
+        """单条或批量编码，返回归一化向量 (N, D)。快照取用绝不阻塞——未就绪返回 None（注册表顺带踢后台加载）"""
+        model = embedding_registry.get_model_nowait(_MODEL_NAME)
         if model is None:
             return None
         if isinstance(texts, str):
@@ -409,7 +384,7 @@ class _LocalStore:
         否则请求线程会阻塞30-60秒 → gunicorn WORKER TIMEOUT → worker被杀 → 死循环。"""
         if not query or not str(query).strip():
             return "", []
-        if self._model is None or self._vectors is None:
+        if self._vectors is None or embedding_registry.get_model_nowait(_MODEL_NAME) is None:
             return "", []  # 模型还在加载/失败：本轮跳过记忆召回，游戏照常进行
         with self._lock:
             _ent_set = set(str(x).strip() for x in entity_filter) if entity_filter else None
@@ -467,12 +442,13 @@ class _LocalStore:
             cats[e["category"]] = cats.get(e["category"], 0) + 1
             if e.get("status") == "archived":
                 archived += 1
+        _st = embedding_registry.get_state(_MODEL_NAME)
         return {
-            "available": self._model is not None,  # 可用=模型就绪（加载中为False，防误用）
-            "model_ready": self._model is not None,
-            "model_loading": self._model is None and self._model_error is None,
+            "available": _st["ready"],  # 可用=模型就绪（加载中为False，防误用）
+            "model_ready": _st["ready"],
+            "model_loading": not _st["ready"] and _st["error"] is None,
             "model": _MODEL_NAME,
-            "model_error": self._model_error,
+            "model_error": _st["error"],
             "count": len(self._entries),
             "categories": cats,
             "archived": archived,
@@ -488,22 +464,23 @@ _WARMUP_RETRY_INTERVAL = 15  # 重试间隔（秒）
 
 def _warmup_model():
     """后台预热：加载模型；失败自动重试（服务器重启瞬间的内存竞争等一过性故障可自愈，
-    无需手动重启/点重建）。重试期间清除错误标记——状态栏显示"加载中"而非"不可用"。"""
+    无需手动重启/点重建）。重试期间解除失败冻结——状态栏显示"加载中"而非"不可用"。"""
     # 延迟启动：避开进程启动即退出的短命脚本（daemon线程中途加载torch会在解释器关闭时崩溃）
     time.sleep(1)
     retries = 0
     while _store._model is None:
         try:
+            embedding_registry.clear_error(_MODEL_NAME)  # 解除冻结立即重试（保留退避计数）
             if _store._load_model() is not None:
                 return
         except Exception:
             pass
         retries += 1
         if retries >= _WARMUP_MAX_RETRY:
+            _err = embedding_registry.get_state(_MODEL_NAME)["error"]
             print(f"[本地记忆] 模型预热失败（已重试{retries}次），读写暂不可用，"
-                  f"可点击状态栏'重建'按钮恢复。最后原因: {str(_store._model_error)[:100]}")
+                  f"可点击状态栏'重建'按钮恢复。最后原因: {str(_err)[:100]}")
             return
-        _store._model_error = None  # 一过性失败：清除标记稍后重试，期间对外显示"加载中"
         time.sleep(_WARMUP_RETRY_INTERVAL)
 
 
@@ -654,9 +631,10 @@ def rebuild_vectors():
     """
     # 自愈：清除历史加载失败记录并重试（仍失败则带出真实原因，而非笼统的"模型不可用"）
     if _store._model is None:
-        _store._model_error = None
+        embedding_registry.clear_error(_MODEL_NAME, reset_count=True)
         if _store._load_model() is None:
-            raise RuntimeError(f"模型重试加载仍失败: {(_store._model_error or '未知原因')[:150]}")
+            raise RuntimeError(f"模型重试加载仍失败: "
+                               f"{(embedding_registry.get_state(_MODEL_NAME)['error'] or '未知原因')[:150]}")
     # 1. 锁外读磁盘全量条目（含孤儿行；同 unique_id 后写的覆盖先写的）
     disk_entries = {}
     if os.path.exists(_ENTRIES_FILE):

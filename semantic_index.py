@@ -26,6 +26,9 @@ os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
 import numpy as np
 
+# 共享向量模型注册表：与记忆库 local_vector_store.py 同名共用一个实例（设计见 docs/08 文档 §5）
+import embedding_registry
+
 # ========== 1. 配置加载 ==========
 try:
     from dotenv import load_dotenv
@@ -52,50 +55,29 @@ _hash_list = None       # [content_hash, ...] 与向量行一一对应，用于�
 _id_to_idx = None       # {entry_id: row_index}（预留，目前用list.index）
 _available = False      # 模型是否加载成功
 _build_attempted = False  # 是否已尝试过构建（避免反复重试）
-_model_load_started = False  # 后台模型加载是否已踢过一次（防失败后每轮重试刷线程）
 
 
 # ========== 3. 模型加载（懒加载） ==========
 def _load_model():
-    """懒加载embedding模型（首次调用时加载，约3秒）"""
+    """加载模型（阻塞式；仅构建/重建路径调用，检索路径一律走 embedding_registry.get_model_nowait）。
+    走共享注册表：与记忆库同名模型共用一个实例（TTL 冻结 + 退避重试由注册表统一管理）"""
     global _model, _available
-    if _model is None:
-        try:
-            # colorama 护栏仅 Windows 本地开发启用；Linux 服务器不执行此分支，
-            # 也无需部署 win_console_guard.py
-            if sys.platform == "win32":
-                try:
-                    from win_console_guard import ensure_safe_console
-                    ensure_safe_console()
-                except Exception:
-                    pass
-            from sentence_transformers import SentenceTransformer
-            t0 = time.time()
-            _model = SentenceTransformer(_MODEL_NAME, device='cpu')
-            _available = True
-            print(f"[语义检索] ✅ 模型加载完成: {_MODEL_NAME} ({time.time()-t0:.1f}s)")
-        except ImportError:
-            _available = False
-            # 不打印错误，避免未安装时刷屏
-        except Exception as e:
-            _available = False
-            print(f"[语义检索] ❌ 模型加载失败（安全降级）: {e}")
+    _model = embedding_registry.ensure_loaded(_MODEL_NAME)
+    _available = _model is not None
     return _model
 
 
 def is_available():
     """检查语义检索是否可用（供worldbook调用决定是否走L5）
     【铁律】请求路径绝不等待模型加载（服务器上30-60秒会拖死gunicorn worker）：
-    未就绪时只踢一脚后台加载线程，本轮按"不可用"降级为纯关键词检索。"""
-    global _model_load_started
+    未就绪时由共享注册表踢一脚后台加载，本轮按"不可用"降级为纯关键词检索。"""
+    global _model, _available
     if not _ENABLE:
         return False
     if _available and _vectors is not None:
         return True
-    if _model is None and not _model_load_started:
-        _model_load_started = True
-        import threading
-        threading.Thread(target=_load_model, daemon=True).start()
+    _model = embedding_registry.get_model_nowait(_MODEL_NAME)
+    _available = _model is not None
     return _available and _vectors is not None
 
 
@@ -190,11 +172,9 @@ def build_vectors(entries):
         else:
             modified_ids.add(eid)  # 无哈希记录，视为变更
 
-    # 无任何变更 → 跳过
+    # 无任何变更 → 跳过（仅踢一脚后台加载；注册表保证同名只加载一次、绝不阻塞）
     if not new_ids and not removed_ids and not modified_ids:
-        if _model is None:
-            import threading
-            threading.Thread(target=_load_model, daemon=True).start()
+        embedding_registry.get_model_nowait(_MODEL_NAME)
         return
 
     # 如果变动量超过50% → 全量重建更划算
@@ -312,7 +292,8 @@ def search_semantic(query_text, top_k=30):
         return []
 
     try:
-        model = _load_model()
+        # 【红线】检索路径只走 nowait：未就绪直接降级返回空，绝不阻塞等待模型
+        model = embedding_registry.get_model_nowait(_MODEL_NAME)
         if model is None:
             return []
 
@@ -347,6 +328,11 @@ def search_semantic(query_text, top_k=30):
 # ========== 7. 状态查询（供Web端） ==========
 def get_status():
     """供web端状态查询"""
+    global _model, _available
+    if _ENABLE:
+        # 刷新共享模型状态（nowait 不阻塞；未启动时顺带踢后台加载）
+        _model = embedding_registry.get_model_nowait(_MODEL_NAME)
+        _available = _model is not None
     return {
         "enabled": _ENABLE,
         "available": _available and _vectors is not None,

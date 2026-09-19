@@ -3496,10 +3496,13 @@ def _build_editable_schema():
     })
     schema.append({
         "group": "memory_backend",
-        "label": "🧠 云向量记忆本地化",
+        "label": "🧠 向量检索（世界书+记忆库）",
         "fields": [
             {"key": "MEMORY_BACKEND", "label": "记忆后端 cloud=百炼云端 / local=本地向量库", "type": "text"},
-            {"key": "LOCAL_MEMORY_MODEL", "label": "本地检索模型（留空默认 bge-small-zh-v1.5）", "type": "text"},
+            # 虚拟合并键：两个模块共用同一向量模型实例，面板只留一个输入框
+            {"key": "VECTOR_MODEL", "label": "向量模型", "type": "text",
+             "read_key": "SEMANTIC_MODEL",
+             "desc": "世界书与记忆库共用同一模型实例（保存时同值写入 SEMANTIC_MODEL + LOCAL_MEMORY_MODEL，保持一致才共享内存）。修改后需重启服务，并重建两个向量快照"},
         ]
     })
     return schema
@@ -3545,7 +3548,8 @@ def api_get_env_config():
     schema = _build_editable_schema()
     for group in schema:
         for field in group["fields"]:
-            val = os.getenv(field["key"], "")
+            # 虚拟键（如 VECTOR_MODEL）经 read_key 读真实环境变量
+            val = os.getenv(field.get("read_key") or field["key"], "")
             # 环境变量未设置时，回退显示 schema 里的默认值（如 LLM 采样参数）
             if not val and field.get("default") is not None:
                 val = field["default"]
@@ -3586,13 +3590,20 @@ def api_update_env_config():
             continue
         filtered[key] = value
 
+    # 虚拟键展开：向量模型单一输入 → 同值双写两个真实键（两库共用同一注册表实例）
+    user_changed = list(filtered.keys())
+    if "VECTOR_MODEL" in filtered:
+        _v = filtered.pop("VECTOR_MODEL")
+        filtered["SEMANTIC_MODEL"] = _v
+        filtered["LOCAL_MEMORY_MODEL"] = _v
+
     if not filtered:
         return jsonify({"status": "success", "message": "无有效更改（密码未修改则跳过）", "skipped": skipped})
 
     try:
         _update_env_keys(filtered)
-        changed = list(filtered.keys())
-        print(f"[API预设] 批量更新 .env: {changed}（跳过: {skipped}），需重启服务生效")
+        changed = user_changed
+        print(f"[API预设] 批量更新 .env: {user_changed} → 实际写入 {list(filtered.keys())}（跳过: {skipped}），需重启服务生效")
         return jsonify({
             "status": "success",
             "message": f"已更新 {len(changed)} 项配置，需重启服务生效",
