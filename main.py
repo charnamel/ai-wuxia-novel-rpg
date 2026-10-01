@@ -217,11 +217,12 @@ STATIC_SYSTEM_PROMPT = """
 - 不可能的事用叙事让其自然失败，不要生硬拒绝。
 
 ## 格式限制（必须遵守，不可省略）
+标签名必须逐字照抄下列写法（含【】、斜杠与字序），禁止简写或自创：把【NPC状态变动】写成【NPC状态】、把【时间变更】写成【时间】、把【道具/自身健康状态】写成【道具/物品】，一律视为格式错误。
 必须按要求输出下列字段（可省略的见说明）：
 【本轮剧情内容】
 【NPC状态变动】角色名：好感±X / 无变化
-【道具/自身健康状态】修为/武功/新增道具/消耗道具
-【时间变更】时辰名（仅耗时动作标注；必须是十二时辰标准值之一，不得附加任何文字）
+【道具/自身健康状态】固定键名：新增武功：武功名（境界）/ 新增道具：物品A、物品B / 消耗道具：物品C / 丢弃道具：物品D。键名必须逐字使用"新增武功/新增道具/消耗道具/丢弃道具"，禁止用"获得/得到/入手/拾取/使用/失去"等同义词替代；多个物品用顿号"、"分隔；物品名可带括号说明（如：乌木官牌（武德骑尉正五品））；无变动时整行只写"无"
+【时间变更】时辰名（仅耗时动作标注；必须是十二时辰标准值之一，只写时辰本身——禁止"申时（15:00-17:00）"这类附加文字）
 【地点变更】新地点（仅移动时）
 【行动选项】选项1 / 选项2 / 选项3（须贴合当前剧情、方向各异、可直接执行，避免空泛重复）
 可选【近期剧情记录】一句话本轮关键事件
@@ -1923,7 +1924,10 @@ def _clean_item_name(item: str) -> str:
         return ""
     # 含格式标签关键词（消耗道具/丢弃道具/新增武功等标签残留）
     format_tags = ["消耗道具", "丢弃道具", "新增道具", "新增武功", "持有道具",
-                   "消耗：", "丢弃：", "新增：", "持有：", "综合修为", "整体修为",
+                   "消耗：", "丢弃：", "新增：", "持有：",
+                   "获得：", "得到：", "入手：", "拾取：", "捡到：", "取得：", "拿到：",
+                   "使用：", "用掉：", "耗去：", "用去：", "扔掉：", "舍弃：", "交出：",
+                   "综合修为", "整体修为",
                    "尚需实战打磨", "尚需打磨"]
     if any(tag in item for tag in format_tags):
         return ""
@@ -1946,6 +1950,23 @@ def _clean_item_name(item: str) -> str:
     if len(item) < 2:
         return ""
     return item
+
+
+# ===== 物品解析正则常量（主路径与兜底③共用，两处行为保持一致）=====
+# 标签：兼容【道具/物品】【道具】【物品】等漂移写法（"道具/物品"开头 + 可选"/xxx"后缀，排除【物品栏】等叙述误配）
+ITEM_TAG = r"【(?:道具|物品)(?:/[^】]*)?】"
+# 动词同义词表（提示词已要求标准键名，此处为正文漂移时的容错）
+_VERB_ADD   = r"(?:新增|获得|得到|入手|拾取|捡到|取得|拿到)"
+_VERB_USE   = r"(?:消耗|使用|用掉|耗去|用去)"
+_VERB_DROP  = r"(?:丢弃|扔掉|舍弃|交出)"
+_VERB_SKILL = r"新增武功"
+# 已知标签头白名单：块截断/键截断边界（防物品名内【】被误截、防行内标签吞内容）
+_TAG_HEAD = r"【(?:本轮|NPC|道具|物品|时间|地点|行动|任务|近期|传闻|江湖|持有|体力|银两|综合)"
+_ITEM_BOUNDARY = r"(?=" + _TAG_HEAD + r"|$)"
+# 物品键 = 动词 + 可选"道具/物品"后缀 + 冒号；捕获到下一个键/武功键/已知标签/换行/结尾为止
+_ITEM_KEY = (r"(?:" + _VERB_ADD + r"|" + _VERB_USE + r"|" + _VERB_DROP + r")"
+             r"(?:道具|物品)?[:：]")
+_ITEM_STOP = r"(?=" + _ITEM_KEY + r"|" + _VERB_SKILL + r"|" + _TAG_HEAD + r"|\n|$)"
 
 
 def parse_and_update_player_state(reply_text: str, tool_calls=None):
@@ -2034,14 +2055,16 @@ def parse_and_update_player_state(reply_text: str, tool_calls=None):
             skip_overall_parse = True
 
     # ========== 第二层：从【道具/自身健康状态】块提取正文格式 ==========
+    # 先按标准标签精确匹配（零误判），失败再按宽松标签容错（【道具/物品】等漂移写法）
     item_block = ""
-    block_match = re.search(r"【道具/自身健康状态】\s*(.+?)(?=\n【|$)", reply_text, re.S)
+    block_match = (re.search(r"【道具/自身健康状态】\s*(.+?)" + _ITEM_BOUNDARY, reply_text, re.S)
+                   or re.search(ITEM_TAG + r"\s*(.+?)" + _ITEM_BOUNDARY, reply_text, re.S))
     if block_match:
         item_block = block_match.group(1).strip()
 
     if not skill_added and item_block:
         # 全局匹配「新增武功」，不依赖前后顺序
-        skill_in_block = re.search(r"新增武功[:：]\s*(.+?)(?=\s*/\s*(?:新增|消耗|丢弃|综合|整体)|$)", item_block)
+        skill_in_block = re.search(_VERB_SKILL + r"[:：]\s*(.+?)" + _ITEM_STOP, item_block)
         if skill_in_block:
             skill_raw = skill_in_block.group(1).strip()
             level_keywords = "|".join(player.REALM_LIST)
@@ -2076,8 +2099,9 @@ def parse_and_update_player_state(reply_text: str, tool_calls=None):
                 print(f"[DEBUG] 正文武功等级未匹配，原始内容：{skill_raw[:50]}")
 
     # 关键：无论是否从块里抓到武功，都先把武功相关内容从item_block里剥离，避免污染物品
+    #     剥离边界：下一个物品键/武功键/已知标签/换行/结尾
     if item_block:
-        item_block = re.sub(r"新增武功[:：].*?(\s*/\s*|$)", "", item_block).strip()
+        item_block = re.sub(_VERB_SKILL + r"[:：].*?" + _ITEM_STOP, "", item_block).strip()
 
     # ========== 第三层：全文模糊匹配兜底（极端情况） ==========
     if not skill_added:
@@ -2178,10 +2202,10 @@ def parse_and_update_player_state(reply_text: str, tool_calls=None):
     # ===================== 物品处理（基于已剥离武功的干净 item_block） =====================
     if item_block:
         # ---------- 4.1 新增道具 ----------
-        add_match = re.search(r"新增道具[:：]\s*(.+?)(?=\s*/\s*(?:消耗|丢弃|新增)|$)", item_block)
-        if add_match:
-            add_raw = add_match.group(1).strip()
-            raw_items = re.split(r'[、，,；;\n]+', add_raw)
+        # 容错动词（新增/获得/得到/入手等）+ 冒号守卫；findall支持同行多个标签
+        add_matches = re.findall(_VERB_ADD + r"(?:道具|物品)?[:：]\s*(.+?)" + _ITEM_STOP, item_block)
+        for add_raw in add_matches:
+            raw_items = re.split(r'[、，,；;\n]+', add_raw.strip())
             for raw in raw_items:
                 item = _clean_item_name(raw)
                 if not item:
@@ -2191,10 +2215,9 @@ def parse_and_update_player_state(reply_text: str, tool_calls=None):
                     print(f"【新增道具】{item}")
 
         # ---------- 4.2 消耗道具 ----------
-        consume_match = re.search(r"消耗道具[:：]\s*(.+?)(?=\s*/\s*(?:新增|丢弃|消耗)|$)", item_block)
-        if consume_match:
-            consume_raw = consume_match.group(1).strip()
-            raw_items = re.split(r'[、，,；;\n]+', consume_raw)
+        consume_matches = re.findall(_VERB_USE + r"(?:道具|物品)?[:：]\s*(.+?)" + _ITEM_STOP, item_block)
+        for consume_raw in consume_matches:
+            raw_items = re.split(r'[、，,；;\n]+', consume_raw.strip())
             for raw in raw_items:
                 item = _clean_item_name(raw)
                 if not item:
@@ -2220,10 +2243,9 @@ def parse_and_update_player_state(reply_text: str, tool_calls=None):
                     print(f"【物品消耗提示】背包中未找到：{item}")
 
         # ---------- 4.3 丢弃道具 ----------
-        discard_match = re.search(r"丢弃道具[:：]\s*(.+?)(?=\s*/\s*(?:新增|消耗|丢弃)|$)", item_block)
-        if discard_match:
-            discard_raw = discard_match.group(1).strip()
-            raw_items = re.split(r'[、，,；;\n]+', discard_raw)
+        discard_matches = re.findall(_VERB_DROP + r"(?:道具|物品)?[:：]\s*(.+?)" + _ITEM_STOP, item_block)
+        for discard_raw in discard_matches:
+            raw_items = re.split(r'[、，,；;\n]+', discard_raw.strip())
             for raw in raw_items:
                 item = _clean_item_name(raw)
                 if not item:
@@ -4201,9 +4223,11 @@ def process_one_round(user_input: str, is_web: bool = False):
                 # ★ 输入结构化（独立模块 input_parser）：@角色 / #旁白 / 无标记=玩家
                 actual_user_action = input_parser.parse_player_input(stripped_input)
                 # ★ 玩家旁白（#段）指定天气 → 本轮即时生效（写入当前季节池内天气 + 锁 1 个抽奖周期）
+                # 注意：此处不可引用 current_round——它在普通输入路径下尚未赋值（只在"回归主线"分支与
+                #      后方 Prompt 构建段赋值），会抛 UnboundLocalError 并被吞掉导致功能静默失效
                 try:
                     _nn_now = (player_obj.novel_node or "") if player_obj is not None else ""
-                    _w_new = apply_player_weather(stripped_input, _nn_now, current_round)
+                    _w_new = apply_player_weather(stripped_input, _nn_now)
                     if _w_new:
                         current_weather = _w_new
                 except Exception as _e_w:
@@ -5063,7 +5087,7 @@ __L4_MERGE_SLOT__
         reply_clean = re.sub(r'\n{3,}', '\n\n', reply_clean).strip()
 
         # 解析回复（使用清洗后的 reply_clean）
-        part_split = re.split(r"(?:\*\*)?\s*\n*【(本轮剧情(?:内容)?|NPC状态变动|道具/自身健康状态|行动选项)】\s*(?:\*\*)?\s*\n*", reply_clean)
+        part_split = re.split(r"(?:\*\*)?\s*\n*【(本轮剧情(?:内容)?|NPC状态变动|道具(?:/[^】]*)?|物品(?:/[^】]*)?|行动选项)】\s*(?:\*\*)?\s*\n*", reply_clean)
         plot_content = ""
         npc_change_content = ""
         item_state_content = ""
@@ -5078,7 +5102,8 @@ __L4_MERGE_SLOT__
                     plot_content = part_split[idx + 1].strip()
             elif seg == "NPC状态变动" and idx + 1 < len(part_split):
                 npc_change_content = part_split[idx + 1].strip()
-            elif seg == "道具/自身健康状态" and idx + 1 < len(part_split):
+            elif idx % 2 == 1 and (seg.startswith("道具") or seg.startswith("物品")) and idx + 1 < len(part_split):
+                # 奇偶守卫：re.split单捕获组保证标签必在奇数索引，防止内容段（如"物品栏整理…"）被误判为标签
                 item_state_content = part_split[idx + 1].strip()
             elif seg == "行动选项" and idx + 1 < len(part_split):
                 action_options_raw = part_split[idx + 1].strip()
@@ -5412,28 +5437,39 @@ __L4_MERGE_SLOT__
 
         # ===== 正则兜底③：【道具/自身健康状态】道具/武功变动（工具未处理时生效）=====
         if item_state_content and item_state_content != "无":
-            # 新增道具
-            item_add = re.findall(r"新增道具[：:]\s*(.+?)(?=消耗道具|丢弃道具|\n|$)", item_state_content)
+            # 新增道具（与主路径共用 _VERB_*/_ITEM_STOP 常量，行为一致）
+            item_add = re.findall(_VERB_ADD + r"(?:道具|物品)?[:：]\s*(.+?)" + _ITEM_STOP, item_state_content)
             if item_add:
                 player = get_player()
                 if player:
                     for items_str in item_add:
-                        for it in re.split(r"[、，,]", items_str):
+                        for it in re.split(r"[、，,；;]", items_str):
                             it = _clean_item_name(it.strip())
                             if it:
                                 player.add_item(it)
                                 print(f"🎒 获得道具：{it}（正则兜底）")
             # 消耗道具
-            item_use = re.findall(r"消耗道具[：:]\s*(.+?)(?=新增道具|丢弃道具|\n|$)", item_state_content)
+            item_use = re.findall(_VERB_USE + r"(?:道具|物品)?[:：]\s*(.+?)" + _ITEM_STOP, item_state_content)
             if item_use:
                 player = get_player()
                 if player:
                     for items_str in item_use:
-                        for it in re.split(r"[、，,]", items_str):
+                        for it in re.split(r"[、，,；;]", items_str):
                             it = _clean_item_name(it.strip())
                             if it and it in player.item_list:
                                 player.item_list.remove(it)
                                 print(f"🎒 消耗道具：{it}（正则兜底）")
+            # 丢弃道具
+            item_discard = re.findall(_VERB_DROP + r"(?:道具|物品)?[:：]\s*(.+?)" + _ITEM_STOP, item_state_content)
+            if item_discard:
+                player = get_player()
+                if player:
+                    for items_str in item_discard:
+                        for it in re.split(r"[、，,；;]", items_str):
+                            it = _clean_item_name(it.strip())
+                            if it and it in player.item_list:
+                                player.item_list.remove(it)
+                                print(f"🎒 丢弃道具：{it}（正则兜底）")
             # 综合修为（兜底解析）
             # 综合修为部分已有工具处理，跳过
 
