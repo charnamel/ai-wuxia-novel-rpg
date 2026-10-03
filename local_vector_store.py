@@ -300,8 +300,19 @@ class _LocalStore:
                     self._latest_date_by_user[user_id] = key
             self._entries.append(entry)
             self._ids.add(unique_id)
+            # H2 维度防护：库内向量与当前模型不兼容（512维遗留档读入后）→ 弃用旧向量矩阵；
+            # 旧条目以零向量占位（余弦相似度恒为0，检索天然过滤），点『重建』后按当前模型
+            # 全量重编码即恢复检索
+            if self._vectors is not None and self._vectors.shape[1] != vec.shape[1]:
+                print(f"[本地记忆] 警告：库内向量({self._vectors.shape[1]}维)与当前模型"
+                      f"({vec.shape[1]}维)不兼容，已弃用旧向量（条目保留），"
+                      f"建议点状态栏『重建』按钮恢复旧条目检索")
+                self._vectors = None
             if self._vectors is None:
-                self._vectors = vec
+                # 为既有条目补零向量占位，保持 条目↔向量 行对齐
+                # （同时修复：无向量文件存档读档后首次写入的 向量1 vs 条目N+1 错位）
+                _pad = np.zeros((len(self._entries) - 1, vec.shape[1]), dtype=np.float32)
+                self._vectors = np.vstack([_pad, vec]) if _pad.shape[0] else vec
             else:
                 self._vectors = np.vstack([self._vectors, vec])
             self._apply_lifecycle_locked(entry)
@@ -384,7 +395,17 @@ class _LocalStore:
             for entry in self._entries[-len(pending):]:
                 self._apply_lifecycle_locked(entry)
             mat = np.vstack([v.reshape(1, -1) for _, v in pending])
-            self._vectors = mat if self._vectors is None else np.vstack([self._vectors, mat])
+            # H2 维度防护（与 add_memory 同款）：维度不兼容弃用旧向量，既有条目补零占位
+            if self._vectors is not None and self._vectors.shape[1] != mat.shape[1]:
+                print(f"[本地记忆] 警告：库内向量({self._vectors.shape[1]}维)与当前模型"
+                      f"({mat.shape[1]}维)不兼容，已弃用旧向量（条目保留），"
+                      f"建议点『重建』恢复检索")
+                self._vectors = None
+            if self._vectors is None:
+                _pad = np.zeros((len(self._entries) - mat.shape[0], mat.shape[1]), dtype=np.float32)
+                self._vectors = np.vstack([_pad, mat]) if _pad.shape[0] else mat
+            else:
+                self._vectors = np.vstack([self._vectors, mat])
             self._flush_locked()
             return len(pending)
 
@@ -705,6 +726,23 @@ def rebuild_vectors():
                 f.write(json.dumps(e, ensure_ascii=False) + "\n")
         _store._flush_locked()
     return len(entries)
+
+
+def reload_from_disk():
+    """读档后强制从磁盘重建内存状态（load_game 已把 data/ 整体替换为存档内容）。
+    与 rebuild_vectors() 的区别：不做「磁盘∪内存」合并，以磁盘为唯一真相；
+    模型实例不重置（embedding_registry 共享，重置会带来 30-60 秒不可用）。
+    纯文件 I/O 不碰模型（数千行 jsonl + ~20MB npy，<1秒），持锁期间检索短暂等待。"""
+    with _store._lock:
+        _store._entries = []
+        _store._ids = set()
+        _store._vectors = None
+        _store._latest_date_by_user = {}
+        _store._query_cache = {}
+        _store._dirty_count = 0
+        _store._entries_dirty = False
+        _store._load()   # 复用现有读盘逻辑（含条目/向量数对齐截断保护）
+    return len(_store._entries)
 
 
 # 优雅退出时强制落盘（systemctl restart 发 SIGTERM 可触发；防重启丢尾部向量）

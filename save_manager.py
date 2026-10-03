@@ -78,6 +78,16 @@ def save_game(slot_name: str):
         shutil.rmtree(target_dir)
     
     try:
+        # H1：落盘记忆向量再复制（向量文件平时最多滞后条目7条，存档不落盘会把滞后
+        # 固化进槽位；读档时 _load 对齐截断会静默丢掉这几条记忆）
+        try:
+            import cloud_memory_v2 as _cmv
+            _backend = str(getattr(_cmv, "_MEMORY_BACKEND", "cloud")).lower()
+        except Exception:
+            _backend = "cloud"
+        if _backend == "local":
+            import local_vector_store as _lvs
+            _lvs.flush()
         # 复制整个 data 文件夹
         shutil.copytree(DATA_DIR, target_dir)
         
@@ -90,6 +100,38 @@ def save_game(slot_name: str):
         print(f"✅ 游戏已存档至：{clean_name} (轮次: {meta['round']})")
     except Exception as e:
         print(f"❌ 存档失败：{e}")
+
+def _sync_memory_after_load():
+    """读档后同步内存单例（load_game 已把 data/ 整体替换为存档内容，进程内缓存需强制重载）。
+    各项独立容错：单项失败不影响其余，也不影响读档主流程。"""
+    done = []
+    try:  # 本地向量记忆库（仅 local 后端有意义；cloud 模式记忆在云端，本地无文件可重载）
+        try:
+            import cloud_memory_v2 as _cmv
+            _backend = str(getattr(_cmv, "_MEMORY_BACKEND", "cloud")).lower()
+        except Exception:
+            _backend = "local"
+        if _backend == "local":
+            import local_vector_store as _lvs
+            if hasattr(_lvs, "reload_from_disk"):
+                done.append(f"记忆库已重载：{_lvs.reload_from_disk()} 条")
+    except Exception as e:
+        print(f"[读档] 记忆库重载失败：{str(e)[:120]}")
+    try:  # 玩家单例（player.json 已被存档版本替换）
+        from player_manager import reload_player
+        reload_player()
+        done.append("玩家状态已重载")
+    except Exception as e:
+        print(f"[读档] 玩家重载失败：{str(e)[:120]}")
+    try:  # 战斗缓存（运行态，防旧时间线战斗上下文串进下一轮提示词）
+        import battle_system as _bs
+        _bs.clear_battle_cache()
+        done.append("战斗缓存已清空")
+    except Exception as e:
+        print(f"[读档] 战斗缓存清理失败：{str(e)[:120]}")
+    if done:
+        print("[读档] " + "；".join(done))
+
 
 def load_game(slot_name: str):
     """从指定槽位读取存档，覆盖当前进度"""
@@ -120,6 +162,11 @@ def load_game(slot_name: str):
             print(f"✅ 读档成功！当前回到：{meta.get('time', '未知时间')}，轮次：{meta.get('round', 0)}")
         else:
             print("✅ 读档成功！(旧版存档)")
+        # 内存单例同步（修复：读档只换磁盘不换内存——向量库/玩家/战斗缓存归位）
+        try:
+            _sync_memory_after_load()
+        except Exception as e:
+            print(f"[读档] 内存状态同步异常（存档数据不受影响）：{e}")
     except Exception as e:
         print(f"❌ 读档失败：{e}")
 
