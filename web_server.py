@@ -3428,7 +3428,7 @@ def _build_editable_schema():
             "label": "🎚️ LLM 采样参数（temperature / top_p，可编辑，重启生效）",
             "fields": [
                 {"key": "MAIN_LOOP_TEMP", "label": "主循环·温度", "type": "text", "default": "0.65",
-                 "desc": "主循环剧情生成温度（0~1，越高越有创造力）。web 主剧情共用。默认 0.65"},
+                 "desc": "主循环剧情生成温度（0~1，越高越有创造力）。web 主剧情共用。默认 0.65。⚠️ 思考模式开启时此参数不生效（DeepSeek/GLM 官方行为，静默忽略）"},
                 {"key": "MAIN_LOOP_TOP_P", "label": "主循环·top_p", "type": "text", "default": "1.0",
                  "desc": "主循环 nucleus 采样门限，越小越保守。默认 1.0"},
                 {"key": "AUX_LOOP_TEMP", "label": "辅助·温度", "type": "text", "default": "0.3",
@@ -3439,6 +3439,23 @@ def _build_editable_schema():
                  "desc": "开局面貌/初始感悟生成温度（保留较高创造性）。默认 0.7"},
                 {"key": "TEMP_NPC_PROFILE_TEMP", "label": "临时对手档案·温度", "type": "text", "default": "0.6",
                  "desc": "web 对战「临时对手」人物档案生成温度。默认 0.6"},
+            ]
+        },
+        {
+            "group": "thinking",
+            "label": "🧠 思考模式（保存后免重启，实时生效）",
+            "fields": [
+                {"key": "MAIN_LOOP_THINKING", "label": "主循环·思考开关", "type": "select",
+                 "options": ["auto", "enabled", "disabled"], "default": "auto",
+                 "desc": "auto=按模型默认（GLM-5.3强制开、其余关，即原行为）。enabled=强制开：DeepSeek 也会先打腹稿再写正文，文学性↑，但延迟/成本↑，且 temperature 将不生效。GLM-5.3 无论选什么都强制开（官方不可关）。⚠️ 主循环带工具调用：开思考后 DeepSeek 官方要求历史轮 reasoning_content 回传，尚未做此改造前建议先保持 auto"},
+                {"key": "MAIN_LOOP_REASONING_EFFORT", "label": "主循环·思考强度", "type": "select",
+                 "options": ["low", "high", "max"], "default": "low",
+                 "desc": "low=低成本档（推荐）；high/max 更深刻但更慢更贵。对 GLM-5.3 同样生效（未设置时回落 GLM_REASONING_EFFORT 旧键）"},
+                {"key": "AUX_LOOP_THINKING", "label": "辅助·思考开关", "type": "select",
+                 "options": ["auto", "enabled", "disabled"], "default": "disabled",
+                 "desc": "后台总结/传记/记忆/章节摘要等任务。开思考通常只增加成本与延迟，默认关"},
+                {"key": "AUX_LOOP_REASONING_EFFORT", "label": "辅助·思考强度", "type": "select",
+                 "options": ["low", "high", "max"], "default": "low"},
             ]
         },
         {
@@ -3603,10 +3620,24 @@ def api_update_env_config():
     try:
         _update_env_keys(filtered)
         changed = user_changed
-        print(f"[API预设] 批量更新 .env: {user_changed} → 实际写入 {list(filtered.keys())}（跳过: {skipped}），需重启服务生效")
+        print(f"[API预设] 批量更新 .env: {user_changed} → 实际写入 {list(filtered.keys())}（跳过: {skipped}）")
+        # 思考模式4键为实时读（os.environ 同步后立即生效），其余键需重启
+        _live_keys = {"MAIN_LOOP_THINKING", "MAIN_LOOP_REASONING_EFFORT",
+                      "AUX_LOOP_THINKING", "AUX_LOOP_REASONING_EFFORT"}
+        _live_changed = [k for k in changed if k in _live_keys]
+        if changed and len(_live_changed) == len(changed):
+            msg = f"已更新 {len(changed)} 项配置，实时生效，无需重启"
+            needs_restart = "none"
+        elif _live_changed:
+            msg = f"已更新 {len(changed)} 项配置（其中 {len(_live_changed)} 项思考模式实时生效，其余需重启）"
+            needs_restart = "partial"
+        else:
+            msg = f"已更新 {len(changed)} 项配置，需重启服务生效"
+            needs_restart = "all"
         return jsonify({
             "status": "success",
-            "message": f"已更新 {len(changed)} 项配置，需重启服务生效",
+            "message": msg,
+            "needs_restart": needs_restart,
             "changed": changed,
             "skipped": skipped,
         })

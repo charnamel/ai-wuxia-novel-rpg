@@ -129,23 +129,17 @@ ACTIVE_RETRIEVAL_BASE_URL = _env("ACTIVE_RETRIEVAL_BASE_URL", "") or DEEPSEEK_BA
 ACTIVE_RETRIEVAL_MODEL = _env("ACTIVE_RETRIEVAL_MODEL", "") or "deepseek-v4-flash"
 
 
-# ===== thinking参数分派（按模型家族返回extra_body） =====
+# ===== thinking参数分派（按模型家族 + 面板开关返回extra_body） =====
 # GLM-5.3/GLM-5.3-FLASH 强制思考：thinking.type传disabled直接400报错
 # （官方文档：https://docs.bigmodel.cn/cn/guide/capabilities/thinking）
-# 其余模型保持关闭思考以保证temperature生效、降低成本、加速推理
-GLM_THINKING_EFFORT = _env("GLM_REASONING_EFFORT", "low")  # low/high/max，低成本档
-
-
-def thinking_extra_body(model_name):
-    """按模型名返回thinking相关的extra_body dict。
-
-    - glm-5.3系列：思考强制开启（不可关），用reasoning_effort控制成本
-    - 其他模型：关闭思考（原行为）
-    """
-    _m = (model_name or "").lower()
-    if "glm-5.3" in _m:
-        return {"thinking": {"type": "enabled"}, "reasoning_effort": GLM_THINKING_EFFORT}
-    return {"thinking": {"type": "disabled"}}
+# DeepSeek 支持参数级开关：thinking.type=enabled/disabled + reasoning_effort=low/high/max
+# （官方文档：https://api-docs.deepseek.com/zh-cn/guides/thinking_mode/）
+# ⚠️ 思考模式下 temperature 静默失效（不报错但不生效），top_p 仅 0.95-1.0 有效
+# 面板键（web「API设置」；实时读 os.environ，面板保存后免重启生效）：
+#   MAIN_LOOP_THINKING / AUX_LOOP_THINKING：auto=按家族默认（GLM开/其余关）/ enabled / disabled
+#   MAIN_LOOP_REASONING_EFFORT / AUX_LOOP_REASONING_EFFORT：low / high / max
+GLM_THINKING_EFFORT = _env("GLM_REASONING_EFFORT", "low")  # 兼容旧键：GLM 专用 effort（未设新键时回落）
+_THINKING_EFFORTS = ("low", "high", "max")
 
 
 def is_glm53(model_name):
@@ -153,12 +147,45 @@ def is_glm53(model_name):
     return "glm-5.3" in (model_name or "").lower()
 
 
-GLM53_MIN_MAX_TOKENS = 5000  # GLM-5.3思考token计入completion，额度不足时思考吃光导致content为空
+def _thinking_conf(model_name, loop):
+    """返回 (enabled, effort)。GLM-5.3 强制开（官方不可关）；
+    其余按面板开关，auto/未设置=家族默认（关，原行为）。非法 effort 回落 low/GLM旧键。"""
+    forced = is_glm53(model_name)
+    _key = {"main": "MAIN_LOOP_THINKING", "aux": "AUX_LOOP_THINKING"}.get(loop, "")
+    mode = (os.getenv(_key, "auto") if _key else "auto").lower().strip()
+    enabled = True if forced else (mode == "enabled")
+    _eff_key = {"main": "MAIN_LOOP_REASONING_EFFORT", "aux": "AUX_LOOP_REASONING_EFFORT"}.get(loop, "")
+    effort = (os.getenv(_eff_key, "") if _eff_key else "").lower().strip()
+    if effort not in _THINKING_EFFORTS:
+        # GLM 回落旧键 GLM_REASONING_EFFORT（实时读，与面板新键一致免重启）
+        effort = (os.getenv("GLM_REASONING_EFFORT", "") if forced else "").lower().strip()
+        if effort not in _THINKING_EFFORTS:
+            effort = GLM_THINKING_EFFORT if forced else "low"
+    return enabled, effort
 
 
-def adjust_max_tokens(model_name, max_tokens):
-    """GLM-5.3系列：max_tokens提到至少5000，给思考留额度；其他模型原样返回"""
-    if is_glm53(model_name):
+def thinking_extra_body(model_name, loop="main"):
+    """按模型名+回路返回thinking相关的extra_body dict。
+
+    - glm-5.3系列：思考强制开启（不可关），用reasoning_effort控制成本
+    - 其他模型：面板可配（loop="main"读MAIN_LOOP_*、loop="aux"读AUX_LOOP_*；auto=关，原行为）
+    - loop="util"（主动检索等后台小任务）：恒关——开思考只增加延迟与成本
+    """
+    if loop == "util":
+        return {"thinking": {"type": "disabled"}}
+    enabled, effort = _thinking_conf(model_name, loop)
+    if enabled:
+        return {"thinking": {"type": "enabled"}, "reasoning_effort": effort}
+    return {"thinking": {"type": "disabled"}}
+
+
+GLM53_MIN_MAX_TOKENS = 5000  # 思考token计入completion，额度不足时思考吃光导致content为空
+
+
+def adjust_max_tokens(model_name, max_tokens, loop="main"):
+    """思考开启时（任何模型）：max_tokens提到至少5000，给思维链留额度，防content为空。
+    GLM-5.3恒开思考故恒保底；其他模型按面板开关判断。"""
+    if loop != "util" and _thinking_conf(model_name, loop)[0]:
         return max(max_tokens or 0, GLM53_MIN_MAX_TOKENS)
     return max_tokens
 
@@ -167,10 +194,49 @@ _THINK_RE = re.compile(r"<think>.*?</think>", re.S)
 
 
 def strip_think_tags(text):
-    """剥离模型内联思考块：<think>...</think>（含未闭合前缀，即思考被max_tokens截断的情况）"""
+    """剥离模型内联思考块：<think>...▶（含未闭合前缀，即思考被max_tokens截断的情况）"""
     if not text:
         return text
     text = _THINK_RE.sub("", text)
     if "<think>" in text:
         text = text.split("<think>", 1)[0]
     return text.strip()
+
+
+# ===== 裸思考泄漏清洗（思维链混入 content 的兜底） =====
+# 场景：中转/聚合端点把思维链并进 content，或 content 为空时兜底提取 reasoning_content——
+# 裸思维链（无标签包裹）直接进剧情/数据文件。依据：游戏正文与格式块全为中文，
+# 裸思维链以英文为主，按"英文占比"逐行判定剔除。
+_INTERJECTION_LINE_RE = re.compile(
+    r"^(?:ok|okay|o\.k\.?|hmm+|ah+|oh+|alright|done|skip|wait|right|yeah|yes|no|"
+    r"good|fine|so|now|then|let me|i'll|i think)[.!,~\s]*$", re.I)
+_TRAILING_INTERJECTION_RE = re.compile(
+    r"[\s\.,]*\s(?:OK|Okay|Hmm+|Alright|Done|Skip|Right)[\.\!]?\s*$")
+_CJK_RE = re.compile(r"[\u4e00-\u9fff\u3400-\u4dbf【】]")
+_LATIN_RE = re.compile(r"[A-Za-z]")
+
+
+def strip_reasoning_text(text):
+    """剥离混入正文的思考过程（三层，防误伤中文正文/格式块）：
+    1) ...▶ 标签块（复用 strip_think_tags，含未闭合前缀）
+    2) 英文行：CJK=0 且字母≥8 的纯英文行；字母≥12 且字母≥3×CJK 的英文主导混合行
+    3) 整行仅为英文口头禅（OK./Hmm./Let me…）的短行；行尾孤立口头禅（"无变化. OK."→"无变化"）
+    中文主导行（含物品括号说明等）不受影响；数字/纯符号行保留。"""
+    if not text:
+        return text
+    text = strip_think_tags(text)
+    kept = []
+    for line in text.splitlines():
+        cjk = len(_CJK_RE.findall(line))
+        latin = len(_LATIN_RE.findall(line))
+        if latin >= 8 and cjk == 0:
+            continue
+        if latin >= 12 and cjk > 0 and latin >= 3 * cjk:
+            continue
+        if _INTERJECTION_LINE_RE.match(line.strip()):
+            continue
+        line = _TRAILING_INTERJECTION_RE.sub("", line)
+        kept.append(line)
+    out = "\n".join(kept)
+    out = re.sub(r"\n{3,}", "\n\n", out)
+    return out.strip()

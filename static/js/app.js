@@ -3628,7 +3628,7 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     if (el) updates[f.key] = el.value;
                 }
             }
-            if (!confirm('确定要保存所有更改吗？\n\n未修改的密码字段会自动跳过。\n保存后需重启服务生效。')) return;
+            if (!confirm('确定要保存所有更改吗？\n\n未修改的密码字段会自动跳过。\n思考模式等实时参数保存后立即生效；模型/密钥/温度等配置需重启服务生效。')) return;
             try {
                 const res = await fetch('/api/presets/env', {
                     method: 'POST',
@@ -3641,7 +3641,12 @@ DC: ${dr.dc}` + (dr.dc_reason ? ` (${dr.dc_reason})` : '') +
                     if (data.skipped && data.skipped.length > 0) {
                         msg += '\n\n跳过（未修改）: ' + data.skipped.join(', ');
                     }
-                    msg += '\n\n请在服务器执行：sudo systemctl restart game1';
+                    // 按后端返回决定是否提示重启：none=全实时生效不提示；partial=仅其余配置需重启
+                    if (data.needs_restart === 'all') {
+                        msg += '\n\n请在服务器执行：sudo systemctl restart game1';
+                    } else if (data.needs_restart === 'partial') {
+                        msg += '\n\n其余配置需在服务器执行：sudo systemctl restart game1 后生效';
+                    }
                     alert(msg);
                     loadApiPresets();
                 } else {

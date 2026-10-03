@@ -7,7 +7,7 @@ import textwrap
 import colorama
 import threading
 # 在 main.py 中删除原来的定义，改为导入
-from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, MAIN_LOOP_SESSION_ID, CLOUD_MEM_SLOT_ID, thinking_extra_body, is_glm53, strip_think_tags, adjust_max_tokens, MAIN_LOOP_TEMP, MAIN_LOOP_TOP_P, AUX_LOOP_TEMP, AUX_LOOP_TOP_P, OPENING_INSIGHT_TEMP, TEMP_NPC_PROFILE_TEMP
+from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, MAIN_LOOP_SESSION_ID, CLOUD_MEM_SLOT_ID, thinking_extra_body, is_glm53, strip_think_tags, strip_reasoning_text, adjust_max_tokens, MAIN_LOOP_TEMP, MAIN_LOOP_TOP_P, AUX_LOOP_TEMP, AUX_LOOP_TOP_P, OPENING_INSIGHT_TEMP, TEMP_NPC_PROFILE_TEMP
 from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node, format_money_liang #导入作弊器代码
 from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 from option_gen import clean_action_options  # 行动选项清洗（主循环解析与兜底共用）
@@ -211,6 +211,7 @@ STATIC_SYSTEM_PROMPT = """
 7. 武功检定：当输入含【!系统检定·必须遵循!】时，剧情走向严格服从 8 档结论；natural=20 提升 2 档、natural=1 降低 2 档。绝对不得违背结论；叙事须体现境界差异，但禁止出现"骰子/DC/检定/档位/差值/d20"等游戏术语。
 
 ## 回复要求
+- 全程仅用简体中文输出（含思考过程）；正文、标签、选项一律禁止英文语句。
 - 正文剧情 250 字以内；战斗、重大揭示最多 400 字。宁可压缩细节，不可写长。
 - 不解释背景、机制或推理链；把线索压成关键画面与下一步行动压力。
 - 不要在末尾问"你要怎么做"——直接推进场景到自然停顿处。
@@ -524,6 +525,8 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_p
         try:
             # 构建请求参数
             _model_name = model if model else DEEPSEEK_MODEL
+            # 回路判定：主循环显式传 MAIN_LOOP_MODEL；其余（辅助/默认模型）按 aux 读思考配置
+            _loop = "main" if (MAIN_LOOP_MODEL and _model_name == MAIN_LOOP_MODEL) else "aux"
             kwargs = {
                 "model": _model_name,
                 "messages": [
@@ -531,7 +534,7 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_p
                     {"role": "user", "content": clean_user}
                 ],
                 "temperature": temp,
-                "max_tokens": adjust_max_tokens(_model_name, max_tokens),  # GLM-5.3思考吃completion额度，提到≥5000
+                "max_tokens": adjust_max_tokens(_model_name, max_tokens, loop=_loop),  # 思考开启时保底5000，防思维链吃光额度content为空
                 "top_p": top_p,
                 "stream": stream,
                 "timeout": actual_timeout
@@ -547,7 +550,7 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_p
                 kwargs.pop("max_tokens", None)
                 kwargs["extra_body"] = {"thinking": {"type": "disabled"}, "max_completion_tokens": max_tokens}
             else:
-                kwargs["extra_body"] = thinking_extra_body(model or DEEPSEEK_MODEL)
+                kwargs["extra_body"] = thinking_extra_body(model or DEEPSEEK_MODEL, loop=_loop)
             # 会话 ID 有值即附加 x-opencode-session 头（任意主循环 A/B/C 皆可，不限定 URL 含 opencode）；留空则不发
             _hd = {"x-opencode-session": MAIN_LOOP_SESSION_ID} if (api_key and base_url and MAIN_LOOP_SESSION_ID) else None
             _client = OpenAI(api_key=api_key, base_url=base_url, default_headers=_hd) if (api_key and base_url) else client
@@ -632,12 +635,12 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_p
                         full_text += delta
                 print(COLOR_END, flush=True)
                 print()
-                return {"content": strip_think_tags(full_text), "tool_calls": None}
+                return {"content": strip_reasoning_text(full_text), "tool_calls": None}
 
             else:
                 # 非流式：可能返回工具调用
                 choice = resp.choices[0]
-                content = strip_think_tags(choice.message.content or "")
+                content = strip_reasoning_text(choice.message.content or "")
                 tool_calls = choice.message.tool_calls if hasattr(choice.message, 'tool_calls') else None
                 if content and content.strip():
                     return {"content": content.strip(), "tool_calls": tool_calls}
@@ -660,14 +663,14 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_p
                     try:
                         resp2 = _client.chat.completions.create(**_kwargs2)
                         _ch2 = resp2.choices[0]
-                        _content2 = strip_think_tags(_ch2.message.content or "")
+                        _content2 = strip_reasoning_text(_ch2.message.content or "")
                         if not _content2:
                             # 第二轮content也为空，尝试reasoning_content兜底
                             # （仅限MiMo等无法关思考的模型；GLM-5.3思考走独立字段，绝不能当正文）
                             if not is_glm53(_model_name):
-                                _reasoning2 = getattr(_ch2.message, 'reasoning_content', None) or ""
+                                _reasoning2 = strip_reasoning_text(getattr(_ch2.message, 'reasoning_content', None) or "")
                                 if _reasoning2:
-                                    print(f"{COLOR_WARN}[MiMo兜底] 第二轮content仍为空，提取reasoning_content({len(_reasoning2)}字符){COLOR_END}")
+                                    print(f"{COLOR_WARN}[MiMo兜底] 第二轮content仍为空，提取reasoning_content(清洗后{len(_reasoning2)}字符){COLOR_END}")
                                     _content2 = _reasoning2
                         if _content2:
                             return {"content": _content2.strip(), "tool_calls": tool_calls}
@@ -678,11 +681,11 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_p
                         print(f"{COLOR_WARN}[MiMo兜底] 第二轮调用失败({e2})，返回空content+tool_calls{COLOR_END}")
                         return {"content": "", "tool_calls": tool_calls}
                 else:
-                    # ★ 兜底：思考模式未关闭时，提取 reasoning_content（与 llm_call_npc_gen 一致）
+                    # ★ 兜底：思考模式未关闭时，提取 reasoning_content（清洗思维链后再用，纯思维链视同空）
                     # 仅限MiMo等无法关思考的模型；GLM-5.3思考走独立字段，当正文会污染剧情，改为抛异常重试
-                    reasoning = getattr(choice.message, 'reasoning_content', None) or ""
+                    reasoning = strip_reasoning_text(getattr(choice.message, 'reasoning_content', None) or "")
                     if reasoning and not is_glm53(_model_name):
-                        print(f"{COLOR_WARN}[主循环思考模式兜底] content为空，提取reasoning_content({len(reasoning)}字符){COLOR_END}")
+                        print(f"{COLOR_WARN}[主循环思考模式兜底] content为空，提取reasoning_content(清洗后{len(reasoning)}字符){COLOR_END}")
                         return {"content": reasoning.strip(), "tool_calls": None}
                     raise Exception("模型返回空内容且无工具调用")
 
@@ -729,18 +732,18 @@ def llm_call_npc_gen(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_
                 top_p=top_p,
                 stream=False,
                 timeout=NPC_GEN_TIMEOUT,
-                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL, loop="aux")
             )
             # 安全检查：message.content 可能为 None
             _msg = resp.choices[0].message
-            content = getattr(_msg, 'content', '') or ''
+            content = strip_reasoning_text(getattr(_msg, 'content', '') or '')
             result = content.strip()
             if not result:
-                # ★ 兜底：思考模式未关闭时，提取 reasoning_content
+                # ★ 兜底：思考模式未关闭时，提取 reasoning_content（清洗思维链后再用）
                 # 仅限MiMo等无法关思考的模型；GLM-5.3思考走独立字段，当正文会污染输出
-                reasoning = getattr(_msg, 'reasoning_content', None) or ""
+                reasoning = strip_reasoning_text(getattr(_msg, 'reasoning_content', None) or "")
                 if reasoning and not is_glm53(DEEPSEEK_MODEL):
-                    print(f"{COLOR_WARN}[NPC思考模式兜底] content为空，提取reasoning_content({len(reasoning)}字符){COLOR_END}")
+                    print(f"{COLOR_WARN}[NPC思考模式兜底] content为空，提取reasoning_content(清洗后{len(reasoning)}字符){COLOR_END}")
                     return reasoning.strip()
                 raise Exception("API返回空内容")
             return result
@@ -1193,10 +1196,10 @@ def _background_generate_l3(new_round):
                     {"role": "user", "content": full_prompt}
                 ],
                 max_tokens=2000, temperature=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, timeout=75,
-                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL, loop="aux")
             )
             # 安全检查：message.content 可能为 None
-            content = getattr(resp.choices[0].message, 'content', '') or ''
+            content = strip_reasoning_text(getattr(resp.choices[0].message, 'content', '') or '')
             new_full_raw = content.strip()
             if new_full_raw:
                 full_summary = new_full_raw
@@ -1210,7 +1213,7 @@ def _background_generate_l3(new_round):
                                 {"role": "user", "content": f"以下剧情概述当前{len(full_summary)}字，必须压缩到600字以内（含标点）：\n- 保留优先级从高到低：主线关键事件与结局、人物关系变化、未解伏笔；先删战斗过程与招式细节、日常相处、风物描写\n- 允许大幅合并改写、句式极简，信息要点尽量保留但表述精炼\n- 600字是硬性上限，宁可多删不得超出\n\n{full_summary}"}
                             ],
                             max_tokens=1200, temperature=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, timeout=60,
-                            extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+                            extra_body=thinking_extra_body(DEEPSEEK_MODEL, loop="aux")
                         )
                         compressed = (getattr(resp2.choices[0].message, 'content', '') or '').strip()
                         if compressed and len(compressed) < len(full_summary):
@@ -1262,10 +1265,10 @@ def _background_generate_l3(new_round):
                 {"role": "user", "content": bio_prompt}
             ],
             max_tokens=2000, temperature=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, timeout=75,
-            extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+            extra_body=thinking_extra_body(DEEPSEEK_MODEL, loop="aux")
         )
         # 安全检查：message.content 可能为 None
-        content = getattr(resp.choices[0].message, 'content', '') or ''
+        content = strip_reasoning_text(getattr(resp.choices[0].message, 'content', '') or '')
         new_bio_text = content.strip()
         
         # ========== 增强JSON解析：自动剥离 + 修复 + 三级兜底 ==========
@@ -1415,9 +1418,9 @@ def _distill_npc_memories(new_round):
                     {"role": "user", "content": distill_prompt}
                 ],
                 max_tokens=800, temperature=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P, timeout=30,
-                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+                extra_body=thinking_extra_body(DEEPSEEK_MODEL, loop="aux")
             )
-            content = getattr(resp.choices[0].message, 'content', '') or ''
+            content = strip_reasoning_text(getattr(resp.choices[0].message, 'content', '') or '')
             content = content.strip()
         except Exception as e:
             print(f"{COLOR_WARN}⚠️ [NPC蒸馏] AI调用失败，跳过: {e}{COLOR_END}")
@@ -1594,7 +1597,7 @@ def update_context_cache(new_plot, user_action=""):
 #                 temperature=AUX_LOOP_TEMP, top_p=AUX_LOOP_TOP_P,
 #                 max_tokens=400,
 #                 timeout=45,
-#                 extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+#                 extra_body=thinking_extra_body(DEEPSEEK_MODEL, loop="aux")
 #             )
 #             # 安全检查：message.content 可能为 None
 #             content = getattr(compress_resp.choices[0].message, 'content', '') or ''
@@ -5965,10 +5968,10 @@ def game_core_loop():
                                 temperature=AUX_LOOP_TEMP,
                                 top_p=AUX_LOOP_TOP_P,
                                 timeout=60,
-                                extra_body=thinking_extra_body(DEEPSEEK_MODEL)
+                                extra_body=thinking_extra_body(DEEPSEEK_MODEL, loop="aux")
                             )
                             # 安全检查：message.content 可能为 None
-                            content = getattr(resp.choices[0].message, 'content', '') or ''
+                            content = strip_reasoning_text(getattr(resp.choices[0].message, 'content', '') or '')
                             task_summary = content.strip()
                             if task_summary:
                                 # 作为一轮剧情写入上下文（仿战斗系统）
