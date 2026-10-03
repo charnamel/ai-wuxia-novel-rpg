@@ -7,7 +7,7 @@ import textwrap
 import colorama
 import threading
 # 在 main.py 中删除原来的定义，改为导入
-from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, MAIN_LOOP_SESSION_ID, CLOUD_MEM_SLOT_ID, thinking_extra_body, is_glm53, strip_think_tags, strip_reasoning_text, adjust_max_tokens, MAIN_LOOP_TEMP, MAIN_LOOP_TOP_P, AUX_LOOP_TEMP, AUX_LOOP_TOP_P, OPENING_INSIGHT_TEMP, TEMP_NPC_PROFILE_TEMP
+from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, COMMON_TIMEOUT, MAIN_LOOP_API_KEY, MAIN_LOOP_BASE_URL, MAIN_LOOP_MODEL, MAIN_LOOP_TIMEOUT, MAIN_LOOP_SESSION_ID, CLOUD_MEM_SLOT_ID, thinking_extra_body, is_glm53, is_ds_thinking, strip_think_tags, strip_reasoning_text, adjust_max_tokens, MAIN_LOOP_TEMP, MAIN_LOOP_TOP_P, AUX_LOOP_TEMP, AUX_LOOP_TOP_P, OPENING_INSIGHT_TEMP, TEMP_NPC_PROFILE_TEMP
 from player_manager import Player, get_player, set_player,edit_player_raw, save_player_raw, set_player_field, sync_age_from_novel_node, format_money_liang #导入作弊器代码
 from active_cloud_retrieval import active_retrieve_cloud, merge_with_passive
 from option_gen import clean_action_options  # 行动选项清洗（主循环解析与兜底共用）
@@ -645,6 +645,36 @@ def llm_call_common(sys_prompt: str, user_prompt: str, temp=AUX_LOOP_TEMP, top_p
                 if content and content.strip():
                     return {"content": content.strip(), "tool_calls": tool_calls}
                 elif tool_calls:
+                    # ★ DeepSeek思考模式·标准回传链路（官方契约：带tools须回传reasoning_content，漏传400）
+                    # 第一轮只回tool_calls时，把 assistant(含CoT+tool_calls) + tool结果 原样回传，
+                    # 模型顺着自己第一轮的思维链续写正文——判定与剧情同源，不丢思考、无有损摘要。
+                    # 仅「DeepSeek+思考开」准入；任何一步失败退回下方MiMo兜底，最坏等于现状。
+                    if is_ds_thinking(_model_name, _loop):
+                        try:
+                            _tool_msgs = []
+                            for _tc in tool_calls:
+                                _tool_msgs.append({
+                                    "role": "tool",
+                                    "tool_call_id": getattr(_tc, "id", None) or "",
+                                    "content": "状态更新已应用。",
+                                })
+                            _kwargs2 = dict(kwargs)  # tools/thinking/max_tokens全部保留，仅替换messages
+                            _kwargs2["messages"] = [
+                                {"role": "system", "content": clean_sys},
+                                {"role": "user", "content": clean_user},
+                                choice.message,  # 原对象append：SDK自动带回reasoning_content+tool_calls
+                            ] + _tool_msgs
+                            resp2 = _client.chat.completions.create(**_kwargs2)
+                            _ch2 = resp2.choices[0]
+                            _content2 = strip_reasoning_text(_ch2.message.content or "")
+                            if _content2 and _content2.strip():
+                                print(f"{COLOR_GREEN}[DS思考回传] CoT续写成功，正文{len(_content2)}字符{COLOR_END}")
+                                return {"content": _content2.strip(), "tool_calls": tool_calls}
+                            # 第二轮又只回tool_calls无正文 → 退回旧兜底（第三次调用去tools拿文字）
+                            print(f"{COLOR_WARN}[DS思考回传] 第二轮未返回正文，退回MiMo兜底{COLOR_END}")
+                        except Exception as _ds_e:
+                            # 中转端点可能不认reasoning_content回传（400等）→ 退回旧兜底
+                            print(f"{COLOR_WARN}[DS思考回传] 失败({str(_ds_e)[:150]})，退回MiMo兜底{COLOR_END}")
                     # ★ 方案A：模型只返回tool_calls无文字（MiMo/GPT等标准函数调用行为）
                     # 去掉tools做第二轮调用获取剧情文字，DeepSeek不会走到这里
                     print(f"{COLOR_WARN}[MiMo兜底] 第一轮仅返回tool_calls({len(tool_calls)}个)，正在补充调用获取文字...{COLOR_END}")

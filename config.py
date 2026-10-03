@@ -179,6 +179,14 @@ def thinking_extra_body(model_name, loop="main"):
     return {"thinking": {"type": "disabled"}}
 
 
+def is_ds_thinking(model_name, loop="main"):
+    """DeepSeek 且思考开启 → 主循环工具调用走「标准回传链路」。
+    DeepSeek官方契约：带tools的请求必须回传reasoning_content（漏传400），
+    回传后模型顺着自己的CoT续写正文，判定与剧情同源一致。
+    其他模型（MiMo/GLM/DeepSeek关思考）无此契约，一律返回False走原MiMo兜底，行为不变。"""
+    return "deepseek" in (model_name or "").lower() and _thinking_conf(model_name, loop)[0]
+
+
 GLM53_MIN_MAX_TOKENS = 5000  # 思考token计入completion，额度不足时思考吃光导致content为空
 
 
